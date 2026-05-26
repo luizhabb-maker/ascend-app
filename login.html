@@ -699,8 +699,12 @@ function fbErr(code) {
     'auth/too-many-requests':        'Muitas tentativas. Tente novamente em alguns minutos.',
     'auth/network-request-failed':   'Sem conexão. Verifique sua internet.',
     'auth/popup-blocked':            'Popup bloqueado pelo navegador. Habilite popups e tente novamente.',
+    'auth/unauthorized-domain':      'Domínio não autorizado no Firebase. Acesse Firebase Console → Authentication → Settings → Authorized domains e adicione este domínio.',
+    'auth/operation-not-allowed':    'Login com email/senha desativado. Acesse Firebase Console → Authentication → Sign-in methods e ative Email/senha.',
+    'auth/configuration-not-found':  'Firebase Authentication não configurado corretamente.',
   };
-  return map[code] || 'Ocorreu um erro. Tente novamente.';
+  console.error('[ASCEND Auth error]', code);
+  return map[code] || `Erro inesperado (${code}). Verifique o console do navegador.`;
 }
 
 // ── LOADING STATE ──
