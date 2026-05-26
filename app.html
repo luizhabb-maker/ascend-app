@@ -680,7 +680,7 @@
       <div class="top-actions">
         <div class="icon-btn" title="Notificações">🔔</div>
         <div class="icon-btn" title="Buscar">⌕</div>
-        <button class="btn btn-primary" style="font-size:12px;padding:8px 14px">+ Novo bloco</button>
+        <button class="btn btn-primary" style="font-size:12px;padding:8px 14px" onclick="openBlocoModal()">+ Novo bloco</button>
       </div>
     </div>
 
@@ -879,7 +879,7 @@
           <div class="card-title" style="margin:0">Timeline do dia</div>
           <button class="btn btn-ghost" style="font-size:12px;padding:7px 12px">✦ Gerar com IA</button>
         </div>
-        <div class="timeline">
+        <div class="timeline" id="routine-timeline">
           <div class="timeline-item done">
             <div class="timeline-block">
               <div class="timeline-time">05:00</div>
@@ -1850,6 +1850,55 @@
   </div>
 </nav>
 
+<!-- ═══ MODAL NOVO BLOCO ═══ -->
+<div id="bloco-overlay" style="display:none;position:fixed;inset:0;z-index:3000;background:rgba(0,0,0,0.75);backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;padding:20px">
+  <div style="background:#0d1120;border:1px solid rgba(255,255,255,0.1);border-radius:20px;padding:32px;width:100%;max-width:420px;animation:slideup 0.25s ease;box-shadow:0 40px 80px rgba(0,0,0,0.6)">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px">
+      <div style="font-size:17px;font-weight:800">+ Novo bloco de rotina</div>
+      <button onclick="closeBlocoModal()" style="background:rgba(255,255,255,0.06);border:none;width:30px;height:30px;border-radius:50%;color:#94A3B8;cursor:pointer;font-size:16px">✕</button>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div>
+        <label style="font-size:11px;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px">Horário</label>
+        <input id="bloco-time" type="time" style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:11px 14px;color:#F1F5F9;font-size:14px;font-family:inherit;outline:none" onfocus="this.style.borderColor='rgba(139,92,246,.5)'" onblur="this.style.borderColor='rgba(255,255,255,0.1)'">
+      </div>
+      <div>
+        <label style="font-size:11px;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px">Emoji</label>
+        <div style="display:flex;gap:8px;flex-wrap:wrap" id="bloco-emoji-btns">
+          <button onclick="selectEmoji(this,'☀️')" class="emoji-pick selected">☀️</button>
+          <button onclick="selectEmoji(this,'🧘')" class="emoji-pick">🧘</button>
+          <button onclick="selectEmoji(this,'📚')" class="emoji-pick">📚</button>
+          <button onclick="selectEmoji(this,'🏋️')" class="emoji-pick">🏋️</button>
+          <button onclick="selectEmoji(this,'💼')" class="emoji-pick">💼</button>
+          <button onclick="selectEmoji(this,'🍽️')" class="emoji-pick">🍽️</button>
+          <button onclick="selectEmoji(this,'📵')" class="emoji-pick">📵</button>
+          <button onclick="selectEmoji(this,'🌙')" class="emoji-pick">🌙</button>
+          <button onclick="selectEmoji(this,'💧')" class="emoji-pick">💧</button>
+          <button onclick="selectEmoji(this,'🎯')" class="emoji-pick">🎯</button>
+        </div>
+      </div>
+      <div>
+        <label style="font-size:11px;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px">Nome do bloco</label>
+        <input id="bloco-label" type="text" placeholder="Ex: Treino de força" maxlength="40" style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:11px 14px;color:#F1F5F9;font-size:14px;font-family:inherit;outline:none" onfocus="this.style.borderColor='rgba(139,92,246,.5)'" onblur="this.style.borderColor='rgba(255,255,255,0.1)'">
+      </div>
+      <div>
+        <label style="font-size:11px;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px">Descrição <span style="font-weight:400;text-transform:none">(opcional)</span></label>
+        <input id="bloco-desc" type="text" placeholder="Ex: 45 min · Academia" maxlength="60" style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:11px 14px;color:#F1F5F9;font-size:14px;font-family:inherit;outline:none" onfocus="this.style.borderColor='rgba(139,92,246,.5)'" onblur="this.style.borderColor='rgba(255,255,255,0.1)'">
+      </div>
+      <button onclick="salvarBloco()" style="background:linear-gradient(135deg,#8B5CF6,#7C3AED);color:#fff;border:none;border-radius:11px;padding:13px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;box-shadow:0 0 24px rgba(139,92,246,.35);margin-top:4px">Adicionar bloco</button>
+    </div>
+  </div>
+</div>
+
+<style>
+@keyframes slideup { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+.emoji-pick { background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:6px 10px;font-size:18px;cursor:pointer;transition:all 0.15s }
+.emoji-pick.selected { background:rgba(139,92,246,0.2);border-color:rgba(139,92,246,0.5) }
+.emoji-pick:hover { background:rgba(255,255,255,0.1) }
+.bloco-delete { opacity:0;font-size:14px;cursor:pointer;transition:opacity 0.2s;background:none;border:none;color:#f87171;padding:4px 6px }
+.timeline-item:hover .bloco-delete { opacity:1 }
+</style>
+
 <script>
 // ── DATE / GREETING ──
 (function(){
@@ -2218,9 +2267,111 @@ try {
       const daySnap = await _db.collection('users').doc(_uid).collection('daily').doc(todayKey()).get();
       if (daySnap.exists) applyDailyData(daySnap.data());
     } catch(e) { console.warn('loadDaily:', e); }
+
+    // Carrega rotina do usuário
+    carregarRotina();
   });
 } catch(e) {
   console.warn('Firebase init failed — modo demo ativo');
+}
+
+// ── MODAL NOVO BLOCO ──
+let _selectedEmoji = '☀️';
+
+function openBlocoModal() {
+  const ov = document.getElementById('bloco-overlay');
+  ov.style.display = 'flex';
+  document.getElementById('bloco-label').value = '';
+  document.getElementById('bloco-desc').value = '';
+  document.getElementById('bloco-time').value = '';
+  _selectedEmoji = '☀️';
+  document.querySelectorAll('.emoji-pick').forEach(b => b.classList.remove('selected'));
+  document.querySelector('.emoji-pick').classList.add('selected');
+}
+function closeBlocoModal() {
+  document.getElementById('bloco-overlay').style.display = 'none';
+}
+function selectEmoji(btn, emoji) {
+  document.querySelectorAll('.emoji-pick').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  _selectedEmoji = emoji;
+}
+
+async function salvarBloco() {
+  const time  = document.getElementById('bloco-time').value;
+  const label = document.getElementById('bloco-label').value.trim();
+  const desc  = document.getElementById('bloco-desc').value.trim();
+  if (!time || !label) { alert('Preencha o horário e o nome do bloco.'); return; }
+
+  const bloco = { time, label: `${_selectedEmoji} ${label}`, desc, done: false, id: Date.now().toString() };
+
+  if (_uid && _db) {
+    try {
+      await _db.collection('users').doc(_uid).collection('routine').doc(bloco.id).set(bloco);
+    } catch(e) { console.warn('salvarBloco:', e); }
+  }
+
+  adicionarBlocoNaTimeline(bloco);
+  closeBlocoModal();
+}
+
+function adicionarBlocoNaTimeline(bloco) {
+  const timeline = document.getElementById('routine-timeline');
+  if (!timeline) return;
+  const el = document.createElement('div');
+  el.className = 'timeline-item';
+  el.dataset.blocoId = bloco.id;
+  el.innerHTML = `
+    <div class="timeline-block" style="display:flex;align-items:center;gap:10px">
+      <div style="flex:1">
+        <div class="timeline-time">${bloco.time}</div>
+        <div class="timeline-label">${bloco.label}</div>
+        ${bloco.desc ? `<div class="timeline-desc">${bloco.desc}</div>` : ''}
+      </div>
+      <button class="bloco-delete" onclick="deletarBloco(this,'${bloco.id}')" title="Remover">✕</button>
+    </div>`;
+  el.querySelector('.timeline-block').addEventListener('click', (e) => {
+    if (e.target.classList.contains('bloco-delete')) return;
+    el.classList.toggle('done');
+    marcarBlocoFeito(bloco.id, el.classList.contains('done'));
+  });
+  // Inserir na ordem correta por horário
+  const items = [...timeline.querySelectorAll('.timeline-item[data-bloco-id]')];
+  const inserted = items.find(i => i.dataset.blocoId !== bloco.id && (i.querySelector('.timeline-time')?.textContent || '') > bloco.time);
+  if (inserted) timeline.insertBefore(el, inserted);
+  else timeline.appendChild(el);
+}
+
+async function marcarBlocoFeito(id, done) {
+  if (!_uid || !_db) return;
+  try {
+    await _db.collection('users').doc(_uid).collection('routine').doc(id).update({ done });
+  } catch(e) { console.warn('marcarBlocoFeito:', e); }
+}
+
+async function deletarBloco(btn, id) {
+  btn.closest('.timeline-item').remove();
+  if (_uid && _db) {
+    try { await _db.collection('users').doc(_uid).collection('routine').doc(id).delete(); } catch(e) {}
+  }
+}
+
+async function carregarRotina() {
+  if (!_uid || !_db) return;
+  try {
+    const snap = await _db.collection('users').doc(_uid).collection('routine').get();
+    if (snap.empty) return;
+    const blocos = [];
+    snap.forEach(doc => blocos.push(doc.data()));
+    blocos.sort((a, b) => a.time.localeCompare(b.time));
+    // Limpa os blocos demo e insere os do usuário
+    const timeline = document.getElementById('routine-timeline');
+    if (timeline) {
+      // Remove só blocos sem data-bloco-id (os hardcoded demo)
+      timeline.querySelectorAll('.timeline-item:not([data-bloco-id])').forEach(el => el.remove());
+      blocos.forEach(b => adicionarBlocoNaTimeline(b));
+    }
+  } catch(e) { console.warn('carregarRotina:', e); }
 }
 
 // Salva água ao mudar (patch no water tracker)
