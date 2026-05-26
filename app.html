@@ -695,10 +695,10 @@
       <div style="display:flex; gap:16px; margin-bottom:20px; background:var(--glass); border:1px solid var(--glass-border); border-radius:16px; padding:20px; align-items:center; flex-wrap:wrap;">
         <div style="flex:1; min-width:200px;">
           <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text-muted);margin-bottom:4px">Pontuação do Dia</div>
-          <div style="font-size:42px; font-weight:900; background: linear-gradient(90deg, var(--purple), var(--cyan)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; line-height:1">82</div>
-          <div style="font-size:12px;color:var(--text-soft);margin-top:4px">↑ +6 pontos vs. ontem</div>
+          <div id="dash-score" style="font-size:42px; font-weight:900; background: linear-gradient(90deg, var(--purple), var(--cyan)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; line-height:1">0</div>
+          <div style="font-size:12px;color:var(--text-soft);margin-top:4px" id="dash-score-sub">Complete hábitos para aumentar</div>
           <div class="progress-bar" style="margin-top:12px; height:8px;">
-            <div class="progress-fill" style="width:82%"></div>
+            <div class="progress-fill" id="dash-score-bar" style="width:0%"></div>
           </div>
         </div>
         <div style="display:flex; gap:24px; flex-wrap:wrap;">
@@ -706,39 +706,29 @@
             <div class="score-ring">
               <svg viewBox="0 0 80 80" width="80" height="80">
                 <circle cx="40" cy="40" r="32" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="6"/>
-                <circle cx="40" cy="40" r="32" fill="none" stroke="var(--purple)" stroke-width="6" stroke-dasharray="201" stroke-dashoffset="40" stroke-linecap="round"/>
+                <circle id="ring-habitos" cx="40" cy="40" r="32" fill="none" stroke="var(--purple)" stroke-width="6" stroke-dasharray="201" stroke-dashoffset="201" stroke-linecap="round"/>
               </svg>
-              <div class="score-ring-val">80<span>foco</span></div>
+              <div class="score-ring-val" id="ring-habitos-val">0<span>hab</span></div>
             </div>
-            <div class="score-label">Foco</div>
+            <div class="score-label">Hábitos</div>
           </div>
           <div class="score-ring-wrap">
             <div class="score-ring">
               <svg viewBox="0 0 80 80" width="80" height="80">
                 <circle cx="40" cy="40" r="32" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="6"/>
-                <circle cx="40" cy="40" r="32" fill="none" stroke="var(--green)" stroke-width="6" stroke-dasharray="201" stroke-dashoffset="50" stroke-linecap="round"/>
+                <circle id="ring-agua" cx="40" cy="40" r="32" fill="none" stroke="var(--cyan)" stroke-width="6" stroke-dasharray="201" stroke-dashoffset="201" stroke-linecap="round"/>
               </svg>
-              <div class="score-ring-val" style="color:var(--green)">75<span>saúde</span></div>
+              <div class="score-ring-val" style="color:var(--cyan)" id="ring-agua-val">0<span>água</span></div>
             </div>
-            <div class="score-label">Saúde</div>
+            <div class="score-label">Água</div>
           </div>
           <div class="score-ring-wrap">
             <div class="score-ring">
               <svg viewBox="0 0 80 80" width="80" height="80">
                 <circle cx="40" cy="40" r="32" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="6"/>
-                <circle cx="40" cy="40" r="32" fill="none" stroke="var(--cyan)" stroke-width="6" stroke-dasharray="201" stroke-dashoffset="60" stroke-linecap="round"/>
+                <circle id="ring-sono" cx="40" cy="40" r="32" fill="none" stroke="var(--amber)" stroke-width="6" stroke-dasharray="201" stroke-dashoffset="201" stroke-linecap="round"/>
               </svg>
-              <div class="score-ring-val" style="color:var(--cyan)">70<span>prod</span></div>
-            </div>
-            <div class="score-label">Produtividade</div>
-          </div>
-          <div class="score-ring-wrap">
-            <div class="score-ring">
-              <svg viewBox="0 0 80 80" width="80" height="80">
-                <circle cx="40" cy="40" r="32" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="6"/>
-                <circle cx="40" cy="40" r="32" fill="none" stroke="var(--amber)" stroke-width="6" stroke-dasharray="201" stroke-dashoffset="80" stroke-linecap="round"/>
-              </svg>
-              <div class="score-ring-val" style="color:var(--amber)">60<span>sono</span></div>
+              <div class="score-ring-val" style="color:var(--amber)" id="ring-sono-val">0<span>sono</span></div>
             </div>
             <div class="score-label">Sono</div>
           </div>
@@ -748,32 +738,29 @@
       <!-- Métricas -->
       <div class="grid-4 mb-16">
         <div class="metric-card">
-          <div class="metric-icon">⚡</div>
-          <div class="metric-label">Treino</div>
-          <div class="metric-value" style="color:var(--green)">Feito</div>
-          <div class="metric-sub">45 min · Costas</div>
-          <span class="tag tag-green">✓ Concluído</span>
-        </div>
-        <div class="metric-card">
           <div class="metric-icon">💧</div>
           <div class="metric-label">Hidratação</div>
-          <div class="metric-value" style="color:var(--cyan)">1,8L</div>
-          <div class="metric-sub">Meta: 2,5L</div>
-          <div class="progress-bar" style="margin-top:6px"><div class="progress-fill" style="width:72%; background: linear-gradient(90deg, var(--cyan), var(--blue))"></div></div>
+          <div class="metric-value" style="color:var(--cyan)" id="dash-water-val">0L</div>
+          <div class="metric-sub" id="dash-water-sub">Meta: —</div>
+          <div class="progress-bar" style="margin-top:6px"><div class="progress-fill" id="dash-water-bar" style="width:0%; background: linear-gradient(90deg, var(--cyan), var(--blue))"></div></div>
         </div>
-        <div class="metric-card">
+        <div class="metric-card" style="cursor:pointer" onclick="openSonoModal()">
           <div class="metric-icon">😴</div>
-          <div class="metric-label">Sono</div>
-          <div class="metric-value" style="color:var(--amber)">6h 20m</div>
-          <div class="metric-sub">Meta: 8h</div>
-          <span class="tag tag-amber">Abaixo da meta</span>
+          <div class="metric-label">Sono ontem</div>
+          <div class="metric-value" style="color:var(--amber)" id="dash-sleep-val">—</div>
+          <div class="metric-sub" id="dash-sleep-sub">Toque para registrar</div>
         </div>
         <div class="metric-card">
           <div class="metric-icon">⚖️</div>
           <div class="metric-label">Peso</div>
-          <div class="metric-value">83,2<span style="font-size:14px;font-weight:400"> kg</span></div>
-          <div class="metric-sub">Meta: 80 kg</div>
-          <div class="metric-change down">↓ -0,3 kg esta semana</div>
+          <div class="metric-value" id="dash-peso-val">—</div>
+          <div class="metric-sub" id="dash-peso-sub">Registre no Fitness</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-icon">🔥</div>
+          <div class="metric-label">Sequência</div>
+          <div class="metric-value" style="color:var(--amber)" id="dash-streak-val">0</div>
+          <div class="metric-sub">dias consecutivos</div>
         </div>
       </div>
 
@@ -802,34 +789,10 @@
         </div>
         <div class="card">
           <div class="card-title">Hábitos de hoje</div>
-          <div class="habit-item" data-habit="meditacao" onclick="toggleHabit(this)">
-            <div class="habit-check done">✓</div>
-            <div class="habit-name">Meditação 10 min</div>
-            <div class="habit-streak">🔥 12 dias</div>
-          </div>
-          <div class="habit-item" data-habit="leitura" onclick="toggleHabit(this)">
-            <div class="habit-check done">✓</div>
-            <div class="habit-name">Leitura 20 min</div>
-            <div class="habit-streak">🔥 8 dias</div>
-          </div>
-          <div class="habit-item" data-habit="sem-alcool" onclick="toggleHabit(this)">
-            <div class="habit-check done">✓</div>
-            <div class="habit-name">Sem álcool</div>
-            <div class="habit-streak">🔥 21 dias</div>
-          </div>
-          <div class="habit-item" data-habit="sem-redes" onclick="toggleHabit(this)">
-            <div class="habit-check"></div>
-            <div class="habit-name">Sem redes sociais após 21h</div>
-            <div class="habit-streak" style="color:var(--text-muted)">— pendente</div>
-          </div>
-          <div class="habit-item" data-habit="cold-shower" onclick="toggleHabit(this)">
-            <div class="habit-check"></div>
-            <div class="habit-name">Cold shower</div>
-            <div class="habit-streak" style="color:var(--text-muted)">— pendente</div>
-          </div>
+          <div id="dash-habits-list"><div style="text-align:center;padding:20px;color:var(--text-muted);font-size:13px">Adicione hábitos na aba Hábitos.</div></div>
           <div style="display:flex; align-items:center; justify-content:space-between; margin-top:10px; padding-top:10px; border-top:1px solid var(--glass-border)">
-            <div style="font-size:12px;color:var(--text-soft)">3 de 5 concluídos</div>
-            <div class="progress-bar" style="width:120px"><div class="progress-fill" style="width:60%"></div></div>
+            <div style="font-size:12px;color:var(--text-soft)" id="dash-hab-count">0 de 0 concluídos</div>
+            <div class="progress-bar" style="width:120px"><div class="progress-fill" id="dash-hab-bar" style="width:0%"></div></div>
           </div>
         </div>
       </div>
@@ -877,65 +840,10 @@
       <div class="card mb-16">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
           <div class="card-title" style="margin:0">Timeline do dia</div>
-          <button class="btn btn-ghost" style="font-size:12px;padding:7px 12px">✦ Gerar com IA</button>
+          <button class="btn btn-ghost" style="font-size:12px;padding:7px 12px" onclick="openBlocoModal()">+ Novo bloco</button>
         </div>
         <div class="timeline" id="routine-timeline">
-          <div class="timeline-item done">
-            <div class="timeline-block">
-              <div class="timeline-time">05:00</div>
-              <div class="timeline-label">☀️ Despertar</div>
-              <div class="timeline-desc">Alarme, alongamento, respiração</div>
-            </div>
-          </div>
-          <div class="timeline-item done">
-            <div class="timeline-block">
-              <div class="timeline-time">05:30</div>
-              <div class="timeline-label">🧘 Meditação matinal</div>
-              <div class="timeline-desc">10 min · Mindfulness · App Calm</div>
-            </div>
-          </div>
-          <div class="timeline-item done">
-            <div class="timeline-block">
-              <div class="timeline-time">06:00</div>
-              <div class="timeline-label">📚 Leitura</div>
-              <div class="timeline-desc">20 min · "Atomic Habits"</div>
-            </div>
-          </div>
-          <div class="timeline-item active-now">
-            <div class="timeline-block">
-              <div style="display:flex;align-items:center;justify-content:space-between">
-                <div class="timeline-time">20:00 · <span style="color:var(--purple);font-size:10px;font-weight:700">AGORA</span></div>
-                <span class="tag tag-purple">Ativo</span>
-              </div>
-              <div class="timeline-label">🏋️ Treino — Costas</div>
-              <div class="timeline-desc">45 min · Academia · Alta intensidade</div>
-              <div style="margin-top:10px;display:flex;gap:8px">
-                <button class="btn btn-primary" style="font-size:12px;padding:7px 14px">▶ Iniciar treino</button>
-                <button class="btn btn-ghost" style="font-size:12px;padding:7px 14px">Pular</button>
-              </div>
-            </div>
-          </div>
-          <div class="timeline-item">
-            <div class="timeline-block">
-              <div class="timeline-time">21:00</div>
-              <div class="timeline-label">🍽️ Jantar + hidratação</div>
-              <div class="timeline-desc">Refeição leve · Completar 2,5L de água</div>
-            </div>
-          </div>
-          <div class="timeline-item">
-            <div class="timeline-block">
-              <div class="timeline-time">22:00</div>
-              <div class="timeline-label">📵 Modo sem telas</div>
-              <div class="timeline-desc">Bloquear apps · Leitura física</div>
-            </div>
-          </div>
-          <div class="timeline-item">
-            <div class="timeline-block">
-              <div class="timeline-time">22:30</div>
-              <div class="timeline-label">🌙 Dormir</div>
-              <div class="timeline-desc">Meta: 8 horas de sono</div>
-            </div>
-          </div>
+          <div id="routine-empty" style="text-align:center;padding:32px;color:var(--text-muted);font-size:13px">Nenhum bloco ainda. Clique em "+ Novo bloco" para começar.</div>
         </div>
       </div>
     </div>
@@ -950,17 +858,17 @@
       <div class="grid-3 mb-16">
         <div class="metric-card" style="text-align:center">
           <div class="metric-icon" style="font-size:28px">🔥</div>
-          <div class="metric-value" style="color:var(--amber)">21</div>
+          <div class="metric-value" style="color:var(--amber)" id="hab-best-streak">0</div>
           <div class="metric-label">Maior sequência</div>
         </div>
         <div class="metric-card" style="text-align:center">
           <div class="metric-icon" style="font-size:28px">✓</div>
-          <div class="metric-value" style="color:var(--green)">87%</div>
-          <div class="metric-label">Taxa essa semana</div>
+          <div class="metric-value" style="color:var(--green)" id="hab-rate">0%</div>
+          <div class="metric-label">Concluídos hoje</div>
         </div>
         <div class="metric-card" style="text-align:center">
           <div class="metric-icon" style="font-size:28px">◈</div>
-          <div class="metric-value" style="color:var(--purple)">5</div>
+          <div class="metric-value" style="color:var(--purple)" id="hab-count">0</div>
           <div class="metric-label">Hábitos ativos</div>
         </div>
       </div>
@@ -968,47 +876,10 @@
       <div class="card mb-16">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
           <div class="card-title" style="margin:0">Hábitos de hoje</div>
-          <button class="btn btn-ghost" style="font-size:12px;padding:7px 12px">+ Novo hábito</button>
+          <button class="btn btn-ghost" style="font-size:12px;padding:7px 12px" onclick="openHabitoModal()">+ Novo hábito</button>
         </div>
-        <div class="habit-item" onclick="toggleHabit(this)">
-          <div class="habit-check done">✓</div>
-          <div style="flex:1">
-            <div class="habit-name">🧘 Meditação 10 min</div>
-            <div style="font-size:11px;color:var(--text-muted)">Toda manhã · 05:30</div>
-          </div>
-          <div class="habit-streak">🔥 12 dias</div>
-        </div>
-        <div class="habit-item" onclick="toggleHabit(this)">
-          <div class="habit-check done">✓</div>
-          <div style="flex:1">
-            <div class="habit-name">📚 Leitura 20 min</div>
-            <div style="font-size:11px;color:var(--text-muted)">Toda manhã · 06:00</div>
-          </div>
-          <div class="habit-streak">🔥 8 dias</div>
-        </div>
-        <div class="habit-item" onclick="toggleHabit(this)">
-          <div class="habit-check done">✓</div>
-          <div style="flex:1">
-            <div class="habit-name">🚫 Sem álcool</div>
-            <div style="font-size:11px;color:var(--text-muted)">Detox · Reforço diário</div>
-          </div>
-          <div class="habit-streak">🔥 21 dias</div>
-        </div>
-        <div class="habit-item" onclick="toggleHabit(this)">
-          <div class="habit-check"></div>
-          <div style="flex:1">
-            <div class="habit-name">📵 Sem redes após 21h</div>
-            <div style="font-size:11px;color:var(--text-muted)">Detox digital · Noturno</div>
-          </div>
-          <div class="habit-streak" style="color:var(--text-muted)">5 dias</div>
-        </div>
-        <div class="habit-item" onclick="toggleHabit(this)">
-          <div class="habit-check"></div>
-          <div style="flex:1">
-            <div class="habit-name">🚿 Cold shower</div>
-            <div style="font-size:11px;color:var(--text-muted)">Toda manhã · 3 min</div>
-          </div>
-          <div class="habit-streak" style="color:var(--text-muted)">3 dias</div>
+        <div id="habits-full-list">
+          <div style="text-align:center;padding:32px;color:var(--text-muted);font-size:13px">Nenhum hábito ainda. Clique em "+ Novo hábito" para começar.</div>
         </div>
       </div>
 
@@ -1028,48 +899,33 @@
       </div>
 
       <div class="grid-4 mb-16">
-        <div class="metric-card">
+        <div class="metric-card" style="cursor:pointer" onclick="openPesoModal()">
           <div class="metric-icon">⚖️</div>
           <div class="metric-label">Peso atual</div>
-          <div class="metric-value">83,2<span style="font-size:14px"> kg</span></div>
-          <div class="metric-change down">↓ -0,3 kg</div>
+          <div class="metric-value" id="fit-peso-val">—</div>
+          <div class="metric-sub" id="fit-peso-sub">Toque para registrar</div>
         </div>
         <div class="metric-card">
           <div class="metric-icon">🏋️</div>
           <div class="metric-label">Treinos/semana</div>
-          <div class="metric-value" style="color:var(--purple)">4</div>
-          <div class="metric-sub">Meta: 5 treinos</div>
+          <div class="metric-value" style="color:var(--purple)" id="fit-treinos-val">0</div>
+          <div class="metric-sub" id="fit-treinos-sub">Meta: — treinos</div>
         </div>
         <div class="metric-card">
+          <div class="metric-icon">😴</div>
+          <div class="metric-label">Sono ontem</div>
+          <div class="metric-value" style="color:var(--amber)" id="fit-sono-val">—</div>
+          <div class="metric-sub" id="fit-sono-sub">Toque para registrar</div>
+        </div>
+        <div class="metric-card" style="cursor:pointer" onclick="openTreinoModal()">
           <div class="metric-icon">🔥</div>
-          <div class="metric-label">Calorias queimadas</div>
-          <div class="metric-value" style="color:var(--amber)">2.340</div>
-          <div class="metric-sub">Esta semana</div>
-        </div>
-        <div class="metric-card">
-          <div class="metric-icon">👣</div>
-          <div class="metric-label">Passos hoje</div>
-          <div class="metric-value" style="color:var(--green)">7.842</div>
-          <div class="metric-sub">Meta: 10.000</div>
+          <div class="metric-label">Registrar treino</div>
+          <div class="metric-value" style="color:var(--green)">+</div>
+          <div class="metric-sub">Log de hoje</div>
         </div>
       </div>
 
-      <div class="workout-card mb-16">
-        <div class="workout-info">
-          <div style="display:flex;gap:8px;margin-bottom:8px">
-            <span class="tag tag-purple">Próximo treino</span>
-            <span class="tag tag-green">Hoje · 20:00</span>
-          </div>
-          <h3>Costas & Bíceps</h3>
-          <div style="font-size:12px;color:var(--text-soft)">Hipertrofia · Volume alto · 6 exercícios</div>
-          <div class="workout-stats">
-            <div class="workout-stat"><div class="val">6</div><div class="lbl">Exercícios</div></div>
-            <div class="workout-stat"><div class="val">45</div><div class="lbl">Minutos</div></div>
-            <div class="workout-stat"><div class="val">~320</div><div class="lbl">Cal</div></div>
-          </div>
-        </div>
-        <button class="play-btn" onclick="alert('Treino iniciado! 💪')">▶</button>
-      </div>
+      <div id="fit-treinos-list" style="margin-bottom:16px"></div>
 
       <div class="grid-2 mb-16">
         <div class="card">
@@ -1230,21 +1086,21 @@
               <span style="font-size:22px">◆</span>
               <div>
                 <div style="font-size:11px;color:var(--text-muted);font-weight:500">Nível atual</div>
-                <div>7 — Consistente</div>
+                <div id="evol-level-text">1 — Iniciante</div>
               </div>
             </div>
           </div>
           <div style="flex:1;min-width:200px">
             <div style="display:flex;justify-content:space-between;margin-bottom:6px">
               <span style="font-size:12px;color:var(--text-soft)">XP atual</span>
-              <span style="font-size:12px;font-weight:700">3.420 / 4.000 XP</span>
+              <span style="font-size:12px;font-weight:700" id="evol-xp-text">0 / 500 XP</span>
             </div>
-            <div class="xp-bar"><div class="xp-fill" style="width:85%"></div></div>
-            <div style="font-size:11px;color:var(--text-muted);margin-top:6px">580 XP para o Nível 8 — Focado</div>
+            <div class="xp-bar"><div class="xp-fill" id="evol-xp-bar" style="width:0%"></div></div>
+            <div style="font-size:11px;color:var(--text-muted);margin-top:6px" id="evol-xp-next">500 XP para o próximo nível</div>
           </div>
           <div style="text-align:center">
             <div style="font-size:11px;color:var(--text-muted)">XP hoje</div>
-            <div style="font-size:24px;font-weight:800;color:var(--purple)">+180</div>
+            <div style="font-size:24px;font-weight:800;color:var(--purple)" id="evol-xp-today">+0</div>
           </div>
         </div>
       </div>
@@ -1252,21 +1108,21 @@
       <div class="grid-3 mb-16">
         <div class="metric-card" style="text-align:center;border-color:rgba(245,158,11,0.2)">
           <div style="font-size:28px">🔥</div>
-          <div class="metric-value" style="color:var(--amber)">12</div>
+          <div class="metric-value" style="color:var(--amber)" id="evol-streak">0</div>
           <div class="metric-label">Sequência atual</div>
           <div class="metric-sub">dias consecutivos</div>
         </div>
         <div class="metric-card" style="text-align:center;border-color:rgba(139,92,246,0.2)">
           <div style="font-size:28px">⭐</div>
-          <div class="metric-value" style="color:var(--purple)">87</div>
+          <div class="metric-value" style="color:var(--purple)" id="evol-score">0</div>
           <div class="metric-label">Score Disciplina</div>
-          <div class="metric-sub">Top 20% dos usuários</div>
+          <div class="metric-sub">baseado em hoje</div>
         </div>
         <div class="metric-card" style="text-align:center;border-color:rgba(34,197,94,0.2)">
-          <div style="font-size:28px">🏆</div>
-          <div class="metric-value" style="color:var(--green)">11</div>
-          <div class="metric-label">Conquistas</div>
-          <div class="metric-sub">de 32 desbloqueadas</div>
+          <div style="font-size:28px">📅</div>
+          <div class="metric-value" style="color:var(--green)" id="evol-days">0</div>
+          <div class="metric-label">Dias no ASCEND</div>
+          <div class="metric-sub">desde o cadastro</div>
         </div>
       </div>
 
@@ -1457,22 +1313,25 @@
       </div>
 
       <div class="card mb-16">
-        <div class="card-title">Metas pessoais</div>
-        <div class="setting-row">
-          <div><div class="setting-label">Meta de sono</div><div class="setting-desc">Horas de sono por noite</div></div>
-          <div style="font-size:15px;font-weight:700;color:var(--purple)">8h</div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+          <div class="card-title" style="margin:0">Metas pessoais</div>
+          <button class="btn btn-ghost" style="font-size:12px;padding:6px 12px" onclick="salvarGoals()">💾 Salvar</button>
         </div>
         <div class="setting-row">
-          <div><div class="setting-label">Meta de água</div><div class="setting-desc">Litros por dia</div></div>
-          <div style="font-size:15px;font-weight:700;color:var(--cyan)">2,5L</div>
+          <div><div class="setting-label">Meta de sono (horas)</div><div class="setting-desc">Horas de sono por noite</div></div>
+          <input id="goal-sleep" type="number" min="4" max="12" value="8" style="width:64px;background:var(--glass);border:1px solid var(--glass-border);border-radius:8px;padding:6px 10px;color:var(--text);font-size:14px;font-weight:700;font-family:inherit;text-align:center;outline:none" onfocus="this.style.borderColor='rgba(139,92,246,.5)'" onblur="this.style.borderColor='rgba(255,255,255,0.08)'">
         </div>
         <div class="setting-row">
-          <div><div class="setting-label">Meta de peso</div><div class="setting-desc">Peso alvo</div></div>
-          <div style="font-size:15px;font-weight:700;color:var(--green)">80 kg</div>
+          <div><div class="setting-label">Meta de água (copos)</div><div class="setting-desc">Copos de 350ml por dia</div></div>
+          <input id="goal-water" type="number" min="1" max="20" value="7" style="width:64px;background:var(--glass);border:1px solid var(--glass-border);border-radius:8px;padding:6px 10px;color:var(--text);font-size:14px;font-weight:700;font-family:inherit;text-align:center;outline:none" onfocus="this.style.borderColor='rgba(139,92,246,.5)'" onblur="this.style.borderColor='rgba(255,255,255,0.08)'">
+        </div>
+        <div class="setting-row">
+          <div><div class="setting-label">Meta de peso (kg)</div><div class="setting-desc">Peso alvo</div></div>
+          <input id="goal-weight" type="number" min="30" max="300" value="80" style="width:72px;background:var(--glass);border:1px solid var(--glass-border);border-radius:8px;padding:6px 10px;color:var(--text);font-size:14px;font-weight:700;font-family:inherit;text-align:center;outline:none" onfocus="this.style.borderColor='rgba(139,92,246,.5)'" onblur="this.style.borderColor='rgba(255,255,255,0.08)'">
         </div>
         <div class="setting-row">
           <div><div class="setting-label">Treinos por semana</div><div class="setting-desc">Frequência semanal</div></div>
-          <div style="font-size:15px;font-weight:700;color:var(--purple)">5x</div>
+          <input id="goal-workouts" type="number" min="1" max="7" value="5" style="width:64px;background:var(--glass);border:1px solid var(--glass-border);border-radius:8px;padding:6px 10px;color:var(--text);font-size:14px;font-weight:700;font-family:inherit;text-align:center;outline:none" onfocus="this.style.borderColor='rgba(139,92,246,.5)'" onblur="this.style.borderColor='rgba(255,255,255,0.08)'">
         </div>
       </div>
 
@@ -1529,25 +1388,20 @@
 
       <!-- Pomodoro Timer -->
       <div class="focus-timer">
-        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--purple)">🎯 Sessão de foco ativa</div>
-        <div class="timer-circle">
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--purple)" id="pomo-label">🎯 Sessão Pomodoro</div>
+        <div class="timer-circle" id="pomo-circle" style="background:conic-gradient(var(--purple) 0% 100%, rgba(255,255,255,0.05) 100%)">
           <div class="timer-inner">
-            <div class="timer-value">18:43</div>
-            <div class="timer-label">restantes</div>
+            <div class="timer-value" id="pomo-display">25:00</div>
+            <div class="timer-label" id="pomo-sublabel">pronto</div>
           </div>
         </div>
-        <div style="font-size:13px;color:var(--text-soft)">Desenvolvimento ASCEND · Pomodoro 2 de 4</div>
+        <div style="font-size:13px;color:var(--text-soft)" id="pomo-session-info">Sessão de foco de 25 minutos</div>
         <div style="display:flex;gap:10px">
-          <button class="btn btn-primary">⏸ Pausar</button>
-          <button class="btn btn-ghost">⏭ Pular</button>
-          <button class="btn btn-ghost">✕ Encerrar</button>
+          <button class="btn btn-primary" id="pomo-btn-play" onclick="pomoToggle()">▶ Iniciar</button>
+          <button class="btn btn-ghost" onclick="pomoSkip()">⏭ Pular</button>
+          <button class="btn btn-ghost" onclick="pomoReset()">↺ Resetar</button>
         </div>
-        <div style="display:flex;gap:8px">
-          <div style="width:24px;height:6px;border-radius:99px;background:var(--purple);box-shadow:0 0 6px rgba(139,92,246,0.5)"></div>
-          <div style="width:24px;height:6px;border-radius:99px;background:var(--purple);box-shadow:0 0 6px rgba(139,92,246,0.5)"></div>
-          <div style="width:24px;height:6px;border-radius:99px;background:rgba(255,255,255,0.1)"></div>
-          <div style="width:24px;height:6px;border-radius:99px;background:rgba(255,255,255,0.1)"></div>
-        </div>
+        <div style="display:flex;gap:8px" id="pomo-dots"></div>
       </div>
 
       <div class="grid-2 mb-16">
@@ -1555,67 +1409,22 @@
         <div class="card">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
             <div class="card-title" style="margin:0">Tarefas de hoje</div>
-            <button class="btn btn-ghost" style="font-size:11px;padding:6px 10px">+ Adicionar</button>
+            <button class="btn btn-ghost" style="font-size:11px;padding:6px 10px" onclick="openTarefaModal()">+ Adicionar</button>
           </div>
-          <div class="goal-row" onclick="this.querySelector('.goal-check').classList.toggle('done')">
-            <div class="goal-check done">✓</div>
-            <div style="flex:1"><div class="goal-text">Revisar design do Dashboard</div><div style="font-size:10px;color:var(--text-muted)">ASCEND · 30 min</div></div>
-            <span class="goal-priority" style="background:rgba(239,68,68,0.12);color:#EF4444;border:1px solid rgba(239,68,68,0.2)">Alta</span>
-          </div>
-          <div class="goal-row" onclick="this.querySelector('.goal-check').classList.toggle('done')">
-            <div class="goal-check done">✓</div>
-            <div style="flex:1"><div class="goal-text">Escrever master prompt v2</div><div style="font-size:10px;color:var(--text-muted)">Produto · 45 min</div></div>
-            <span class="goal-priority" style="background:rgba(239,68,68,0.12);color:#EF4444;border:1px solid rgba(239,68,68,0.2)">Alta</span>
-          </div>
-          <div class="goal-row" onclick="this.querySelector('.goal-check').classList.toggle('done')">
-            <div class="goal-check done">✓</div>
-            <div style="flex:1"><div class="goal-text">Agendar reunião com investidor</div><div style="font-size:10px;color:var(--text-muted)">Negócios · 15 min</div></div>
-            <span class="goal-priority" style="background:rgba(139,92,246,0.12);color:var(--purple);border:1px solid rgba(139,92,246,0.2)">Média</span>
-          </div>
-          <div class="goal-row" onclick="this.querySelector('.goal-check').classList.toggle('done')">
-            <div class="goal-check done">✓</div>
-            <div style="flex:1"><div class="goal-text">Responder e-mails importantes</div><div style="font-size:10px;color:var(--text-muted)">Administrativo</div></div>
-            <span class="goal-priority" style="background:rgba(100,116,139,0.12);color:var(--text-muted);border:1px solid rgba(100,116,139,0.2)">Baixa</span>
-          </div>
-          <div class="goal-row" onclick="this.querySelector('.goal-check').classList.toggle('done')">
-            <div class="goal-check"></div>
-            <div style="flex:1"><div class="goal-text">Revisar código do backend</div><div style="font-size:10px;color:var(--text-muted)">Dev · 2 horas</div></div>
-            <span class="goal-priority" style="background:rgba(239,68,68,0.12);color:#EF4444;border:1px solid rgba(239,68,68,0.2)">Alta</span>
-          </div>
-          <div class="goal-row" onclick="this.querySelector('.goal-check').classList.toggle('done')">
-            <div class="goal-check"></div>
-            <div style="flex:1"><div class="goal-text">Preparar pitch deck</div><div style="font-size:10px;color:var(--text-muted)">Produto · 1 hora</div></div>
-            <span class="goal-priority" style="background:rgba(139,92,246,0.12);color:var(--purple);border:1px solid rgba(139,92,246,0.2)">Média</span>
-          </div>
-          <div class="goal-row" onclick="this.querySelector('.goal-check').classList.toggle('done')">
-            <div class="goal-check"></div>
-            <div style="flex:1"><div class="goal-text">Ler 20 páginas do livro</div><div style="font-size:10px;color:var(--text-muted)">Pessoal · 20 min</div></div>
-            <span class="goal-priority" style="background:rgba(100,116,139,0.12);color:var(--text-muted);border:1px solid rgba(100,116,139,0.2)">Baixa</span>
+          <div id="tasks-list"><div style="text-align:center;padding:20px;color:var(--text-muted);font-size:13px">Nenhuma tarefa. Clique em "+ Adicionar".</div></div>
+          <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--glass-border);display:flex;justify-content:space-between;align-items:center">
+            <span style="font-size:12px;color:var(--text-soft)" id="tasks-count">0 de 0 concluídas</span>
+            <div class="progress-bar" style="width:100px"><div class="progress-fill" id="tasks-bar" style="width:0%"></div></div>
           </div>
         </div>
 
         <!-- Metas semanais -->
         <div>
-          <div class="card mb-16">
-            <div class="card-title">Metas da semana</div>
-            <div style="margin-bottom:12px">
-              <div style="display:flex;justify-content:space-between;margin-bottom:5px"><span style="font-size:12px;font-weight:600">🚀 Lançar MVP do ASCEND</span><span style="font-size:11px;color:var(--text-muted)">35%</span></div>
-              <div class="progress-bar"><div class="progress-fill" style="width:35%"></div></div>
-            </div>
-            <div style="margin-bottom:12px">
-              <div style="display:flex;justify-content:space-between;margin-bottom:5px"><span style="font-size:12px;font-weight:600">📣 Criar estratégia de marketing</span><span style="font-size:11px;color:var(--text-muted)">60%</span></div>
-              <div class="progress-bar"><div class="progress-fill" style="width:60%"></div></div>
-            </div>
-            <div style="margin-bottom:12px">
-              <div style="display:flex;justify-content:space-between;margin-bottom:5px"><span style="font-size:12px;font-weight:600">🤝 Fechar 3 parcerias</span><span style="font-size:11px;color:var(--text-muted)">0%</span></div>
-              <div class="progress-bar"><div class="progress-fill" style="width:0%"></div></div>
-            </div>
-          </div>
           <div class="ai-card" style="margin-bottom:0">
             <div class="ai-orb" style="width:36px;height:36px;font-size:14px">✦</div>
             <div class="ai-content">
               <div class="ai-title">Sugestão de foco</div>
-              <div class="ai-text">Sua energia está alta agora. Ideal para revisão de código — tarefa de alta exigência cognitiva. Quer iniciar uma sessão de deep work de 90 min?</div>
+              <div class="ai-text" id="pomo-ai-tip">Inicie uma sessão Pomodoro de 25 minutos para entrar em modo de foco profundo.</div>
             </div>
           </div>
         </div>
@@ -1704,31 +1513,29 @@
       </div>
 
       <div class="profile-hero">
-        <div class="profile-avatar-big">LB</div>
-        <div style="font-size:20px;font-weight:800;margin-bottom:4px">Luiz Borba</div>
-        <div style="font-size:13px;color:var(--text-soft);margin-bottom:12px">luiz.borba@jumplabel.com.br</div>
+        <div class="profile-avatar-big" id="perf-avatar">?</div>
+        <div style="font-size:20px;font-weight:800;margin-bottom:4px" id="perf-name">—</div>
+        <div style="font-size:13px;color:var(--text-soft);margin-bottom:12px" id="perf-email">—</div>
         <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
-          <span class="tag tag-purple">◆ Nível 7 — Consistente</span>
-          <span class="tag tag-amber">🔥 12 dias de sequência</span>
-          <span class="tag tag-green">⭐ Score 87</span>
+          <span class="tag tag-purple" id="perf-level-tag">◆ Nível 1</span>
+          <span class="tag tag-amber" id="perf-streak-tag">🔥 0 dias</span>
+          <span class="tag tag-green" id="perf-score-tag">⭐ Score 0</span>
         </div>
-        <button class="btn btn-ghost" style="margin-top:16px;font-size:12px">✎ Editar perfil</button>
       </div>
 
       <div class="grid-3 mb-16">
-        <div class="metric-card" style="text-align:center"><div style="font-size:26px;margin-bottom:6px">🏆</div><div class="metric-value" style="color:var(--purple)">11</div><div class="metric-label">Conquistas</div></div>
-        <div class="metric-card" style="text-align:center"><div style="font-size:26px;margin-bottom:6px">◈</div><div class="metric-value" style="color:var(--green)">5</div><div class="metric-label">Hábitos ativos</div></div>
-        <div class="metric-card" style="text-align:center"><div style="font-size:26px;margin-bottom:6px">📅</div><div class="metric-value" style="color:var(--cyan)">47</div><div class="metric-label">Dias no ASCEND</div></div>
+        <div class="metric-card" style="text-align:center"><div style="font-size:26px;margin-bottom:6px">◈</div><div class="metric-value" style="color:var(--green)" id="perf-hab-count">0</div><div class="metric-label">Hábitos ativos</div></div>
+        <div class="metric-card" style="text-align:center"><div style="font-size:26px;margin-bottom:6px">🏋️</div><div class="metric-value" style="color:var(--purple)" id="perf-treinos-count">0</div><div class="metric-label">Treinos totais</div></div>
+        <div class="metric-card" style="text-align:center"><div style="font-size:26px;margin-bottom:6px">📅</div><div class="metric-value" style="color:var(--cyan)" id="perf-days-count">0</div><div class="metric-label">Dias no ASCEND</div></div>
       </div>
 
       <div class="grid-2 mb-16">
         <div class="card">
           <div class="card-title">Estatísticas pessoais</div>
-          <div class="setting-row"><div><div class="setting-label">Treinos realizados</div></div><div style="font-size:15px;font-weight:700;color:var(--green)">28</div></div>
-          <div class="setting-row"><div><div class="setting-label">Horas de foco profundo</div></div><div style="font-size:15px;font-weight:700;color:var(--purple)">94h</div></div>
-          <div class="setting-row"><div><div class="setting-label">Peso perdido</div></div><div style="font-size:15px;font-weight:700;color:var(--cyan)">3,3 kg</div></div>
-          <div class="setting-row"><div><div class="setting-label">Melhor sequência</div></div><div style="font-size:15px;font-weight:700;color:var(--amber)">21 dias</div></div>
-          <div class="setting-row"><div><div class="setting-label">XP total acumulado</div></div><div style="font-size:15px;font-weight:700;color:var(--purple)">3.420</div></div>
+          <div class="setting-row"><div><div class="setting-label">XP total acumulado</div></div><div style="font-size:15px;font-weight:700;color:var(--purple)" id="perf-xp">0</div></div>
+          <div class="setting-row"><div><div class="setting-label">Sequência atual</div></div><div style="font-size:15px;font-weight:700;color:var(--amber)" id="perf-streak-val">0 dias</div></div>
+          <div class="setting-row"><div><div class="setting-label">Hábitos concluídos hoje</div></div><div style="font-size:15px;font-weight:700;color:var(--green)" id="perf-hab-today">0</div></div>
+          <div class="setting-row"><div><div class="setting-label">Nível</div></div><div style="font-size:15px;font-weight:700;color:var(--purple)" id="perf-level-val">1</div></div>
         </div>
         <div class="card">
           <div class="card-title">Modo Casal</div>
@@ -1778,24 +1585,22 @@
     <div class="widget">
       <div class="widget-title">Sequência ativa</div>
       <div style="display:flex;align-items:baseline;gap:4px">
-        <div class="widget-value" style="color:var(--amber)">🔥 12</div>
+        <div class="widget-value" style="color:var(--amber)" id="streak-val">🔥 0</div>
         <div class="widget-sub">dias</div>
       </div>
       <div class="streak-row" id="streakRow"></div>
-      <div style="font-size:11px;color:var(--text-muted);margin-top:8px">Maior sequência: 21 dias</div>
     </div>
 
     <!-- Sono -->
-    <div class="widget">
+    <div class="widget" style="cursor:pointer" onclick="openSonoModal()">
       <div class="widget-title">Sono ontem</div>
       <div style="display:flex;align-items:baseline;gap:4px">
-        <div class="widget-value" style="color:var(--amber)">6h 20m</div>
+        <div class="widget-value" style="color:var(--amber)" id="sleep-val">—</div>
       </div>
-      <div class="widget-sub">Meta: 8 horas</div>
+      <div class="widget-sub" id="sleep-sub">Toque para registrar</div>
       <div class="progress-bar" style="margin-top:10px;height:4px">
-        <div class="progress-fill" style="width:79%;background:linear-gradient(90deg,var(--amber),#F97316)"></div>
+        <div class="progress-fill" id="sleep-bar" style="width:0%;background:linear-gradient(90deg,var(--amber),#F97316)"></div>
       </div>
-      <div style="font-size:10px;color:var(--text-muted);margin-top:6px">Dormiu às 23:15 · Acordou às 05:35</div>
     </div>
 
     <!-- Score foco -->
@@ -1890,6 +1695,122 @@
   </div>
 </div>
 
+<!-- MODAL HÁBITO -->
+<div id="habito-overlay" style="display:none;position:fixed;inset:0;z-index:3000;background:rgba(0,0,0,0.75);backdrop-filter:blur(8px);align-items:center;justify-content:center;padding:20px">
+  <div style="background:#0d1120;border:1px solid rgba(255,255,255,0.1);border-radius:20px;padding:32px;width:100%;max-width:400px;animation:slideup 0.25s ease;box-shadow:0 40px 80px rgba(0,0,0,0.6)">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px">
+      <div style="font-size:17px;font-weight:800">+ Novo hábito</div>
+      <button onclick="closeHabitoModal()" style="background:rgba(255,255,255,0.06);border:none;width:30px;height:30px;border-radius:50%;color:#94A3B8;cursor:pointer;font-size:16px">✕</button>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div>
+        <label style="font-size:11px;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px">Emoji</label>
+        <div style="display:flex;gap:8px;flex-wrap:wrap" id="habito-emoji-btns">
+          <button onclick="selectHabitoEmoji(this,'🧘')" class="emoji-pick selected">🧘</button>
+          <button onclick="selectHabitoEmoji(this,'📚')" class="emoji-pick">📚</button>
+          <button onclick="selectHabitoEmoji(this,'🏋️')" class="emoji-pick">🏋️</button>
+          <button onclick="selectHabitoEmoji(this,'💧')" class="emoji-pick">💧</button>
+          <button onclick="selectHabitoEmoji(this,'🚫')" class="emoji-pick">🚫</button>
+          <button onclick="selectHabitoEmoji(this,'❄️')" class="emoji-pick">❄️</button>
+          <button onclick="selectHabitoEmoji(this,'🌿')" class="emoji-pick">🌿</button>
+          <button onclick="selectHabitoEmoji(this,'✍️')" class="emoji-pick">✍️</button>
+          <button onclick="selectHabitoEmoji(this,'🎯')" class="emoji-pick">🎯</button>
+          <button onclick="selectHabitoEmoji(this,'🛌')" class="emoji-pick">🛌</button>
+        </div>
+      </div>
+      <div>
+        <label style="font-size:11px;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px">Nome do hábito</label>
+        <input id="habito-name" type="text" placeholder="Ex: Meditação 10 min" maxlength="40" style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:11px 14px;color:#F1F5F9;font-size:14px;font-family:inherit;outline:none" onfocus="this.style.borderColor='rgba(139,92,246,.5)'" onblur="this.style.borderColor='rgba(255,255,255,0.1)'">
+      </div>
+      <button onclick="salvarHabito()" style="background:linear-gradient(135deg,#8B5CF6,#7C3AED);color:#fff;border:none;border-radius:11px;padding:13px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;box-shadow:0 0 24px rgba(139,92,246,.35);margin-top:4px">Adicionar hábito</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL TAREFA -->
+<div id="tarefa-overlay" style="display:none;position:fixed;inset:0;z-index:3000;background:rgba(0,0,0,0.75);backdrop-filter:blur(8px);align-items:center;justify-content:center;padding:20px">
+  <div style="background:#0d1120;border:1px solid rgba(255,255,255,0.1);border-radius:20px;padding:32px;width:100%;max-width:420px;animation:slideup 0.25s ease;box-shadow:0 40px 80px rgba(0,0,0,0.6)">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px">
+      <div style="font-size:17px;font-weight:800">+ Nova tarefa</div>
+      <button onclick="closeTarefaModal()" style="background:rgba(255,255,255,0.06);border:none;width:30px;height:30px;border-radius:50%;color:#94A3B8;cursor:pointer;font-size:16px">✕</button>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div>
+        <label style="font-size:11px;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px">Tarefa</label>
+        <input id="tarefa-text" type="text" placeholder="Ex: Revisar código do projeto" maxlength="60" style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:11px 14px;color:#F1F5F9;font-size:14px;font-family:inherit;outline:none" onfocus="this.style.borderColor='rgba(139,92,246,.5)'" onblur="this.style.borderColor='rgba(255,255,255,0.1)'">
+      </div>
+      <div>
+        <label style="font-size:11px;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px">Prioridade</label>
+        <div style="display:flex;gap:8px">
+          <button onclick="selectPriority(this,'alta')" class="priority-btn selected" data-p="alta" style="flex:1;padding:8px;border-radius:8px;border:1px solid rgba(239,68,68,0.4);background:rgba(239,68,68,0.1);color:#EF4444;font-size:12px;font-weight:700;cursor:pointer">Alta</button>
+          <button onclick="selectPriority(this,'media')" class="priority-btn" data-p="media" style="flex:1;padding:8px;border-radius:8px;border:1px solid rgba(139,92,246,0.3);background:rgba(139,92,246,0.08);color:#8B5CF6;font-size:12px;font-weight:700;cursor:pointer">Média</button>
+          <button onclick="selectPriority(this,'baixa')" class="priority-btn" data-p="baixa" style="flex:1;padding:8px;border-radius:8px;border:1px solid rgba(100,116,139,0.3);background:rgba(100,116,139,0.08);color:#64748B;font-size:12px;font-weight:700;cursor:pointer">Baixa</button>
+        </div>
+      </div>
+      <div>
+        <label style="font-size:11px;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px">Contexto <span style="font-weight:400;text-transform:none">(opcional)</span></label>
+        <input id="tarefa-ctx" type="text" placeholder="Ex: Dev · 2 horas" maxlength="40" style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:11px 14px;color:#F1F5F9;font-size:14px;font-family:inherit;outline:none" onfocus="this.style.borderColor='rgba(139,92,246,.5)'" onblur="this.style.borderColor='rgba(255,255,255,0.1)'">
+      </div>
+      <button onclick="salvarTarefa()" style="background:linear-gradient(135deg,#8B5CF6,#7C3AED);color:#fff;border:none;border-radius:11px;padding:13px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;box-shadow:0 0 24px rgba(139,92,246,.35);margin-top:4px">Adicionar tarefa</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL SONO -->
+<div id="sono-overlay" style="display:none;position:fixed;inset:0;z-index:3000;background:rgba(0,0,0,0.75);backdrop-filter:blur(8px);align-items:center;justify-content:center;padding:20px">
+  <div style="background:#0d1120;border:1px solid rgba(255,255,255,0.1);border-radius:20px;padding:32px;width:100%;max-width:360px;animation:slideup 0.25s ease;box-shadow:0 40px 80px rgba(0,0,0,0.6)">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px">
+      <div style="font-size:17px;font-weight:800">😴 Registrar sono</div>
+      <button onclick="closeSonoModal()" style="background:rgba(255,255,255,0.06);border:none;width:30px;height:30px;border-radius:50%;color:#94A3B8;cursor:pointer;font-size:16px">✕</button>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div>
+        <label style="font-size:11px;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px">Horas dormidas</label>
+        <input id="sono-horas" type="number" min="1" max="16" step="0.5" placeholder="Ex: 7.5" style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:11px 14px;color:#F1F5F9;font-size:20px;font-family:inherit;outline:none;text-align:center;font-weight:700" onfocus="this.style.borderColor='rgba(245,158,11,.5)'" onblur="this.style.borderColor='rgba(255,255,255,0.1)'">
+      </div>
+      <button onclick="salvarSono()" style="background:linear-gradient(135deg,#F59E0B,#D97706);color:#fff;border:none;border-radius:11px;padding:13px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:4px">Registrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL PESO -->
+<div id="peso-overlay" style="display:none;position:fixed;inset:0;z-index:3000;background:rgba(0,0,0,0.75);backdrop-filter:blur(8px);align-items:center;justify-content:center;padding:20px">
+  <div style="background:#0d1120;border:1px solid rgba(255,255,255,0.1);border-radius:20px;padding:32px;width:100%;max-width:360px;animation:slideup 0.25s ease;box-shadow:0 40px 80px rgba(0,0,0,0.6)">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px">
+      <div style="font-size:17px;font-weight:800">⚖️ Registrar peso</div>
+      <button onclick="closePesoModal()" style="background:rgba(255,255,255,0.06);border:none;width:30px;height:30px;border-radius:50%;color:#94A3B8;cursor:pointer;font-size:16px">✕</button>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div>
+        <label style="font-size:11px;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px">Peso (kg)</label>
+        <input id="peso-kg" type="number" min="30" max="300" step="0.1" placeholder="Ex: 83.5" style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:11px 14px;color:#F1F5F9;font-size:20px;font-family:inherit;outline:none;text-align:center;font-weight:700" onfocus="this.style.borderColor='rgba(34,197,94,.5)'" onblur="this.style.borderColor='rgba(255,255,255,0.1)'">
+      </div>
+      <button onclick="salvarPeso()" style="background:linear-gradient(135deg,#22C55E,#16A34A);color:#fff;border:none;border-radius:11px;padding:13px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:4px">Registrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL TREINO -->
+<div id="treino-overlay" style="display:none;position:fixed;inset:0;z-index:3000;background:rgba(0,0,0,0.75);backdrop-filter:blur(8px);align-items:center;justify-content:center;padding:20px">
+  <div style="background:#0d1120;border:1px solid rgba(255,255,255,0.1);border-radius:20px;padding:32px;width:100%;max-width:400px;animation:slideup 0.25s ease;box-shadow:0 40px 80px rgba(0,0,0,0.6)">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px">
+      <div style="font-size:17px;font-weight:800">🏋️ Registrar treino</div>
+      <button onclick="closeTreinoModal()" style="background:rgba(255,255,255,0.06);border:none;width:30px;height:30px;border-radius:50%;color:#94A3B8;cursor:pointer;font-size:16px">✕</button>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div>
+        <label style="font-size:11px;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px">Tipo de treino</label>
+        <input id="treino-tipo" type="text" placeholder="Ex: Peito & Tríceps" maxlength="40" style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:11px 14px;color:#F1F5F9;font-size:14px;font-family:inherit;outline:none" onfocus="this.style.borderColor='rgba(139,92,246,.5)'" onblur="this.style.borderColor='rgba(255,255,255,0.1)'">
+      </div>
+      <div>
+        <label style="font-size:11px;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px">Duração (minutos)</label>
+        <input id="treino-min" type="number" min="1" max="300" placeholder="Ex: 45" style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:11px 14px;color:#F1F5F9;font-size:14px;font-family:inherit;outline:none" onfocus="this.style.borderColor='rgba(139,92,246,.5)'" onblur="this.style.borderColor='rgba(255,255,255,0.1)'">
+      </div>
+      <button onclick="salvarTreino()" style="background:linear-gradient(135deg,#8B5CF6,#7C3AED);color:#fff;border:none;border-radius:11px;padding:13px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;box-shadow:0 0 24px rgba(139,92,246,.35);margin-top:4px">Registrar treino</button>
+    </div>
+  </div>
+</div>
+
 <style>
 @keyframes slideup { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
 .emoji-pick { background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:6px 10px;font-size:18px;cursor:pointer;transition:all 0.15s }
@@ -1931,13 +1852,13 @@ function mobileNav(id, el) {
   document.querySelector('.main').scrollTop = 0;
 }
 
-// ── HABITS TOGGLE ──
-function toggleHabit(el) {
+// ── HABITS TOGGLE (dashboard inline) ──
+function toggleHabitEl(el, habitId) {
   const check = el.querySelector('.habit-check');
   check.classList.toggle('done');
   check.textContent = check.classList.contains('done') ? '✓' : '';
-  const key = el.dataset.habit;
-  if (key) saveHabit(key, check.classList.contains('done'));
+  saveHabitById(habitId, check.classList.contains('done'));
+  atualizarDashHabitos();
 }
 
 // ── MOOD SELECT ──
@@ -1951,7 +1872,7 @@ function selectMood(el, emoji) {
 
 // ── WATER TRACKER ──
 let waterCount = 5;
-const totalWater = 7;
+let totalWater = 7;
 function buildWater() {
   const c = document.getElementById('waterDots');
   c.innerHTML = '';
@@ -2172,17 +2093,595 @@ function applyUserProfile(user, profileData) {
   if (greet) greet.textContent = `${window._greetWord || 'Olá'}, ${firstName} 👋`;
 }
 
+// ── GLOBAL STATE ──
+let _goals = { sleep: 8, water: 7, weight: 80, workouts: 5 };
+let _habitosData = []; // [{id,name,emoji,streak,createdAt}]
+let _dailyData = {};   // today's doc
+let _treinosData = []; // workouts this week
+let _selectedPriority = 'alta';
+let _selectedHabitoEmoji = '🧘';
+
+// ── DAILY SAVE HELPERS ──
+async function saveDaily(patch) {
+  if (!_uid || !_db) return;
+  try {
+    await _db.collection('users').doc(_uid).collection('daily').doc(todayKey()).set(patch, { merge: true });
+    Object.assign(_dailyData, patch);
+  } catch(e) { console.warn('saveDaily:', e); }
+}
+
+async function saveHabitById(id, done) {
+  await saveDaily({ habits: { [id]: done } });
+  // XP +10 when completing
+  if (done) await addXP(10);
+  atualizarDashHabitos();
+  atualizarMetricasHabitos();
+  recalcScore();
+}
+
+async function saveMood(emoji) { await saveDaily({ mood: emoji }); }
+async function saveWater() {
+  await saveDaily({ water: waterCount });
+  atualizarDashWater();
+  recalcScore();
+}
+
+// ── LOAD GOALS ──
+async function carregarGoals() {
+  if (!_uid || !_db) return;
+  try {
+    const snap = await _db.collection('users').doc(_uid).get();
+    const g = snap.exists ? (snap.data().goals || {}) : {};
+    _goals.sleep    = g.sleep    || 8;
+    _goals.water    = g.water    || 7;
+    _goals.weight   = g.weight   || 80;
+    _goals.workouts = g.workouts || 5;
+    // Aplicar nos inputs de config
+    const el = (id) => document.getElementById(id);
+    if (el('goal-sleep'))    el('goal-sleep').value    = _goals.sleep;
+    if (el('goal-water'))    el('goal-water').value    = _goals.water;
+    if (el('goal-weight'))   el('goal-weight').value   = _goals.weight;
+    if (el('goal-workouts')) el('goal-workouts').value = _goals.workouts;
+    // Atualizar water tracker com meta correta
+    if (window._waterGoalInit) _waterGoalInit();
+  } catch(e) { console.warn('carregarGoals:', e); }
+}
+
+async function salvarGoals() {
+  const g = {
+    sleep:    parseFloat(document.getElementById('goal-sleep')?.value)    || 8,
+    water:    parseInt(document.getElementById('goal-water')?.value)       || 7,
+    weight:   parseFloat(document.getElementById('goal-weight')?.value)   || 80,
+    workouts: parseInt(document.getElementById('goal-workouts')?.value)   || 5,
+  };
+  _goals = g;
+  if (_uid && _db) {
+    try { await _db.collection('users').doc(_uid).set({ goals: g }, { merge: true }); } catch(e) {}
+  }
+  // Update water goal live
+  totalWater = _goals.water;
+  buildWater();
+  updateWaterDisplay();
+  atualizarDashWater();
+  showToast('Metas salvas! ✓');
+}
+
+// ── TOAST ──
+function showToast(msg) {
+  let t = document.getElementById('toast-global');
+  if (!t) {
+    t = document.createElement('div');
+    t.id = 'toast-global';
+    t.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#8B5CF6;color:#fff;padding:10px 20px;border-radius:10px;font-size:13px;font-weight:600;z-index:9999;box-shadow:0 4px 24px rgba(139,92,246,0.4);transition:opacity .3s';
+    document.body.appendChild(t);
+  }
+  t.textContent = msg;
+  t.style.opacity = '1';
+  setTimeout(() => { t.style.opacity = '0'; }, 2500);
+}
+
+// ── HABITS ──
+function openHabitoModal() {
+  document.getElementById('habito-overlay').style.display = 'flex';
+  document.getElementById('habito-name').value = '';
+  _selectedHabitoEmoji = '🧘';
+  document.querySelectorAll('#habito-emoji-btns .emoji-pick').forEach(b => b.classList.remove('selected'));
+  document.querySelector('#habito-emoji-btns .emoji-pick').classList.add('selected');
+}
+function closeHabitoModal() { document.getElementById('habito-overlay').style.display = 'none'; }
+function selectHabitoEmoji(btn, emoji) {
+  document.querySelectorAll('#habito-emoji-btns .emoji-pick').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  _selectedHabitoEmoji = emoji;
+}
+
+async function salvarHabito() {
+  const name = document.getElementById('habito-name').value.trim();
+  if (!name) { alert('Digite o nome do hábito.'); return; }
+  const habito = { id: Date.now().toString(), name, emoji: _selectedHabitoEmoji, streak: 0, createdAt: Date.now() };
+  if (_uid && _db) {
+    try { await _db.collection('users').doc(_uid).collection('habits').doc(habito.id).set(habito); } catch(e) {}
+  }
+  _habitosData.push(habito);
+  renderHabitos();
+  closeHabitoModal();
+  showToast('Hábito criado! ✓');
+}
+
+async function carregarHabitos() {
+  if (!_uid || !_db) return;
+  try {
+    const snap = await _db.collection('users').doc(_uid).collection('habits').get();
+    _habitosData = [];
+    snap.forEach(doc => _habitosData.push(doc.data()));
+    _habitosData.sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
+    renderHabitos();
+  } catch(e) { console.warn('carregarHabitos:', e); }
+}
+
+function renderHabitos() {
+  const list = document.getElementById('habits-full-list');
+  const dashList = document.getElementById('dash-habits-list');
+  if (!list) return;
+
+  if (_habitosData.length === 0) {
+    list.innerHTML = '<div style="text-align:center;padding:32px;color:var(--text-muted);font-size:13px">Nenhum hábito ainda. Clique em "+ Novo hábito" para começar.</div>';
+    if (dashList) dashList.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text-muted);font-size:13px">Adicione hábitos na aba Hábitos.</div>';
+    atualizarMetricasHabitos();
+    return;
+  }
+
+  const todayHabits = (_dailyData && _dailyData.habits) ? _dailyData.habits : {};
+
+  list.innerHTML = '';
+  if (dashList) dashList.innerHTML = '';
+
+  _habitosData.forEach(h => {
+    const done = !!todayHabits[h.id];
+    const streakTxt = h.streak > 0 ? `🔥 ${h.streak} dias` : '— pendente';
+    const streakColor = h.streak > 0 ? 'var(--amber)' : 'var(--text-muted)';
+
+    const el = document.createElement('div');
+    el.className = 'habit-item';
+    el.dataset.habitId = h.id;
+    el.innerHTML = `
+      <div class="habit-check${done?' done':''}">${done?'✓':''}</div>
+      <div style="flex:1">
+        <div class="habit-name">${h.emoji} ${h.name}</div>
+      </div>
+      <div class="habit-streak" style="color:${streakColor}">${streakTxt}</div>
+      <button onclick="deletarHabito('${h.id}',event)" style="background:none;border:none;color:#f87171;cursor:pointer;font-size:13px;padding:4px 6px;opacity:0;transition:opacity .2s" class="hab-del">✕</button>`;
+    el.querySelector('.habit-check').addEventListener('click', () => toggleHabitEl(el, h.id));
+    el.addEventListener('mouseenter', () => el.querySelector('.hab-del').style.opacity = '1');
+    el.addEventListener('mouseleave', () => el.querySelector('.hab-del').style.opacity = '0');
+    list.appendChild(el);
+
+    // Dashboard mini version
+    if (dashList) {
+      const del = document.createElement('div');
+      del.className = 'habit-item';
+      del.dataset.habitId = h.id;
+      del.innerHTML = `
+        <div class="habit-check${done?' done':''}">${done?'✓':''}</div>
+        <div class="habit-name">${h.emoji} ${h.name}</div>
+        <div class="habit-streak" style="color:${streakColor}">${streakTxt}</div>`;
+      del.querySelector('.habit-check').addEventListener('click', () => {
+        const check = del.querySelector('.habit-check');
+        check.classList.toggle('done');
+        check.textContent = check.classList.contains('done') ? '✓' : '';
+        saveHabitById(h.id, check.classList.contains('done'));
+      });
+      dashList.appendChild(del);
+    }
+  });
+
+  atualizarMetricasHabitos();
+  atualizarDashHabitos();
+}
+
+async function deletarHabito(id, e) {
+  e.stopPropagation();
+  _habitosData = _habitosData.filter(h => h.id !== id);
+  if (_uid && _db) {
+    try { await _db.collection('users').doc(_uid).collection('habits').doc(id).delete(); } catch(err) {}
+  }
+  renderHabitos();
+}
+
+function atualizarMetricasHabitos() {
+  const todayHabits = (_dailyData && _dailyData.habits) ? _dailyData.habits : {};
+  const total = _habitosData.length;
+  const done  = _habitosData.filter(h => todayHabits[h.id]).length;
+  const best  = _habitosData.reduce((m, h) => Math.max(m, h.streak || 0), 0);
+  const rate  = total > 0 ? Math.round(done / total * 100) : 0;
+
+  const set = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+  set('hab-best-streak', best);
+  set('hab-rate', rate + '%');
+  set('hab-count', total);
+
+  // Nav badge
+  const badge = document.querySelector('.nav-item[onclick*="habitos"] .nav-badge');
+  if (badge) badge.textContent = total;
+}
+
+function atualizarDashHabitos() {
+  const todayHabits = (_dailyData && _dailyData.habits) ? _dailyData.habits : {};
+  const total = _habitosData.length;
+  const done  = _habitosData.filter(h => todayHabits[h.id]).length;
+  const rate  = total > 0 ? Math.round(done / total * 100) : 0;
+
+  const cnt = document.getElementById('dash-hab-count');
+  const bar = document.getElementById('dash-hab-bar');
+  if (cnt) cnt.textContent = `${done} de ${total} concluídos`;
+  if (bar) bar.style.width = rate + '%';
+}
+
+// ── TASKS ──
+let _tasksData = [];
+
+function openTarefaModal() {
+  document.getElementById('tarefa-overlay').style.display = 'flex';
+  document.getElementById('tarefa-text').value = '';
+  document.getElementById('tarefa-ctx').value = '';
+  _selectedPriority = 'alta';
+  document.querySelectorAll('.priority-btn').forEach(b => {
+    const isAlta = b.dataset.p === 'alta';
+    b.style.opacity = isAlta ? '1' : '0.5';
+  });
+}
+function closeTarefaModal() { document.getElementById('tarefa-overlay').style.display = 'none'; }
+function selectPriority(btn, p) {
+  _selectedPriority = p;
+  document.querySelectorAll('.priority-btn').forEach(b => b.style.opacity = b.dataset.p === p ? '1' : '0.5');
+}
+
+async function salvarTarefa() {
+  const text = document.getElementById('tarefa-text').value.trim();
+  if (!text) { alert('Digite o nome da tarefa.'); return; }
+  const ctx = document.getElementById('tarefa-ctx').value.trim();
+  const tarefa = { id: Date.now().toString(), text, ctx, priority: _selectedPriority, done: false, createdAt: Date.now(), date: todayKey() };
+  if (_uid && _db) {
+    try { await _db.collection('users').doc(_uid).collection('tasks').doc(tarefa.id).set(tarefa); } catch(e) {}
+  }
+  _tasksData.push(tarefa);
+  renderTasks();
+  closeTarefaModal();
+  showToast('Tarefa adicionada! ✓');
+}
+
+async function carregarTasks() {
+  if (!_uid || !_db) return;
+  try {
+    const snap = await _db.collection('users').doc(_uid).collection('tasks').where('date', '==', todayKey()).get();
+    _tasksData = [];
+    snap.forEach(doc => _tasksData.push(doc.data()));
+    _tasksData.sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
+    renderTasks();
+  } catch(e) { console.warn('carregarTasks:', e); }
+}
+
+function renderTasks() {
+  const list = document.getElementById('tasks-list');
+  if (!list) return;
+  if (_tasksData.length === 0) {
+    list.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text-muted);font-size:13px">Nenhuma tarefa. Clique em "+ Adicionar".</div>';
+    atualizarTaskCount();
+    return;
+  }
+  const pColors = { alta: '#EF4444', media: '#8B5CF6', baixa: '#64748B' };
+  const pBg     = { alta: 'rgba(239,68,68,0.12)', media: 'rgba(139,92,246,0.12)', baixa: 'rgba(100,116,139,0.12)' };
+  const pLabels = { alta: 'Alta', media: 'Média', baixa: 'Baixa' };
+  list.innerHTML = '';
+  _tasksData.forEach(t => {
+    const el = document.createElement('div');
+    el.className = 'goal-row';
+    el.dataset.taskId = t.id;
+    el.innerHTML = `
+      <div class="goal-check${t.done?' done':''}${t.done?'":style="background:var(--purple);border-color:var(--purple)"':'"'}>${t.done?'✓':''}</div>
+      <div style="flex:1"><div class="goal-text" style="${t.done?'text-decoration:line-through;opacity:0.5':''}"> ${t.text}</div>${t.ctx?`<div style="font-size:10px;color:var(--text-muted)">${t.ctx}</div>`:''}</div>
+      <span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:99px;background:${pBg[t.priority]};color:${pColors[t.priority]};border:1px solid ${pColors[t.priority]}33">${pLabels[t.priority]}</span>
+      <button onclick="deletarTask('${t.id}',event)" style="background:none;border:none;color:#f87171;cursor:pointer;font-size:13px;padding:4px 6px;opacity:0;transition:opacity .2s" class="task-del">✕</button>`;
+    el.querySelector('.goal-check').addEventListener('click', () => toggleTask(t.id, el));
+    el.addEventListener('mouseenter', () => el.querySelector('.task-del').style.opacity = '1');
+    el.addEventListener('mouseleave', () => el.querySelector('.task-del').style.opacity = '0');
+    list.appendChild(el);
+  });
+  atualizarTaskCount();
+}
+
+async function toggleTask(id, el) {
+  const t = _tasksData.find(x => x.id === id);
+  if (!t) return;
+  t.done = !t.done;
+  if (_uid && _db) {
+    try { await _db.collection('users').doc(_uid).collection('tasks').doc(id).update({ done: t.done }); } catch(e) {}
+  }
+  if (t.done) await addXP(20);
+  renderTasks();
+}
+
+async function deletarTask(id, e) {
+  e.stopPropagation();
+  _tasksData = _tasksData.filter(t => t.id !== id);
+  if (_uid && _db) { try { await _db.collection('users').doc(_uid).collection('tasks').doc(id).delete(); } catch(e) {} }
+  renderTasks();
+}
+
+function atualizarTaskCount() {
+  const total = _tasksData.length;
+  const done  = _tasksData.filter(t => t.done).length;
+  const rate  = total > 0 ? Math.round(done / total * 100) : 0;
+  const cnt = document.getElementById('tasks-count');
+  const bar = document.getElementById('tasks-bar');
+  if (cnt) cnt.textContent = `${done} de ${total} concluídas`;
+  if (bar) bar.style.width = rate + '%';
+}
+
+// ── TREINOS ──
+function openTreinoModal() { document.getElementById('treino-overlay').style.display = 'flex'; document.getElementById('treino-tipo').value = ''; document.getElementById('treino-min').value = ''; }
+function closeTreinoModal() { document.getElementById('treino-overlay').style.display = 'none'; }
+
+async function salvarTreino() {
+  const tipo = document.getElementById('treino-tipo').value.trim();
+  const min  = parseInt(document.getElementById('treino-min').value) || 0;
+  if (!tipo) { alert('Digite o tipo de treino.'); return; }
+  const tr = { id: Date.now().toString(), tipo, min, date: todayKey(), ts: Date.now() };
+  if (_uid && _db) {
+    try { await _db.collection('users').doc(_uid).collection('workouts').doc(tr.id).set(tr); } catch(e) {}
+  }
+  _treinosData.push(tr);
+  await saveDaily({ workout: { tipo, min, done: true } });
+  await addXP(30);
+  renderTreinos();
+  closeTreinoModal();
+  showToast('Treino registrado! 💪 +30 XP');
+}
+
+async function carregarTreinos() {
+  if (!_uid || !_db) return;
+  try {
+    const snap = await _db.collection('users').doc(_uid).collection('workouts').orderBy('ts', 'desc').limit(20).get();
+    _treinosData = [];
+    snap.forEach(doc => _treinosData.push(doc.data()));
+    renderTreinos();
+  } catch(e) { console.warn('carregarTreinos:', e); }
+}
+
+function renderTreinos() {
+  const list = document.getElementById('fit-treinos-list');
+  if (!list) return;
+  // Count this week
+  const startOfWeek = (() => { const d = new Date(); d.setDate(d.getDate() - d.getDay()); return d.toISOString().slice(0,10); })();
+  const thisWeek = _treinosData.filter(t => t.date >= startOfWeek);
+  const tv = document.getElementById('fit-treinos-val');
+  const ts = document.getElementById('fit-treinos-sub');
+  if (tv) tv.textContent = thisWeek.length;
+  if (ts) ts.textContent = `Meta: ${_goals.workouts} treinos`;
+
+  if (_treinosData.length === 0) {
+    list.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text-muted);font-size:13px">Nenhum treino registrado ainda.</div>';
+    return;
+  }
+  list.innerHTML = '';
+  _treinosData.slice(0, 5).forEach(t => {
+    const el = document.createElement('div');
+    el.className = 'workout-card mb-16';
+    el.style.flexDirection = 'column';
+    el.innerHTML = `
+      <div class="workout-info" style="width:100%">
+        <div style="display:flex;gap:8px;margin-bottom:8px"><span class="tag tag-purple">Treino</span><span class="tag tag-green">${t.date}</span></div>
+        <h3>${t.tipo}</h3>
+        <div class="workout-stats">
+          <div class="workout-stat"><div class="val">${t.min || '—'}</div><div class="lbl">Minutos</div></div>
+        </div>
+      </div>`;
+    list.appendChild(el);
+  });
+}
+
+// ── SONO ──
+function openSonoModal() { document.getElementById('sono-overlay').style.display = 'flex'; document.getElementById('sono-horas').value = ''; }
+function closeSonoModal() { document.getElementById('sono-overlay').style.display = 'none'; }
+
+async function salvarSono() {
+  const h = parseFloat(document.getElementById('sono-horas').value);
+  if (!h || h <= 0) { alert('Digite as horas dormidas.'); return; }
+  await saveDaily({ sleep: h });
+  aplicarSono(h);
+  closeSonoModal();
+  showToast(`Sono registrado: ${h}h ✓`);
+  recalcScore();
+}
+
+function aplicarSono(h) {
+  const fmt = `${Math.floor(h)}h ${Math.round((h%1)*60)}m`;
+  const pct = Math.min(100, Math.round(h / _goals.sleep * 100));
+  const set = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+  set('sleep-val', fmt);
+  set('dash-sleep-val', fmt);
+  set('fit-sono-val', fmt);
+  const sub = pct >= 100 ? '✓ Meta atingida' : `Meta: ${_goals.sleep}h`;
+  set('sleep-sub', sub);
+  set('dash-sleep-sub', sub);
+  const bar = document.getElementById('sleep-bar');
+  if (bar) bar.style.width = pct + '%';
+  // Score ring sono
+  updateRing('ring-sono', pct);
+  const rv = document.getElementById('ring-sono-val');
+  if (rv) rv.innerHTML = pct + '<span>sono</span>';
+}
+
+// ── PESO ──
+function openPesoModal() { document.getElementById('peso-overlay').style.display = 'flex'; document.getElementById('peso-kg').value = ''; }
+function closePesoModal() { document.getElementById('peso-overlay').style.display = 'none'; }
+
+async function salvarPeso() {
+  const kg = parseFloat(document.getElementById('peso-kg').value);
+  if (!kg || kg <= 0) { alert('Digite o peso.'); return; }
+  await saveDaily({ weight: kg });
+  if (_uid && _db) { try { await _db.collection('users').doc(_uid).set({ lastWeight: kg }, { merge: true }); } catch(e) {} }
+  aplicarPeso(kg);
+  closePesoModal();
+  showToast(`Peso registrado: ${kg}kg ✓`);
+}
+
+function aplicarPeso(kg) {
+  const fmt = kg.toFixed(1).replace('.', ',') + ' kg';
+  const meta = _goals.weight;
+  const diff = (kg - meta).toFixed(1);
+  const set = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+  set('fit-peso-val', fmt);
+  set('dash-peso-val', fmt);
+  set('fit-peso-sub', diff > 0 ? `↓ ${diff}kg da meta` : '✓ Meta atingida');
+  set('dash-peso-sub', `Meta: ${meta}kg`);
+}
+
+// ── XP / LEVEL ──
+const LEVEL_NAMES = ['Iniciante','Determinado','Consistente','Focado','Disciplinado','Elite','Ascended'];
+const LEVEL_XP    = [0, 500, 1200, 2200, 3500, 5500, 8000, 99999];
+
+function getLevelFromXP(xp) {
+  let lv = 1;
+  for (let i = 1; i < LEVEL_XP.length; i++) { if (xp >= LEVEL_XP[i]) lv = i + 1; else break; }
+  return Math.min(lv, 7);
+}
+
+async function addXP(amount) {
+  if (!_uid || !_db) return;
+  try {
+    const snap = await _db.collection('users').doc(_uid).get();
+    const cur = snap.exists ? (snap.data().xp || 0) : 0;
+    const xpToday = snap.exists ? (snap.data().xpToday || 0) : 0;
+    const newXP = cur + amount;
+    const lv = getLevelFromXP(newXP);
+    await _db.collection('users').doc(_uid).set({ xp: newXP, xpToday: xpToday + amount, level: lv }, { merge: true });
+    renderEvolution(newXP, lv, xpToday + amount, snap.exists ? (snap.data().streak || 0) : 0, snap.exists ? (snap.data().createdAt || Date.now()) : Date.now());
+  } catch(e) {}
+}
+
+function renderEvolution(xp, lv, xpToday, streak, createdAt) {
+  const lv0 = lv - 1;
+  const nextXP = LEVEL_XP[lv] || LEVEL_XP[LEVEL_XP.length - 1];
+  const prevXP = LEVEL_XP[lv0] || 0;
+  const pct = Math.min(100, Math.round((xp - prevXP) / (nextXP - prevXP) * 100));
+  const lvName = LEVEL_NAMES[lv - 1] || 'Ascended';
+  const days = Math.floor((Date.now() - createdAt) / 86400000);
+
+  const set = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+  set('evol-level-text', `${lv} — ${lvName}`);
+  set('evol-xp-text', `${xp.toLocaleString('pt-BR')} / ${nextXP.toLocaleString('pt-BR')} XP`);
+  set('evol-xp-next', `${(nextXP - xp).toLocaleString('pt-BR')} XP para o próximo nível`);
+  set('evol-xp-today', '+' + xpToday);
+  set('evol-streak', streak);
+  set('evol-days', days);
+  const bar = document.getElementById('evol-xp-bar');
+  if (bar) bar.style.width = pct + '%';
+
+  // Sidebar
+  const sl = document.getElementById('sidebar-level');
+  if (sl) sl.textContent = `✦ Nível ${lv} — ${lvName}`;
+
+  // Perfil
+  set('perf-xp', xp.toLocaleString('pt-BR'));
+  set('perf-streak-val', streak + ' dias');
+  set('perf-level-val', lv);
+  set('perf-days-count', days);
+
+  const pt = document.getElementById('perf-level-tag');
+  if (pt) pt.textContent = `◆ Nível ${lv} — ${lvName}`;
+  const ps = document.getElementById('perf-streak-tag');
+  if (ps) ps.textContent = `🔥 ${streak} dias`;
+}
+
+// ── SCORE CALC ──
+function recalcScore() {
+  const todayHabits = (_dailyData && _dailyData.habits) ? _dailyData.habits : {};
+  const total = _habitosData.length;
+  const done  = _habitosData.filter(h => todayHabits[h.id]).length;
+  const habPct   = total > 0 ? done / total : 0;
+  const waterPct = Math.min(1, waterCount / _goals.water);
+  const sleepPct = _dailyData.sleep ? Math.min(1, _dailyData.sleep / _goals.sleep) : 0;
+  const score = Math.round((habPct * 0.4 + waterPct * 0.3 + sleepPct * 0.3) * 100);
+
+  const set = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+  set('dash-score', score);
+  set('evol-score', score);
+  set('perf-score-tag', `⭐ Score ${score}`);
+  const bar = document.getElementById('dash-score-bar');
+  if (bar) bar.style.width = score + '%';
+  const sub = document.getElementById('dash-score-sub');
+  if (sub) sub.textContent = score >= 80 ? '🔥 Dia excelente!' : score >= 50 ? '⬆ Continue assim' : 'Complete mais hábitos';
+
+  updateRing('ring-habitos', Math.round(habPct * 100));
+  const rv1 = document.getElementById('ring-habitos-val');
+  if (rv1) rv1.innerHTML = Math.round(habPct * 100) + '<span>hab</span>';
+  updateRing('ring-agua', Math.round(waterPct * 100));
+  const rv2 = document.getElementById('ring-agua-val');
+  if (rv2) rv2.innerHTML = Math.round(waterPct * 100) + '<span>água</span>';
+}
+
+function updateRing(id, pct) {
+  const circle = document.getElementById(id);
+  if (!circle) return;
+  const offset = 201 - (201 * Math.min(100, pct) / 100);
+  circle.setAttribute('stroke-dashoffset', offset.toFixed(1));
+}
+
+// ── STREAK CALCULATION ──
+async function calcStreak() {
+  if (!_uid || !_db) return 0;
+  try {
+    const snap = await _db.collection('users').doc(_uid).get();
+    const streak = snap.exists ? (snap.data().streak || 0) : 0;
+    return streak;
+  } catch(e) { return 0; }
+}
+
+function renderStreak(streak) {
+  const sv = document.getElementById('streak-val');
+  if (sv) sv.textContent = '🔥 ' + streak;
+  const dv = document.getElementById('dash-streak-val');
+  if (dv) dv.textContent = streak;
+  const ev = document.getElementById('evol-streak');
+  if (ev) ev.textContent = streak;
+  const pt = document.getElementById('perf-streak-tag');
+  if (pt) pt.textContent = `🔥 ${streak} dias`;
+  // Streak row (last 7 dots)
+  const row = document.getElementById('streakRow');
+  if (!row) return;
+  row.innerHTML = '';
+  const days = ['S','T','Q','Q','S','S','D'];
+  const today = new Date().getDay();
+  for (let i = 0; i < 7; i++) {
+    const el = document.createElement('div');
+    const dayIdx = (today - 6 + i + 7) % 7;
+    const isDone = i < streak && i < 7;
+    const isToday = i === 6;
+    el.className = 'streak-day' + (isToday ? ' today' : isDone ? ' done' : '');
+    el.textContent = days[dayIdx];
+    row.appendChild(el);
+  }
+}
+
+// ── WATER (updates with goal) ──
+window._waterGoalInit = function() {
+  totalWater = _goals.water;
+  buildWater();
+  updateWaterDisplay();
+};
+
+// ── APPLY DAILY DATA ──
 function applyDailyData(data) {
   if (!data) return;
+  _dailyData = data;
 
-  // Água
   if (typeof data.water === 'number') {
     waterCount = data.water;
     buildWater();
     updateWaterDisplay();
+    atualizarDashWater();
   }
-
-  // Humor
   if (data.mood) {
     const btn = document.querySelector(`.mood-btn[onclick*="${data.mood}"]`);
     if (btn) {
@@ -2193,49 +2692,28 @@ function applyDailyData(data) {
       if (lbl) lbl.textContent = labels[data.mood] || '';
     }
   }
+  if (data.sleep) aplicarSono(data.sleep);
+  if (data.weight) aplicarPeso(data.weight);
+  recalcScore();
+}
 
-  // Hábitos
-  if (data.habits) {
-    document.querySelectorAll('.habit-item[data-habit]').forEach(el => {
-      const key = el.dataset.habit;
-      const check = el.querySelector('.habit-check');
-      if (data.habits[key]) {
-        check.classList.add('done');
-        check.textContent = '✓';
-      } else {
-        check.classList.remove('done');
-        check.textContent = '';
-      }
-    });
-  }
+function atualizarDashWater() {
+  const l = (waterCount * 0.35).toFixed(1).replace('.', ',');
+  const pct = Math.min(100, Math.round(waterCount / _goals.water * 100));
+  const set = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+  set('dash-water-val', l + 'L');
+  set('dash-water-sub', `Meta: ${(_goals.water * 0.35).toFixed(1).replace('.',',')}L`);
+  const bar = document.getElementById('dash-water-bar');
+  if (bar) bar.style.width = pct + '%';
 }
 
 async function saveHabit(key, done) {
-  if (!_uid || !_db) return;
-  try {
-    await _db.collection('users').doc(_uid).collection('daily').doc(todayKey()).set(
-      { habits: { [key]: done } }, { merge: true }
-    );
-  } catch(e) { console.warn('saveHabit:', e); }
+  await saveHabitById(key, done);
 }
 
-async function saveMood(emoji) {
-  if (!_uid || !_db) return;
-  try {
-    await _db.collection('users').doc(_uid).collection('daily').doc(todayKey()).set(
-      { mood: emoji }, { merge: true }
-    );
-  } catch(e) { console.warn('saveMood:', e); }
-}
+async function saveMoodOld(emoji) { await saveMood(emoji); }
 
-async function saveWater() {
-  if (!_uid || !_db) return;
-  try {
-    await _db.collection('users').doc(_uid).collection('daily').doc(todayKey()).set(
-      { water: waterCount }, { merge: true }
-    );
-  } catch(e) { console.warn('saveWater:', e); }
-}
+async function saveWaterOld() { await saveWater(); }
 
 function signOut() {
   if (_auth) _auth.signOut().then(() => { window.location.href = '/login'; });
@@ -2248,28 +2726,44 @@ try {
   _db   = firebase.firestore();
 
   _auth.onAuthStateChanged(async (user) => {
-    if (!user) {
-      window.location.href = '/login';
-      return;
-    }
+    if (!user) { window.location.href = '/login'; return; }
     _uid = user.uid;
 
-    // Carrega perfil do usuário
+    // Perfil
     try {
       const snap = await _db.collection('users').doc(_uid).get();
-      applyUserProfile(user, snap.exists ? snap.data() : null);
-    } catch(e) {
-      applyUserProfile(user, null);
-    }
+      const d = snap.exists ? snap.data() : {};
+      applyUserProfile(user, d);
+      const xp = d.xp || 0;
+      const lv = d.level || 1;
+      const streak = d.streak || 0;
+      const createdAt = d.createdAt || Date.now();
+      renderEvolution(xp, lv, d.xpToday || 0, streak, createdAt);
+      renderStreak(streak);
+      // Ultimo peso
+      if (d.lastWeight) aplicarPeso(d.lastWeight);
+    } catch(e) { applyUserProfile(user, null); }
 
-    // Carrega dados do dia de hoje
+    // Goals
+    await carregarGoals();
+
+    // Dados do dia
     try {
       const daySnap = await _db.collection('users').doc(_uid).collection('daily').doc(todayKey()).get();
       if (daySnap.exists) applyDailyData(daySnap.data());
     } catch(e) { console.warn('loadDaily:', e); }
 
-    // Carrega rotina do usuário
-    carregarRotina();
+    // Hábitos, Tarefas, Treinos, Rotina em paralelo
+    carregarHabitos();
+    carregarTasks();
+    carregarTreinos();
+    carregarRotinaFull();
+
+    // Perfil counts
+    setTimeout(() => {
+      const phc = document.getElementById('perf-hab-count');
+      if (phc) phc.textContent = _habitosData.length;
+    }, 1500);
   });
 } catch(e) {
   console.warn('Firebase init failed — modo demo ativo');
@@ -2374,16 +2868,147 @@ async function carregarRotina() {
   } catch(e) { console.warn('carregarRotina:', e); }
 }
 
-// Salva água ao mudar (patch no water tracker)
+// ── WATER SAVE PATCH ──
 const _origBuildWater = buildWater;
 buildWater = function() {
   _origBuildWater();
-  // Reaplica o listener de save após reconstrução dos dots
-  document.querySelectorAll('.water-dot').forEach((d, i) => {
+  document.querySelectorAll('.water-dot').forEach((d) => {
     const prev = d.onclick;
-    d.onclick = () => { prev && prev.call(d); saveWater(); };
+    d.onclick = () => { prev && prev.call(d); saveWater(); atualizarDashWater(); recalcScore(); };
   });
 };
+
+// Fix carregarRotina to handle empty state
+async function carregarRotinaFull() {
+  if (!_uid || !_db) return;
+  try {
+    const snap = await _db.collection('users').doc(_uid).collection('routine').get();
+    const empty = document.getElementById('routine-empty');
+    if (snap.empty) { if (empty) empty.style.display = 'block'; return; }
+    if (empty) empty.style.display = 'none';
+    const blocos = [];
+    snap.forEach(doc => blocos.push(doc.data()));
+    blocos.sort((a, b) => a.time.localeCompare(b.time));
+    const timeline = document.getElementById('routine-timeline');
+    if (timeline) {
+      timeline.querySelectorAll('.timeline-item[data-bloco-id]').forEach(el => el.remove());
+      blocos.forEach(b => adicionarBlocoNaTimeline(b));
+    }
+  } catch(e) { console.warn('carregarRotinaFull:', e); }
+}
+
+// Patch adicionarBlocoNaTimeline to also hide empty state
+const _origAdd = adicionarBlocoNaTimeline;
+adicionarBlocoNaTimeline = function(bloco) {
+  const empty = document.getElementById('routine-empty');
+  if (empty) empty.style.display = 'none';
+  _origAdd(bloco);
+};
+
+// ── POMODORO TIMER ──
+let _pomoState = { running: false, mode: 'work', secs: 25*60, session: 1, total: 4, interval: null };
+
+function pomoRenderDots() {
+  const c = document.getElementById('pomo-dots');
+  if (!c) return;
+  c.innerHTML = '';
+  for (let i = 0; i < _pomoState.total; i++) {
+    const d = document.createElement('div');
+    d.style.cssText = `width:24px;height:6px;border-radius:99px;background:${i < _pomoState.session ? 'var(--purple)' : 'rgba(255,255,255,0.1)'};box-shadow:${i < _pomoState.session ? '0 0 6px rgba(139,92,246,0.5)' : 'none'}`;
+    c.appendChild(d);
+  }
+}
+pomoRenderDots();
+
+function pomoDisplay(secs) {
+  const m = String(Math.floor(secs / 60)).padStart(2, '0');
+  const s = String(secs % 60).padStart(2, '0');
+  const el = document.getElementById('pomo-display');
+  if (el) el.textContent = `${m}:${s}`;
+  // Update conic gradient
+  const total = _pomoState.mode === 'work' ? 25*60 : 5*60;
+  const pct = (secs / total) * 100;
+  const circle = document.getElementById('pomo-circle');
+  if (circle) circle.style.background = `conic-gradient(var(--purple) 0% ${pct}%, rgba(255,255,255,0.05) ${pct}%)`;
+}
+
+function pomoToggle() {
+  if (_pomoState.running) {
+    clearInterval(_pomoState.interval);
+    _pomoState.running = false;
+    const btn = document.getElementById('pomo-btn-play');
+    if (btn) btn.textContent = '▶ Continuar';
+    const lbl = document.getElementById('pomo-sublabel');
+    if (lbl) lbl.textContent = 'pausado';
+  } else {
+    _pomoState.running = true;
+    const btn = document.getElementById('pomo-btn-play');
+    if (btn) btn.textContent = '⏸ Pausar';
+    const lbl = document.getElementById('pomo-sublabel');
+    if (lbl) lbl.textContent = 'restantes';
+    const info = document.getElementById('pomo-session-info');
+    if (info) info.textContent = `Sessão ${_pomoState.session} de ${_pomoState.total} · ${_pomoState.mode === 'work' ? 'Foco' : 'Pausa'}`;
+    _pomoState.interval = setInterval(() => {
+      _pomoState.secs--;
+      pomoDisplay(_pomoState.secs);
+      if (_pomoState.secs <= 0) {
+        clearInterval(_pomoState.interval);
+        _pomoState.running = false;
+        if (_pomoState.mode === 'work') {
+          addXP(50);
+          showToast('Pomodoro completo! +50 XP 🎉');
+          _pomoState.mode = 'break';
+          _pomoState.secs = 5 * 60;
+          const l = document.getElementById('pomo-label');
+          if (l) l.textContent = '☕ Pausa de 5 minutos';
+        } else {
+          _pomoState.mode = 'work';
+          _pomoState.session = Math.min(_pomoState.session + 1, _pomoState.total);
+          _pomoState.secs = 25 * 60;
+          pomoRenderDots();
+          const l = document.getElementById('pomo-label');
+          if (l) l.textContent = '🎯 Sessão Pomodoro';
+        }
+        pomoDisplay(_pomoState.secs);
+        const btn2 = document.getElementById('pomo-btn-play');
+        if (btn2) btn2.textContent = '▶ Iniciar';
+      }
+    }, 1000);
+  }
+}
+
+function pomoSkip() {
+  clearInterval(_pomoState.interval);
+  _pomoState.running = false;
+  if (_pomoState.mode === 'work') {
+    _pomoState.mode = 'break'; _pomoState.secs = 5*60;
+    const l = document.getElementById('pomo-label');
+    if (l) l.textContent = '☕ Pausa de 5 minutos';
+  } else {
+    _pomoState.mode = 'work';
+    _pomoState.session = Math.min(_pomoState.session + 1, _pomoState.total);
+    _pomoState.secs = 25*60;
+    pomoRenderDots();
+    const l = document.getElementById('pomo-label');
+    if (l) l.textContent = '🎯 Sessão Pomodoro';
+  }
+  pomoDisplay(_pomoState.secs);
+  const btn = document.getElementById('pomo-btn-play');
+  if (btn) btn.textContent = '▶ Iniciar';
+}
+
+function pomoReset() {
+  clearInterval(_pomoState.interval);
+  _pomoState = { running: false, mode: 'work', secs: 25*60, session: 1, total: 4, interval: null };
+  pomoDisplay(_pomoState.secs);
+  pomoRenderDots();
+  const btn = document.getElementById('pomo-btn-play');
+  if (btn) btn.textContent = '▶ Iniciar';
+  const lbl = document.getElementById('pomo-sublabel');
+  if (lbl) lbl.textContent = 'pronto';
+  const l = document.getElementById('pomo-label');
+  if (l) l.textContent = '🎯 Sessão Pomodoro';
+}
 
 function sendChat() {
   const input = document.getElementById('chatInput');
