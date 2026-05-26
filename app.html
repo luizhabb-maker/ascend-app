@@ -632,6 +632,9 @@
     <div class="nav-item" onclick="navigate('fitness', this)">
       <span class="nav-icon">◉</span><span class="nav-label">Fitness</span>
     </div>
+    <div class="nav-item" onclick="navigate('refeicao', this)">
+      <span class="nav-icon">🍽️</span><span class="nav-label">Refeição</span>
+    </div>
     <div class="nav-item" onclick="navigate('produtividade', this)">
       <span class="nav-icon">◎</span><span class="nav-label">Produtividade</span>
     </div>
@@ -976,6 +979,70 @@
             <div style="font-size:10px;color:var(--text-muted)">Sábado</div>
           </div>
         </div>
+      </div>
+    </div>
+
+    <!-- ════ REFEIÇÃO ════ -->
+    <div class="section" id="section-refeicao">
+      <div class="page-header">
+        <h1>Refeições</h1>
+        <p>Alimentação consciente, nutrição real</p>
+      </div>
+
+      <!-- Métricas do dia -->
+      <div class="grid-4 mb-16">
+        <div class="metric-card" style="text-align:center">
+          <div class="metric-icon">🍳</div>
+          <div class="metric-label">Café da manhã</div>
+          <div class="metric-value" style="font-size:20px" id="ref-cafe-status">—</div>
+          <div class="metric-sub" id="ref-cafe-sub">não registrado</div>
+        </div>
+        <div class="metric-card" style="text-align:center">
+          <div class="metric-icon">🥗</div>
+          <div class="metric-label">Almoço</div>
+          <div class="metric-value" style="font-size:20px" id="ref-almoco-status">—</div>
+          <div class="metric-sub" id="ref-almoco-sub">não registrado</div>
+        </div>
+        <div class="metric-card" style="text-align:center">
+          <div class="metric-icon">🍽️</div>
+          <div class="metric-label">Jantar</div>
+          <div class="metric-value" style="font-size:20px" id="ref-jantar-status">—</div>
+          <div class="metric-sub" id="ref-jantar-sub">não registrado</div>
+        </div>
+        <div class="metric-card" style="text-align:center">
+          <div class="metric-icon">🔥</div>
+          <div class="metric-label">Calorias est.</div>
+          <div class="metric-value" style="color:var(--amber)" id="ref-cal-total">0</div>
+          <div class="metric-sub">kcal hoje</div>
+        </div>
+      </div>
+
+      <!-- Score nutricional -->
+      <div class="card mb-16" style="display:flex;align-items:center;gap:24px;flex-wrap:wrap">
+        <div style="flex:1;min-width:180px">
+          <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text-muted);margin-bottom:4px">Qualidade nutricional hoje</div>
+          <div style="font-size:38px;font-weight:900;background:linear-gradient(90deg,var(--green),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1" id="ref-score">0</div>
+          <div style="font-size:12px;color:var(--text-soft);margin-top:4px" id="ref-score-label">Registre suas refeições</div>
+          <div class="progress-bar" style="margin-top:10px;height:6px"><div class="progress-fill" id="ref-score-bar" style="width:0%;background:linear-gradient(90deg,var(--green),var(--cyan))"></div></div>
+        </div>
+        <button class="btn btn-primary" onclick="openRefeicaoModal()" style="flex-shrink:0">🍽️ + Registrar refeição</button>
+      </div>
+
+      <!-- Lista de refeições do dia -->
+      <div class="card mb-16">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+          <div class="card-title" style="margin:0">Refeições de hoje</div>
+          <button class="btn btn-ghost" style="font-size:12px;padding:7px 12px" onclick="openRefeicaoModal()">+ Adicionar</button>
+        </div>
+        <div id="refeicoes-list">
+          <div style="text-align:center;padding:32px;color:var(--text-muted);font-size:13px">Nenhuma refeição registrada. Clique em "+ Adicionar" para começar.</div>
+        </div>
+      </div>
+
+      <!-- Histórico semanal -->
+      <div class="card">
+        <div class="card-title">Qualidade — últimos 7 dias</div>
+        <div class="chart-wrap"><canvas id="refeicaoChart"></canvas></div>
       </div>
     </div>
 
@@ -1649,8 +1716,8 @@
   <div class="mobile-nav-inner">
     <div class="mob-nav-btn active" onclick="mobileNav('dashboard', this)"><span class="mob-icon">⊞</span><span class="mob-label">Home</span></div>
     <div class="mob-nav-btn" onclick="mobileNav('rotina', this)"><span class="mob-icon">◷</span><span class="mob-label">Rotina</span></div>
+    <div class="mob-nav-btn" onclick="mobileNav('refeicao', this)"><span class="mob-icon">🍽️</span><span class="mob-label">Refeição</span></div>
     <div class="mob-nav-btn" onclick="mobileNav('fitness', this)"><span class="mob-icon">◉</span><span class="mob-label">Fitness</span></div>
-    <div class="mob-nav-btn" onclick="mobileNav('casal', this)"><span class="mob-icon">♡</span><span class="mob-label">Casal</span></div>
     <div class="mob-nav-btn" onclick="mobileNav('perfil', this)"><span class="mob-icon">◎</span><span class="mob-label">Perfil</span></div>
   </div>
 </nav>
@@ -1691,6 +1758,46 @@
         <input id="bloco-desc" type="text" placeholder="Ex: 45 min · Academia" maxlength="60" style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:11px 14px;color:#F1F5F9;font-size:14px;font-family:inherit;outline:none" onfocus="this.style.borderColor='rgba(139,92,246,.5)'" onblur="this.style.borderColor='rgba(255,255,255,0.1)'">
       </div>
       <button onclick="salvarBloco()" style="background:linear-gradient(135deg,#8B5CF6,#7C3AED);color:#fff;border:none;border-radius:11px;padding:13px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;box-shadow:0 0 24px rgba(139,92,246,.35);margin-top:4px">Adicionar bloco</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL REFEIÇÃO -->
+<div id="refeicao-overlay" style="display:none;position:fixed;inset:0;z-index:3000;background:rgba(0,0,0,0.75);backdrop-filter:blur(8px);align-items:center;justify-content:center;padding:20px">
+  <div style="background:#0d1120;border:1px solid rgba(255,255,255,0.1);border-radius:20px;padding:32px;width:100%;max-width:440px;animation:slideup 0.25s ease;box-shadow:0 40px 80px rgba(0,0,0,0.6)">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px">
+      <div style="font-size:17px;font-weight:800">🍽️ Registrar refeição</div>
+      <button onclick="closeRefeicaoModal()" style="background:rgba(255,255,255,0.06);border:none;width:30px;height:30px;border-radius:50%;color:#94A3B8;cursor:pointer;font-size:16px">✕</button>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div>
+        <label style="font-size:11px;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:8px">Tipo de refeição</label>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px" id="ref-tipo-btns">
+          <button onclick="selectRefTipo(this,'cafe')" class="ref-tipo selected" data-t="cafe" style="padding:10px;border-radius:10px;border:1px solid rgba(245,158,11,0.4);background:rgba(245,158,11,0.1);color:#F59E0B;font-size:13px;font-weight:600;cursor:pointer">🍳 Café da manhã</button>
+          <button onclick="selectRefTipo(this,'almoco')" class="ref-tipo" data-t="almoco" style="padding:10px;border-radius:10px;border:1px solid rgba(34,197,94,0.3);background:rgba(34,197,94,0.06);color:#22C55E;font-size:13px;font-weight:600;cursor:pointer">🥗 Almoço</button>
+          <button onclick="selectRefTipo(this,'lanche')" class="ref-tipo" data-t="lanche" style="padding:10px;border-radius:10px;border:1px solid rgba(139,92,246,0.3);background:rgba(139,92,246,0.06);color:#8B5CF6;font-size:13px;font-weight:600;cursor:pointer">🍎 Lanche</button>
+          <button onclick="selectRefTipo(this,'jantar')" class="ref-tipo" data-t="jantar" style="padding:10px;border-radius:10px;border:1px solid rgba(59,130,246,0.3);background:rgba(59,130,246,0.06);color:#3B82F6;font-size:13px;font-weight:600;cursor:pointer">🍽️ Jantar</button>
+        </div>
+      </div>
+      <div>
+        <label style="font-size:11px;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px">O que você comeu?</label>
+        <input id="ref-descricao" type="text" placeholder="Ex: Frango grelhado com arroz e salada" maxlength="80" style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:11px 14px;color:#F1F5F9;font-size:14px;font-family:inherit;outline:none" onfocus="this.style.borderColor='rgba(34,197,94,.5)'" onblur="this.style.borderColor='rgba(255,255,255,0.1)'">
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div>
+          <label style="font-size:11px;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px">Calorias <span style="font-weight:400;text-transform:none">(aprox.)</span></label>
+          <input id="ref-calorias" type="number" min="0" max="5000" placeholder="Ex: 450" style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:11px 14px;color:#F1F5F9;font-size:14px;font-family:inherit;outline:none" onfocus="this.style.borderColor='rgba(245,158,11,.5)'" onblur="this.style.borderColor='rgba(255,255,255,0.1)'">
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px">Qualidade</label>
+          <div style="display:flex;gap:6px;margin-top:6px" id="ref-qual-btns">
+            <button onclick="selectRefQual(this,1)" class="ref-qual" title="Ruim" style="flex:1;padding:8px;border-radius:8px;border:1px solid rgba(239,68,68,0.3);background:rgba(239,68,68,0.06);font-size:16px;cursor:pointer">😬</button>
+            <button onclick="selectRefQual(this,2)" class="ref-qual selected" title="Ok" style="flex:1;padding:8px;border-radius:8px;border:1px solid rgba(245,158,11,0.4);background:rgba(245,158,11,0.1);font-size:16px;cursor:pointer">😐</button>
+            <button onclick="selectRefQual(this,3)" class="ref-qual" title="Saudável" style="flex:1;padding:8px;border-radius:8px;border:1px solid rgba(34,197,94,0.3);background:rgba(34,197,94,0.06);font-size:16px;cursor:pointer">😄</button>
+          </div>
+        </div>
+      </div>
+      <button onclick="salvarRefeicao()" style="background:linear-gradient(135deg,#22C55E,#16A34A);color:#fff;border:none;border-radius:11px;padding:13px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;box-shadow:0 0 24px rgba(34,197,94,.3);margin-top:4px">Registrar refeição</button>
     </div>
   </div>
 </div>
@@ -2753,11 +2860,12 @@ try {
       if (daySnap.exists) applyDailyData(daySnap.data());
     } catch(e) { console.warn('loadDaily:', e); }
 
-    // Hábitos, Tarefas, Treinos, Rotina em paralelo
+    // Hábitos, Tarefas, Treinos, Rotina, Refeições em paralelo
     carregarHabitos();
     carregarTasks();
     carregarTreinos();
     carregarRotinaFull();
+    carregarRefeicoes();
 
     // Perfil counts
     setTimeout(() => {
@@ -3009,6 +3117,182 @@ function pomoReset() {
   const l = document.getElementById('pomo-label');
   if (l) l.textContent = '🎯 Sessão Pomodoro';
 }
+
+// ══════════════════════════════════════
+//  REFEIÇÃO
+// ══════════════════════════════════════
+let _refData = [];       // refeições do dia
+let _refTipo = 'cafe';   // tipo selecionado no modal
+let _refQual = 2;        // qualidade 1=ruim 2=ok 3=saudável
+
+const REF_TIPO_LABELS = { cafe: '🍳 Café da manhã', almoco: '🥗 Almoço', lanche: '🍎 Lanche', jantar: '🍽️ Jantar' };
+const REF_QUAL_LABELS = { 1: 'Ruim', 2: 'Ok', 3: 'Saudável' };
+const REF_QUAL_COLORS = { 1: 'var(--red)', 2: 'var(--amber)', 3: 'var(--green)' };
+const REF_TIPO_COLORS  = { cafe: '#F59E0B', almoco: '#22C55E', lanche: '#8B5CF6', jantar: '#3B82F6' };
+
+function openRefeicaoModal() {
+  document.getElementById('refeicao-overlay').style.display = 'flex';
+  document.getElementById('ref-descricao').value = '';
+  document.getElementById('ref-calorias').value = '';
+  _refTipo = 'cafe';
+  _refQual = 2;
+  document.querySelectorAll('.ref-tipo').forEach(b => b.style.opacity = b.dataset.t === 'cafe' ? '1' : '0.45');
+  document.querySelectorAll('#ref-qual-btns .ref-qual').forEach((b, i) => b.style.opacity = (i + 1) === 2 ? '1' : '0.45');
+}
+
+function closeRefeicaoModal() {
+  document.getElementById('refeicao-overlay').style.display = 'none';
+}
+
+function selectRefTipo(btn, tipo) {
+  _refTipo = tipo;
+  document.querySelectorAll('.ref-tipo').forEach(b => b.style.opacity = b.dataset.t === tipo ? '1' : '0.45');
+}
+
+function selectRefQual(btn, q) {
+  _refQual = q;
+  document.querySelectorAll('#ref-qual-btns .ref-qual').forEach((b, i) => b.style.opacity = (i + 1) === q ? '1' : '0.45');
+}
+
+async function salvarRefeicao() {
+  const desc = document.getElementById('ref-descricao').value.trim();
+  if (!desc) { alert('Descreva o que você comeu.'); return; }
+  const cal = parseInt(document.getElementById('ref-calorias').value) || 0;
+  const ref = {
+    id: Date.now().toString(),
+    tipo: _refTipo,
+    desc,
+    cal,
+    qual: _refQual,
+    date: todayKey(),
+    ts: Date.now()
+  };
+  if (_uid && _db) {
+    try { await _db.collection('users').doc(_uid).collection('meals').doc(ref.id).set(ref); } catch(e) {}
+  }
+  _refData.push(ref);
+  renderRefeicoes();
+  closeRefeicaoModal();
+  showToast('Refeição registrada! ✓');
+}
+
+async function carregarRefeicoes() {
+  if (!_uid || !_db) return;
+  try {
+    const snap = await _db.collection('users').doc(_uid).collection('meals').where('date', '==', todayKey()).get();
+    _refData = [];
+    snap.forEach(doc => _refData.push(doc.data()));
+    _refData.sort((a, b) => (a.ts || 0) - (b.ts || 0));
+    renderRefeicoes();
+  } catch(e) { console.warn('carregarRefeicoes:', e); }
+}
+
+function renderRefeicoes() {
+  const list = document.getElementById('refeicoes-list');
+  if (!list) return;
+
+  if (_refData.length === 0) {
+    list.innerHTML = '<div style="text-align:center;padding:32px;color:var(--text-muted);font-size:13px">Nenhuma refeição registrada. Clique em "+ Adicionar" para começar.</div>';
+    atualizarMetricasRefeicao();
+    return;
+  }
+
+  list.innerHTML = '';
+  _refData.forEach(r => {
+    const qualColor = REF_QUAL_COLORS[r.qual] || 'var(--text-muted)';
+    const qualLabel = REF_QUAL_LABELS[r.qual] || '—';
+    const tipoColor = REF_TIPO_COLORS[r.tipo] || 'var(--text-muted)';
+    const el = document.createElement('div');
+    el.style.cssText = 'display:flex;align-items:center;gap:14px;padding:14px;border-radius:12px;background:var(--glass);border:1px solid var(--glass-border);margin-bottom:10px;transition:all .2s';
+    el.innerHTML = `
+      <div style="width:44px;height:44px;border-radius:12px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0">${REF_TIPO_LABELS[r.tipo]?.split(' ')[0] || '🍽️'}</div>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:12px;font-weight:700;color:${tipoColor};text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px">${REF_TIPO_LABELS[r.tipo]?.split(' ').slice(1).join(' ') || r.tipo}</div>
+        <div style="font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${r.desc}</div>
+        ${r.cal ? `<div style="font-size:11px;color:var(--text-muted);margin-top:2px">~${r.cal} kcal</div>` : ''}
+      </div>
+      <div style="text-align:right;flex-shrink:0">
+        <div style="font-size:11px;font-weight:700;padding:3px 10px;border-radius:99px;background:${qualColor}18;color:${qualColor};border:1px solid ${qualColor}33">${qualLabel}</div>
+      </div>
+      <button onclick="deletarRefeicao('${r.id}',event)" style="background:none;border:none;color:#f87171;cursor:pointer;font-size:13px;padding:4px 6px;opacity:0;transition:opacity .2s;flex-shrink:0" class="ref-del">✕</button>`;
+    el.addEventListener('mouseenter', () => el.querySelector('.ref-del').style.opacity = '1');
+    el.addEventListener('mouseleave', () => el.querySelector('.ref-del').style.opacity = '0');
+    list.appendChild(el);
+  });
+
+  atualizarMetricasRefeicao();
+}
+
+async function deletarRefeicao(id, e) {
+  e.stopPropagation();
+  _refData = _refData.filter(r => r.id !== id);
+  if (_uid && _db) { try { await _db.collection('users').doc(_uid).collection('meals').doc(id).delete(); } catch(e) {} }
+  renderRefeicoes();
+}
+
+function atualizarMetricasRefeicao() {
+  // Cards de tipo
+  ['cafe', 'almoco', 'jantar'].forEach(tipo => {
+    const itens = _refData.filter(r => r.tipo === tipo);
+    const statusEl = document.getElementById(`ref-${tipo}-status`);
+    const subEl    = document.getElementById(`ref-${tipo}-sub`);
+    if (!statusEl) return;
+    if (itens.length > 0) {
+      const qualMed = Math.round(itens.reduce((s, r) => s + r.qual, 0) / itens.length);
+      statusEl.textContent = ['😬','😐','😄'][qualMed - 1] || '✓';
+      subEl.textContent = itens[0].desc.substring(0, 22) + (itens[0].desc.length > 22 ? '…' : '');
+    } else {
+      statusEl.textContent = '—';
+      subEl.textContent = 'não registrado';
+    }
+  });
+
+  // Total calorias
+  const totalCal = _refData.reduce((s, r) => s + (r.cal || 0), 0);
+  const calEl = document.getElementById('ref-cal-total');
+  if (calEl) calEl.textContent = totalCal.toLocaleString('pt-BR');
+
+  // Score nutricional (média de qualidade × 33)
+  const score = _refData.length > 0
+    ? Math.min(100, Math.round(_refData.reduce((s, r) => s + r.qual, 0) / _refData.length / 3 * 100))
+    : 0;
+  const scoreEl  = document.getElementById('ref-score');
+  const scoreLbl = document.getElementById('ref-score-label');
+  const scoreBar = document.getElementById('ref-score-bar');
+  if (scoreEl)  scoreEl.textContent = score;
+  if (scoreBar) scoreBar.style.width = score + '%';
+  if (scoreLbl) {
+    if (_refData.length === 0) scoreLbl.textContent = 'Registre suas refeições';
+    else if (score >= 80) scoreLbl.textContent = '🌿 Alimentação excelente!';
+    else if (score >= 50) scoreLbl.textContent = '⬆ Pode melhorar um pouco';
+    else scoreLbl.textContent = 'Tente incluir mais opções saudáveis';
+  }
+}
+
+// Hook chart init para refeição
+const _origInitCharts = initCharts;
+initCharts = function(section) {
+  _origInitCharts(section);
+  if (section === 'refeicao' && !charts.refeicao) {
+    const ctx = document.getElementById('refeicaoChart');
+    if (!ctx) return;
+    charts.refeicao = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: ['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'],
+        datasets: [{
+          label: 'Qualidade nutricional',
+          data: [0,0,0,0,0,0,0],
+          backgroundColor: 'rgba(34,197,94,0.6)',
+          borderColor: '#22C55E',
+          borderWidth: 1,
+          borderRadius: 8
+        }]
+      },
+      options: chartOpts(true)
+    });
+  }
+};
 
 function sendChat() {
   const input = document.getElementById('chatInput');
