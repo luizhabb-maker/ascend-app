@@ -1470,18 +1470,6 @@
           <input id="goal-sleep" type="number" min="4" max="12" value="8" style="width:64px;background:var(--glass);border:1px solid var(--glass-border);border-radius:8px;padding:6px 10px;color:var(--text);font-size:14px;font-weight:700;font-family:inherit;text-align:center;outline:none" onfocus="this.style.borderColor='rgba(139,92,246,.5)'" onblur="this.style.borderColor='rgba(255,255,255,0.08)'">
         </div>
         <div class="setting-row">
-          <div><div class="setting-label">Meta de água</div><div class="setting-desc">Calculada automaticamente pelo peso (35ml/kg)</div></div>
-          <span id="goal-water-display" style="font-size:14px;font-weight:700;color:var(--cyan)">—</span>
-        </div>
-        <div class="setting-row">
-          <div><div class="setting-label">Peso alvo (kg)</div><div class="setting-desc">Seu peso meta</div></div>
-          <input id="goal-weight" type="number" min="30" max="300" value="80" style="width:72px;background:var(--glass);border:1px solid var(--glass-border);border-radius:8px;padding:6px 10px;color:var(--text);font-size:14px;font-weight:700;font-family:inherit;text-align:center;outline:none" onfocus="this.style.borderColor='rgba(139,92,246,.5)'" onblur="this.style.borderColor='rgba(255,255,255,0.08)'">
-        </div>
-        <div class="setting-row">
-          <div><div class="setting-label">Altura (cm)</div><div class="setting-desc">Usada para calcular IMC</div></div>
-          <input id="goal-height" type="number" min="100" max="250" value="170" style="width:72px;background:var(--glass);border:1px solid var(--glass-border);border-radius:8px;padding:6px 10px;color:var(--text);font-size:14px;font-weight:700;font-family:inherit;text-align:center;outline:none" onfocus="this.style.borderColor='rgba(139,92,246,.5)'" onblur="this.style.borderColor='rgba(255,255,255,0.08)'">
-        </div>
-        <div class="setting-row">
           <div><div class="setting-label">Treinos por semana</div><div class="setting-desc">Frequência semanal</div></div>
           <input id="goal-workouts" type="number" min="1" max="7" value="5" style="width:64px;background:var(--glass);border:1px solid var(--glass-border);border-radius:8px;padding:6px 10px;color:var(--text);font-size:14px;font-weight:700;font-family:inherit;text-align:center;outline:none" onfocus="this.style.borderColor='rgba(139,92,246,.5)'" onblur="this.style.borderColor='rgba(255,255,255,0.08)'">
         </div>
@@ -1690,14 +1678,30 @@
           <div class="setting-row"><div><div class="setting-label">Nível</div></div><div style="font-size:15px;font-weight:700;color:var(--purple)" id="perf-level-val">1</div></div>
         </div>
         <div class="card">
-          <div class="card-title">Modo Casal</div>
-          <div style="display:flex;align-items:center;gap:14px;padding:14px;background:linear-gradient(135deg,rgba(139,92,246,0.08),rgba(6,182,212,0.06));border:1px solid rgba(139,92,246,0.2);border-radius:14px;margin-bottom:12px">
-            <div style="font-size:28px">♥</div>
-            <div><div style="font-size:14px;font-weight:700">Conectado com Ana Lima</div><div style="font-size:11px;color:var(--text-soft)">14 dias de sequência conjunta · Nível 6</div></div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+            <div class="card-title" style="margin:0">Dados físicos</div>
+            <button class="btn btn-ghost" style="font-size:12px;padding:6px 12px" onclick="salvarDadosFisicos()">💾 Salvar</button>
           </div>
-          <div class="setting-row"><div><div class="setting-label">Desafios completados</div></div><div style="font-size:15px;font-weight:700;color:var(--green)">8</div></div>
-          <div class="setting-row"><div><div class="setting-label">Metas compartilhadas</div></div><div style="font-size:15px;font-weight:700;color:var(--purple)">5</div></div>
-          <div style="margin-top:14px"><button class="btn btn-ghost" style="width:100%;justify-content:center;font-size:12px">♡ Ver perfil do casal</button></div>
+          <div class="setting-row">
+            <div><div class="setting-label">Peso atual (kg)</div><div class="setting-desc">Último registrado</div></div>
+            <span id="perf-peso-atual" style="font-size:15px;font-weight:700;color:var(--cyan);cursor:pointer" onclick="openPesoModal()">— <span style="font-size:11px;opacity:.6">✏️</span></span>
+          </div>
+          <div class="setting-row">
+            <div><div class="setting-label">Peso alvo (kg)</div></div>
+            <input id="goal-weight" type="number" min="30" max="300" step="0.1" value="80" style="width:72px;background:var(--glass);border:1px solid var(--glass-border);border-radius:8px;padding:6px 10px;color:var(--text);font-size:14px;font-weight:700;font-family:inherit;text-align:center;outline:none" onfocus="this.style.borderColor='rgba(139,92,246,.5)'" onblur="this.style.borderColor='rgba(255,255,255,0.08)'">
+          </div>
+          <div class="setting-row">
+            <div><div class="setting-label">Altura (cm)</div></div>
+            <input id="goal-height" type="number" min="100" max="250" value="170" style="width:72px;background:var(--glass);border:1px solid var(--glass-border);border-radius:8px;padding:6px 10px;color:var(--text);font-size:14px;font-weight:700;font-family:inherit;text-align:center;outline:none" onfocus="this.style.borderColor='rgba(139,92,246,.5)'" onblur="this.style.borderColor='rgba(255,255,255,0.08)'">
+          </div>
+          <div class="setting-row">
+            <div><div class="setting-label">IMC</div><div class="setting-desc" id="perf-imc-class">—</div></div>
+            <span id="perf-imc-val" style="font-size:15px;font-weight:700;color:var(--cyan)">—</span>
+          </div>
+          <div class="setting-row">
+            <div><div class="setting-label">Meta de água</div><div class="setting-desc">35ml × peso atual</div></div>
+            <span id="goal-water-display" style="font-size:14px;font-weight:700;color:var(--cyan)">—</span>
+          </div>
         </div>
       </div>
     </div>
@@ -2346,24 +2350,48 @@ async function carregarGoals() {
 async function salvarGoals() {
   const g = {
     sleep:    parseFloat(document.getElementById('goal-sleep')?.value)    || 8,
-    weight:   parseFloat(document.getElementById('goal-weight')?.value)   || 80,
-    height:   parseFloat(document.getElementById('goal-height')?.value)   || 170,
+    weight:   _goals.weight,
+    height:   _goals.height,
     workouts: parseInt(document.getElementById('goal-workouts')?.value)   || 5,
   };
   _goals = g;
   if (_uid && _db) {
     try { await _db.collection('users').doc(_uid).set({ goals: g }, { merge: true }); } catch(e) {}
   }
-  // Atualizar exibição da meta de água calculada pelo peso
-  const waterDispEl = document.getElementById('goal-water-display');
-  if (waterDispEl) waterDispEl.textContent = mlParaTexto(aguaGoalMl());
-  // Update water goal live
+  showToast('Metas salvas! ✓');
+}
+
+async function salvarDadosFisicos() {
+  const weight = parseFloat(document.getElementById('goal-weight')?.value) || _goals.weight;
+  const height = parseFloat(document.getElementById('goal-height')?.value) || _goals.height;
+  _goals.weight = weight;
+  _goals.height = height;
+  if (_uid && _db) {
+    try { await _db.collection('users').doc(_uid).set({ goals: { weight, height, sleep: _goals.sleep, workouts: _goals.workouts } }, { merge: true }); } catch(e) {}
+  }
+  atualizarDadosFisicosUI();
   totalWater = Math.round(aguaGoalMl() / 350);
   buildWater();
   updateWaterDisplay();
   atualizarDashWater();
   aguaRenderAba();
-  showToast('Metas salvas! ✓');
+  showToast('Dados físicos salvos! ✓');
+}
+
+function atualizarDadosFisicosUI() {
+  const waterDispEl = document.getElementById('goal-water-display');
+  if (waterDispEl) waterDispEl.textContent = mlParaTexto(aguaGoalMl());
+  // IMC no perfil
+  if (_dailyData.weight || _lastWeight) {
+    const kg = _dailyData.weight || _lastWeight;
+    const h = (_goals.height || 170) / 100;
+    const imc = kg / (h * h);
+    const cls = imcClassificacao(imc);
+    const imcEl = document.getElementById('perf-imc-val');
+    const imcCls = document.getElementById('perf-imc-class');
+    if (imcEl) { imcEl.textContent = imc.toFixed(1); imcEl.style.color = cls.color; }
+    if (imcCls) imcCls.textContent = cls.label;
+  }
 }
 
 // ── TOAST ──
@@ -2734,6 +2762,7 @@ function imcClassificacao(imc) {
 }
 
 function aplicarPeso(kg) {
+  _lastWeight = kg;
   const fmt = kg.toFixed(1).replace('.', ',') + ' kg';
   const meta = _goals.weight;
   const diff = (kg - meta).toFixed(1);
@@ -2742,14 +2771,23 @@ function aplicarPeso(kg) {
   set('dash-peso-val', fmt);
   set('fit-peso-sub', diff > 0 ? `↓ ${diff}kg da meta` : '✓ Meta atingida');
   set('dash-peso-sub', `Meta: ${meta}kg`);
-  // IMC
+  // Peso atual no perfil
+  const perfPeso = document.getElementById('perf-peso-atual');
+  if (perfPeso) perfPeso.innerHTML = `${fmt} <span style="font-size:11px;opacity:.6">✏️</span>`;
+  // IMC (fitness + perfil)
   const h = (_goals.height || 170) / 100;
   const imc = kg / (h * h);
   const cls = imcClassificacao(imc);
-  const imcEl = document.getElementById('fit-imc-val');
-  const imcSub = document.getElementById('fit-imc-sub');
-  if (imcEl) { imcEl.textContent = imc.toFixed(1); imcEl.style.color = cls.color; }
-  if (imcSub) imcSub.textContent = cls.label;
+  const setImc = (valId, subId) => {
+    const v = document.getElementById(valId); const s = document.getElementById(subId);
+    if (v) { v.textContent = imc.toFixed(1); v.style.color = cls.color; }
+    if (s) s.textContent = cls.label;
+  };
+  setImc('fit-imc-val', 'fit-imc-sub');
+  setImc('perf-imc-val', 'perf-imc-class');
+  // Meta de água (depende do peso)
+  const waterDispEl = document.getElementById('goal-water-display');
+  if (waterDispEl) waterDispEl.textContent = mlParaTexto(aguaGoalMl());
 }
 
 // ── XP / LEVEL ──
@@ -3230,10 +3268,11 @@ function pomoReset() {
 // ══════════════════════════════════════
 //  ÁGUA — ABA DEDICADA (ml)
 // ══════════════════════════════════════
+let _lastWeight = 0;
 let _aguaRegistros = [];  // [{ml, hora, ts, id}]
 let _aguaTotalMl   = 0;   // total ml hoje
 
-function aguaGoalMl() { return (_goals.weight || 80) * 35; }
+function aguaGoalMl() { return (_lastWeight || _goals.weight || 80) * 35; }
 
 function mlParaTexto(ml) {
   return ml >= 1000 ? (ml / 1000).toFixed(2).replace(/\.?0+$/, '').replace('.', ',') + 'L'
