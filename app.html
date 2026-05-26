@@ -1464,8 +1464,8 @@
           <input id="goal-sleep" type="number" min="4" max="12" value="8" style="width:64px;background:var(--glass);border:1px solid var(--glass-border);border-radius:8px;padding:6px 10px;color:var(--text);font-size:14px;font-weight:700;font-family:inherit;text-align:center;outline:none" onfocus="this.style.borderColor='rgba(139,92,246,.5)'" onblur="this.style.borderColor='rgba(255,255,255,0.08)'">
         </div>
         <div class="setting-row">
-          <div><div class="setting-label">Meta de água (copos)</div><div class="setting-desc">Copos de 350ml por dia</div></div>
-          <input id="goal-water" type="number" min="1" max="20" value="7" style="width:64px;background:var(--glass);border:1px solid var(--glass-border);border-radius:8px;padding:6px 10px;color:var(--text);font-size:14px;font-weight:700;font-family:inherit;text-align:center;outline:none" onfocus="this.style.borderColor='rgba(139,92,246,.5)'" onblur="this.style.borderColor='rgba(255,255,255,0.08)'">
+          <div><div class="setting-label">Meta de água</div><div class="setting-desc">Calculada automaticamente pelo peso (35ml/kg)</div></div>
+          <span id="goal-water-display" style="font-size:14px;font-weight:700;color:var(--cyan)">—</span>
         </div>
         <div class="setting-row">
           <div><div class="setting-label">Meta de peso (kg)</div><div class="setting-desc">Peso alvo</div></div>
@@ -2316,15 +2316,16 @@ async function carregarGoals() {
     const snap = await _db.collection('users').doc(_uid).get();
     const g = snap.exists ? (snap.data().goals || {}) : {};
     _goals.sleep    = g.sleep    || 8;
-    _goals.water    = g.water    || 7;
     _goals.weight   = g.weight   || 80;
     _goals.workouts = g.workouts || 5;
     // Aplicar nos inputs de config
     const el = (id) => document.getElementById(id);
     if (el('goal-sleep'))    el('goal-sleep').value    = _goals.sleep;
-    if (el('goal-water'))    el('goal-water').value    = _goals.water;
     if (el('goal-weight'))   el('goal-weight').value   = _goals.weight;
     if (el('goal-workouts')) el('goal-workouts').value = _goals.workouts;
+    // Mostrar meta de água calculada pelo peso
+    const waterDispEl = el('goal-water-display');
+    if (waterDispEl) waterDispEl.textContent = mlParaTexto(aguaGoalMl());
     // Atualizar water tracker com meta correta
     if (window._waterGoalInit) _waterGoalInit();
   } catch(e) { console.warn('carregarGoals:', e); }
@@ -2333,7 +2334,6 @@ async function carregarGoals() {
 async function salvarGoals() {
   const g = {
     sleep:    parseFloat(document.getElementById('goal-sleep')?.value)    || 8,
-    water:    parseInt(document.getElementById('goal-water')?.value)       || 7,
     weight:   parseFloat(document.getElementById('goal-weight')?.value)   || 80,
     workouts: parseInt(document.getElementById('goal-workouts')?.value)   || 5,
   };
@@ -2341,11 +2341,15 @@ async function salvarGoals() {
   if (_uid && _db) {
     try { await _db.collection('users').doc(_uid).set({ goals: g }, { merge: true }); } catch(e) {}
   }
+  // Atualizar exibição da meta de água calculada pelo peso
+  const waterDispEl = document.getElementById('goal-water-display');
+  if (waterDispEl) waterDispEl.textContent = mlParaTexto(aguaGoalMl());
   // Update water goal live
-  totalWater = _goals.water;
+  totalWater = Math.round(aguaGoalMl() / 350);
   buildWater();
   updateWaterDisplay();
   atualizarDashWater();
+  aguaRenderAba();
   showToast('Metas salvas! ✓');
 }
 
@@ -2783,7 +2787,7 @@ function recalcScore() {
   const total = _habitosData.length;
   const done  = _habitosData.filter(h => todayHabits[h.id]).length;
   const habPct   = total > 0 ? done / total : 0;
-  const waterPct = Math.min(1, waterCount / _goals.water);
+  const waterPct = Math.min(1, _aguaTotalMl / aguaGoalMl());
   const sleepPct = _dailyData.sleep ? Math.min(1, _dailyData.sleep / _goals.sleep) : 0;
   const score = Math.round((habPct * 0.4 + waterPct * 0.3 + sleepPct * 0.3) * 100);
 
@@ -2849,7 +2853,7 @@ function renderStreak(streak) {
 
 // ── WATER (updates with goal) ──
 window._waterGoalInit = function() {
-  totalWater = _goals.water;
+  totalWater = Math.round(aguaGoalMl() / 350);
   buildWater();
   updateWaterDisplay();
 };
@@ -2881,11 +2885,11 @@ function applyDailyData(data) {
 }
 
 function atualizarDashWater() {
-  const l = (waterCount * 0.35).toFixed(1).replace('.', ',');
-  const pct = Math.min(100, Math.round(waterCount / _goals.water * 100));
+  const goalMl = aguaGoalMl();
+  const pct = Math.min(100, Math.round(_aguaTotalMl / goalMl * 100));
   const set = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
-  set('dash-water-val', l + 'L');
-  set('dash-water-sub', `Meta: ${(_goals.water * 0.35).toFixed(1).replace('.',',')}L`);
+  set('dash-water-val', mlParaTexto(_aguaTotalMl));
+  set('dash-water-sub', `Meta: ${mlParaTexto(goalMl)}`);
   const bar = document.getElementById('dash-water-bar');
   if (bar) bar.style.width = pct + '%';
 }
@@ -3201,7 +3205,7 @@ function pomoReset() {
 let _aguaRegistros = [];  // [{ml, hora, ts, id}]
 let _aguaTotalMl   = 0;   // total ml hoje
 
-function aguaGoalMl() { return (_goals.water || 7) * 350; }
+function aguaGoalMl() { return (_goals.weight || 80) * 35; }
 
 function mlParaTexto(ml) {
   return ml >= 1000 ? (ml / 1000).toFixed(2).replace(/\.?0+$/, '').replace('.', ',') + 'L'
