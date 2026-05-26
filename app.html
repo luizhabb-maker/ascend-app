@@ -912,6 +912,12 @@
           <div class="metric-sub" id="fit-peso-sub">Toque para registrar</div>
         </div>
         <div class="metric-card">
+          <div class="metric-icon">📏</div>
+          <div class="metric-label">IMC</div>
+          <div class="metric-value" id="fit-imc-val" style="color:var(--cyan)">—</div>
+          <div class="metric-sub" id="fit-imc-sub">Peso / altura²</div>
+        </div>
+        <div class="metric-card">
           <div class="metric-icon">🏋️</div>
           <div class="metric-label">Treinos/semana</div>
           <div class="metric-value" style="color:var(--purple)" id="fit-treinos-val">0</div>
@@ -1468,8 +1474,12 @@
           <span id="goal-water-display" style="font-size:14px;font-weight:700;color:var(--cyan)">—</span>
         </div>
         <div class="setting-row">
-          <div><div class="setting-label">Meta de peso (kg)</div><div class="setting-desc">Peso alvo</div></div>
+          <div><div class="setting-label">Peso alvo (kg)</div><div class="setting-desc">Seu peso meta</div></div>
           <input id="goal-weight" type="number" min="30" max="300" value="80" style="width:72px;background:var(--glass);border:1px solid var(--glass-border);border-radius:8px;padding:6px 10px;color:var(--text);font-size:14px;font-weight:700;font-family:inherit;text-align:center;outline:none" onfocus="this.style.borderColor='rgba(139,92,246,.5)'" onblur="this.style.borderColor='rgba(255,255,255,0.08)'">
+        </div>
+        <div class="setting-row">
+          <div><div class="setting-label">Altura (cm)</div><div class="setting-desc">Usada para calcular IMC</div></div>
+          <input id="goal-height" type="number" min="100" max="250" value="170" style="width:72px;background:var(--glass);border:1px solid var(--glass-border);border-radius:8px;padding:6px 10px;color:var(--text);font-size:14px;font-weight:700;font-family:inherit;text-align:center;outline:none" onfocus="this.style.borderColor='rgba(139,92,246,.5)'" onblur="this.style.borderColor='rgba(255,255,255,0.08)'">
         </div>
         <div class="setting-row">
           <div><div class="setting-label">Treinos por semana</div><div class="setting-desc">Frequência semanal</div></div>
@@ -2277,7 +2287,7 @@ function applyUserProfile(user, profileData) {
 }
 
 // ── GLOBAL STATE ──
-let _goals = { sleep: 8, water: 7, weight: 80, workouts: 5 };
+let _goals = { sleep: 8, weight: 80, height: 170, workouts: 5 };
 let _habitosData = []; // [{id,name,emoji,streak,createdAt}]
 let _dailyData = {};   // today's doc
 let _treinosData = []; // workouts this week
@@ -2317,11 +2327,13 @@ async function carregarGoals() {
     const g = snap.exists ? (snap.data().goals || {}) : {};
     _goals.sleep    = g.sleep    || 8;
     _goals.weight   = g.weight   || 80;
+    _goals.height   = g.height   || 170;
     _goals.workouts = g.workouts || 5;
     // Aplicar nos inputs de config
     const el = (id) => document.getElementById(id);
     if (el('goal-sleep'))    el('goal-sleep').value    = _goals.sleep;
     if (el('goal-weight'))   el('goal-weight').value   = _goals.weight;
+    if (el('goal-height'))   el('goal-height').value   = _goals.height;
     if (el('goal-workouts')) el('goal-workouts').value = _goals.workouts;
     // Mostrar meta de água calculada pelo peso
     const waterDispEl = el('goal-water-display');
@@ -2335,6 +2347,7 @@ async function salvarGoals() {
   const g = {
     sleep:    parseFloat(document.getElementById('goal-sleep')?.value)    || 8,
     weight:   parseFloat(document.getElementById('goal-weight')?.value)   || 80,
+    height:   parseFloat(document.getElementById('goal-height')?.value)   || 170,
     workouts: parseInt(document.getElementById('goal-workouts')?.value)   || 5,
   };
   _goals = g;
@@ -2713,6 +2726,13 @@ async function salvarPeso() {
   showToast(`Peso registrado: ${kg}kg ✓`);
 }
 
+function imcClassificacao(imc) {
+  if (imc < 18.5) return { label: 'Abaixo do peso', color: 'var(--amber)' };
+  if (imc < 25)   return { label: 'Peso normal', color: 'var(--green)' };
+  if (imc < 30)   return { label: 'Sobrepeso', color: 'var(--amber)' };
+  return { label: 'Obesidade', color: '#f87171' };
+}
+
 function aplicarPeso(kg) {
   const fmt = kg.toFixed(1).replace('.', ',') + ' kg';
   const meta = _goals.weight;
@@ -2722,6 +2742,14 @@ function aplicarPeso(kg) {
   set('dash-peso-val', fmt);
   set('fit-peso-sub', diff > 0 ? `↓ ${diff}kg da meta` : '✓ Meta atingida');
   set('dash-peso-sub', `Meta: ${meta}kg`);
+  // IMC
+  const h = (_goals.height || 170) / 100;
+  const imc = kg / (h * h);
+  const cls = imcClassificacao(imc);
+  const imcEl = document.getElementById('fit-imc-val');
+  const imcSub = document.getElementById('fit-imc-sub');
+  if (imcEl) { imcEl.textContent = imc.toFixed(1); imcEl.style.color = cls.color; }
+  if (imcSub) imcSub.textContent = cls.label;
 }
 
 // ── XP / LEVEL ──
