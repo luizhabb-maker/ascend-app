@@ -2720,12 +2720,14 @@ function closeSonoModal() { document.getElementById('sono-overlay').style.displa
 
 async function salvarSono() {
   const h = parseFloat(document.getElementById('sono-horas').value);
-  if (!h || h <= 0) { alert('Digite as horas dormidas.'); return; }
-  await saveDaily({ sleep: h });
-  aplicarSono(h);
+  if (!h || h <= 0) { showToast('Digite as horas dormidas.'); return; }
   closeSonoModal();
   showToast(`Sono registrado: ${h}h ✓`);
-  recalcScore();
+  try {
+    await saveDaily({ sleep: h });
+    aplicarSono(h);
+    recalcScore();
+  } catch(e) { console.warn('salvarSono:', e); }
 }
 
 function aplicarSono(h) {
@@ -2752,12 +2754,14 @@ function closePesoModal() { document.getElementById('peso-overlay').style.displa
 
 async function salvarPeso() {
   const kg = parseFloat(document.getElementById('peso-kg').value);
-  if (!kg || kg <= 0) { alert('Digite o peso.'); return; }
-  await saveDaily({ weight: kg });
-  if (_uid && _db) { try { await _db.collection('users').doc(_uid).set({ lastWeight: kg }, { merge: true }); } catch(e) {} }
-  aplicarPeso(kg);
+  if (!kg || kg <= 0) { showToast('Digite o peso.'); return; }
   closePesoModal();
   showToast(`Peso registrado: ${kg}kg ✓`);
+  try {
+    await saveDaily({ weight: kg });
+    if (_uid && _db) await _db.collection('users').doc(_uid).set({ lastWeight: kg }, { merge: true }).catch(() => {});
+    aplicarPeso(kg);
+  } catch(e) { console.warn('salvarPeso:', e); }
 }
 
 function imcClassificacao(imc) {
