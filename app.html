@@ -3238,6 +3238,7 @@ function aguaRenderAba() {
 
   // Sync waterCount (copos de 350ml equivalente) para o widget lateral e score
   waterCount = Math.round(totalMl / 350);
+  buildWater();          // reconstrói dots do painel lateral
   updateWaterDisplay();
   atualizarDashWater();
   recalcScore();
@@ -3272,15 +3273,15 @@ function aguaRenderRegistros() {
   });
 }
 
-async function aguaAdd(ml) {
+function aguaAdd(ml) {
   const now  = new Date();
   const hora = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
   const reg  = { ml, hora, ts: now.getTime(), id: Date.now().toString() };
   _aguaRegistros.push(reg);
   _aguaTotalMl += ml;
-  await salvarAguaFirestore();
   aguaRenderAba();
   showToast(`+${mlParaTexto(ml)} registrado! 💧`);
+  salvarAguaFirestore();
 }
 
 async function aguaRemoverRegistro(id, e) {
