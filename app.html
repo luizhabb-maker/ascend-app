@@ -6,6 +6,9 @@
 <title>ASCEND — Seu Sistema de Evolução</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -653,14 +656,15 @@
     </div>
 
     <div class="sidebar-footer">
-      <div class="user-mini">
-        <div class="avatar">LB</div>
+      <div class="user-mini" onclick="navigate('perfil', null)">
+        <div class="avatar" id="sidebar-avatar">LB</div>
         <div class="user-info">
-          <div class="user-name">Luiz Borba</div>
-          <div class="user-level">✦ Nível 7 — Consistente</div>
+          <div class="user-name" id="sidebar-name">Luiz Borba</div>
+          <div class="user-level" id="sidebar-level">✦ Nível 7 — Consistente</div>
         </div>
         <span style="font-size:12px;color:var(--text-muted)">›</span>
       </div>
+      <button onclick="signOut()" style="width:100%;margin-top:8px;padding:8px;background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:8px;color:#f87171;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;transition:all 0.2s;" onmouseover="this.style.background='rgba(239,68,68,0.15)'" onmouseout="this.style.background='rgba(239,68,68,0.08)'">↩ Sair da conta</button>
     </div>
   </aside>
 
@@ -798,27 +802,27 @@
         </div>
         <div class="card">
           <div class="card-title">Hábitos de hoje</div>
-          <div class="habit-item" onclick="toggleHabit(this)">
+          <div class="habit-item" data-habit="meditacao" onclick="toggleHabit(this)">
             <div class="habit-check done">✓</div>
             <div class="habit-name">Meditação 10 min</div>
             <div class="habit-streak">🔥 12 dias</div>
           </div>
-          <div class="habit-item" onclick="toggleHabit(this)">
+          <div class="habit-item" data-habit="leitura" onclick="toggleHabit(this)">
             <div class="habit-check done">✓</div>
             <div class="habit-name">Leitura 20 min</div>
             <div class="habit-streak">🔥 8 dias</div>
           </div>
-          <div class="habit-item" onclick="toggleHabit(this)">
+          <div class="habit-item" data-habit="sem-alcool" onclick="toggleHabit(this)">
             <div class="habit-check done">✓</div>
             <div class="habit-name">Sem álcool</div>
             <div class="habit-streak">🔥 21 dias</div>
           </div>
-          <div class="habit-item" onclick="toggleHabit(this)">
+          <div class="habit-item" data-habit="sem-redes" onclick="toggleHabit(this)">
             <div class="habit-check"></div>
             <div class="habit-name">Sem redes sociais após 21h</div>
             <div class="habit-streak" style="color:var(--text-muted)">— pendente</div>
           </div>
-          <div class="habit-item" onclick="toggleHabit(this)">
+          <div class="habit-item" data-habit="cold-shower" onclick="toggleHabit(this)">
             <div class="habit-check"></div>
             <div class="habit-name">Cold shower</div>
             <div class="habit-streak" style="color:var(--text-muted)">— pendente</div>
@@ -1414,10 +1418,10 @@
         <div class="card">
           <div class="card-title">Perfil</div>
           <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid var(--glass-border)">
-            <div class="avatar" style="width:52px;height:52px;font-size:18px">LB</div>
+            <div class="avatar" id="config-avatar" style="width:52px;height:52px;font-size:18px">LB</div>
             <div>
-              <div style="font-size:15px;font-weight:700">Luiz Borba</div>
-              <div style="font-size:12px;color:var(--text-muted)">luiz.borba@jumplabel.com.br</div>
+              <div style="font-size:15px;font-weight:700" id="config-name">Luiz Borba</div>
+              <div style="font-size:12px;color:var(--text-muted)" id="config-email">luiz.borba@jumplabel.com.br</div>
             </div>
             <button class="btn btn-ghost" style="margin-left:auto;font-size:12px;padding:7px 12px">Editar</button>
           </div>
@@ -1855,7 +1859,8 @@
   document.getElementById('today-date').textContent = `${dias[d.getDay()]}, ${d.getDate()} de ${meses[d.getMonth()]} de ${d.getFullYear()}`;
   const h = d.getHours();
   const greet = h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite';
-  document.getElementById('greeting').textContent = `${greet}, Luiz 👋`;
+  window._greetWord = greet;
+  document.getElementById('greeting').textContent = `${greet} 👋`;
 })();
 
 // ── NAVIGATION (desktop) ──
@@ -1882,6 +1887,8 @@ function toggleHabit(el) {
   const check = el.querySelector('.habit-check');
   check.classList.toggle('done');
   check.textContent = check.classList.contains('done') ? '✓' : '';
+  const key = el.dataset.habit;
+  if (key) saveHabit(key, check.classList.contains('done'));
 }
 
 // ── MOOD SELECT ──
@@ -1890,6 +1897,7 @@ function selectMood(el, emoji) {
   el.classList.add('selected');
   const labels = {'😫':'Muito mal','😕':'Mal','😐':'Neutro','🙂':'Bem','😄':'Ótimo!'};
   document.getElementById('moodLabel').textContent = labels[emoji] || '';
+  saveMood(emoji);
 }
 
 // ── WATER TRACKER ──
@@ -2058,6 +2066,173 @@ function quickChat(msg) {
   navigate('ia', document.querySelector('.nav-item[onclick*="ia"]'));
   setTimeout(() => { document.getElementById('chatInput').value = msg; sendChat(); }, 150);
 }
+
+// ════════════════════════════════════════════════════════
+//  FIREBASE — AUTH + DADOS POR USUÁRIO
+// ════════════════════════════════════════════════════════
+const _fbCfg = {
+  apiKey:            "AIzaSyBqisol_yUJYmIudCLcw6EEF1AfdGhF_24",
+  authDomain:        "ascend-app-495cd.firebaseapp.com",
+  projectId:         "ascend-app-495cd",
+  storageBucket:     "ascend-app-495cd.firebasestorage.app",
+  messagingSenderId: "37765590660",
+  appId:             "1:37765590660:web:8abc19cc3caea9c48b5cd1"
+};
+
+let _auth = null, _db = null, _uid = null;
+
+function todayKey() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+
+function initials(name) {
+  const parts = (name || '').trim().split(' ').filter(Boolean);
+  if (parts.length === 0) return '?';
+  if (parts.length === 1) return parts[0][0].toUpperCase();
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+}
+
+function applyUserProfile(user, profileData) {
+  const name = profileData?.name || user.displayName || user.email.split('@')[0];
+  const email = user.email || '';
+  const firstName = name.split(' ')[0];
+  const ini = initials(name);
+  const level = profileData?.level || 1;
+  const xp = profileData?.xp || 0;
+  const streak = profileData?.streak || 0;
+
+  // Sidebar
+  const sAvatar = document.getElementById('sidebar-avatar');
+  const sName = document.getElementById('sidebar-name');
+  const sLevel = document.getElementById('sidebar-level');
+  if (sAvatar) sAvatar.textContent = ini;
+  if (sName) sName.textContent = name;
+  if (sLevel) sLevel.textContent = `✦ Nível ${level}`;
+
+  // Config
+  const cAvatar = document.getElementById('config-avatar');
+  const cName = document.getElementById('config-name');
+  const cEmail = document.getElementById('config-email');
+  if (cAvatar) cAvatar.textContent = ini;
+  if (cName) cName.textContent = name;
+  if (cEmail) cEmail.textContent = email;
+
+  // Greeting
+  const greet = document.getElementById('greeting');
+  if (greet) greet.textContent = `${window._greetWord || 'Olá'}, ${firstName} 👋`;
+}
+
+function applyDailyData(data) {
+  if (!data) return;
+
+  // Água
+  if (typeof data.water === 'number') {
+    waterCount = data.water;
+    buildWater();
+    updateWaterDisplay();
+  }
+
+  // Humor
+  if (data.mood) {
+    const btn = document.querySelector(`.mood-btn[onclick*="${data.mood}"]`);
+    if (btn) {
+      document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      const labels = {'😫':'Muito mal','😕':'Mal','😐':'Neutro','🙂':'Bem','😄':'Ótimo!'};
+      const lbl = document.getElementById('moodLabel');
+      if (lbl) lbl.textContent = labels[data.mood] || '';
+    }
+  }
+
+  // Hábitos
+  if (data.habits) {
+    document.querySelectorAll('.habit-item[data-habit]').forEach(el => {
+      const key = el.dataset.habit;
+      const check = el.querySelector('.habit-check');
+      if (data.habits[key]) {
+        check.classList.add('done');
+        check.textContent = '✓';
+      } else {
+        check.classList.remove('done');
+        check.textContent = '';
+      }
+    });
+  }
+}
+
+async function saveHabit(key, done) {
+  if (!_uid || !_db) return;
+  try {
+    await _db.collection('users').doc(_uid).collection('daily').doc(todayKey()).set(
+      { habits: { [key]: done } }, { merge: true }
+    );
+  } catch(e) { console.warn('saveHabit:', e); }
+}
+
+async function saveMood(emoji) {
+  if (!_uid || !_db) return;
+  try {
+    await _db.collection('users').doc(_uid).collection('daily').doc(todayKey()).set(
+      { mood: emoji }, { merge: true }
+    );
+  } catch(e) { console.warn('saveMood:', e); }
+}
+
+async function saveWater() {
+  if (!_uid || !_db) return;
+  try {
+    await _db.collection('users').doc(_uid).collection('daily').doc(todayKey()).set(
+      { water: waterCount }, { merge: true }
+    );
+  } catch(e) { console.warn('saveWater:', e); }
+}
+
+function signOut() {
+  if (_auth) _auth.signOut().then(() => { window.location.href = '/login'; });
+  else window.location.href = '/login';
+}
+
+try {
+  firebase.initializeApp(_fbCfg);
+  _auth = firebase.auth();
+  _db   = firebase.firestore();
+
+  _auth.onAuthStateChanged(async (user) => {
+    if (!user) {
+      window.location.href = '/login';
+      return;
+    }
+    _uid = user.uid;
+
+    // Carrega perfil do usuário
+    try {
+      const snap = await _db.collection('users').doc(_uid).get();
+      applyUserProfile(user, snap.exists ? snap.data() : null);
+    } catch(e) {
+      applyUserProfile(user, null);
+    }
+
+    // Carrega dados do dia de hoje
+    try {
+      const daySnap = await _db.collection('users').doc(_uid).collection('daily').doc(todayKey()).get();
+      if (daySnap.exists) applyDailyData(daySnap.data());
+    } catch(e) { console.warn('loadDaily:', e); }
+  });
+} catch(e) {
+  console.warn('Firebase init failed — modo demo ativo');
+}
+
+// Salva água ao mudar (patch no water tracker)
+const _origBuildWater = buildWater;
+buildWater = function() {
+  _origBuildWater();
+  // Reaplica o listener de save após reconstrução dos dots
+  document.querySelectorAll('.water-dot').forEach((d, i) => {
+    const prev = d.onclick;
+    d.onclick = () => { prev && prev.call(d); saveWater(); };
+  });
+};
 
 function sendChat() {
   const input = document.getElementById('chatInput');
