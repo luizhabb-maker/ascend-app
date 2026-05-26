@@ -1,0 +1,1971 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>ASCEND — Escape a rotina automática</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #09090B;
+  --bg2: #0F172A;
+  --purple: #8B5CF6;
+  --blue: #3B82F6;
+  --cyan: #06B6D4;
+  --green: #22C55E;
+  --amber: #F59E0B;
+  --text: #F1F5F9;
+  --muted: #64748B;
+  --soft: #94A3B8;
+  --glass: rgba(255,255,255,0.04);
+  --border: rgba(255,255,255,0.08);
+}
+
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Inter', sans-serif;
+  font-size: 15px;
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+/* ── NOISE OVERLAY ── */
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events: none; z-index: 0; opacity: 0.4;
+}
+
+/* ── NAV ── */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 18px 60px;
+  background: rgba(9,9,11,0.8);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+  transition: all 0.3s;
+}
+.nav-logo {
+  display: flex; align-items: center; gap: 10px;
+  font-size: 20px; font-weight: 900; letter-spacing: 2px;
+  background: linear-gradient(90deg, var(--purple), var(--cyan));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+}
+.nav-logo-icon {
+  width: 34px; height: 34px;
+  background: linear-gradient(135deg, var(--purple), var(--blue));
+  border-radius: 9px; display: flex; align-items: center; justify-content: center;
+  font-size: 15px; -webkit-text-fill-color: white;
+  box-shadow: 0 0 16px rgba(139,92,246,0.45);
+}
+.nav-links { display: flex; gap: 32px; }
+.nav-links a {
+  color: var(--soft); font-size: 14px; font-weight: 500;
+  text-decoration: none; transition: color 0.2s;
+}
+.nav-links a:hover { color: var(--text); }
+.nav-cta { display: flex; gap: 10px; }
+
+.btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 10px 22px; border-radius: 10px; font-size: 14px; font-weight: 600;
+  cursor: pointer; text-decoration: none; transition: all 0.2s; border: none;
+  font-family: 'Inter', sans-serif;
+}
+.btn-primary {
+  background: var(--purple); color: white;
+  box-shadow: 0 0 20px rgba(139,92,246,0.4);
+}
+.btn-primary:hover { background: #7C3AED; box-shadow: 0 0 30px rgba(139,92,246,0.6); transform: translateY(-1px); }
+.btn-ghost {
+  background: var(--glass); color: var(--soft);
+  border: 1px solid var(--border);
+}
+.btn-ghost:hover { color: var(--text); background: rgba(255,255,255,0.07); }
+.btn-lg { padding: 14px 32px; font-size: 15px; border-radius: 12px; }
+.btn-outline {
+  background: transparent; color: var(--purple);
+  border: 1px solid rgba(139,92,246,0.4);
+}
+.btn-outline:hover { background: rgba(139,92,246,0.1); }
+
+/* ── SECTIONS ── */
+section { position: relative; z-index: 1; }
+.container { max-width: 1100px; margin: 0 auto; padding: 0 60px; }
+
+/* ── HERO ── */
+.hero {
+  min-height: 100vh;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  text-align: center; padding: 120px 60px 80px;
+  position: relative; overflow: hidden;
+}
+.hero-bg {
+  position: absolute; inset: 0; z-index: 0;
+  background: radial-gradient(ellipse 70% 50% at 50% -10%, rgba(139,92,246,0.2) 0%, transparent 70%),
+              radial-gradient(ellipse 40% 40% at 80% 80%, rgba(59,130,246,0.1) 0%, transparent 60%),
+              radial-gradient(ellipse 30% 30% at 20% 90%, rgba(6,182,212,0.08) 0%, transparent 60%);
+}
+/* Particles */
+.particle {
+  position: absolute; border-radius: 50%;
+  background: rgba(139,92,246,0.6);
+  animation: float var(--dur, 8s) ease-in-out infinite;
+  animation-delay: var(--delay, 0s);
+}
+@keyframes float {
+  0%,100%{transform:translateY(0) scale(1);opacity:0.4}
+  50%{transform:translateY(-30px) scale(1.1);opacity:0.8}
+}
+.hero-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: rgba(139,92,246,0.12); border: 1px solid rgba(139,92,246,0.3);
+  border-radius: 99px; padding: 6px 16px; font-size: 12px; font-weight: 600;
+  color: var(--purple); margin-bottom: 28px; letter-spacing: 0.5px;
+  position: relative; z-index: 1;
+}
+.hero-badge::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--purple); box-shadow: 0 0 6px var(--purple); animation: blink 2s ease infinite; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+.hero h1 {
+  font-size: clamp(38px, 5.5vw, 72px); font-weight: 900;
+  line-height: 1.08; letter-spacing: -2px;
+  margin-bottom: 24px;
+  position: relative; z-index: 1;
+}
+.hero h1 .gradient {
+  background: linear-gradient(135deg, var(--purple) 0%, var(--blue) 50%, var(--cyan) 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+}
+.hero p {
+  font-size: clamp(15px, 1.5vw, 18px); color: var(--soft); max-width: 560px;
+  margin: 0 auto 40px; line-height: 1.7; position: relative; z-index: 1;
+}
+.hero-cta {
+  display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;
+  position: relative; z-index: 1; margin-bottom: 60px;
+}
+.hero-stats {
+  display: flex; gap: 48px; justify-content: center; flex-wrap: wrap;
+  position: relative; z-index: 1;
+  padding-top: 40px; border-top: 1px solid var(--border);
+  width: 100%; max-width: 600px;
+}
+.hero-stat .num { font-size: 28px; font-weight: 800; }
+.hero-stat .lbl { font-size: 12px; color: var(--muted); font-weight: 500; }
+
+/* ── MOCKUP ── */
+.hero-mockup {
+  margin-top: 70px; position: relative; z-index: 1;
+  width: 100%; max-width: 900px;
+}
+.mockup-window {
+  background: rgba(15,23,42,0.9);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 40px 100px rgba(0,0,0,0.6), 0 0 60px rgba(139,92,246,0.15);
+}
+.mockup-bar {
+  background: rgba(255,255,255,0.03);
+  border-bottom: 1px solid var(--border);
+  padding: 12px 16px; display: flex; align-items: center; gap: 8px;
+}
+.mockup-dot { width: 10px; height: 10px; border-radius: 50%; }
+.mockup-content {
+  display: grid; grid-template-columns: 180px 1fr 200px;
+  height: 400px; overflow: hidden;
+}
+.mock-sidebar {
+  border-right: 1px solid var(--border);
+  padding: 20px 12px; display: flex; flex-direction: column; gap: 4px;
+}
+.mock-nav { padding: 8px 10px; border-radius: 8px; font-size: 12px; color: var(--soft); display: flex; align-items: center; gap: 8px; }
+.mock-nav.active { background: rgba(139,92,246,0.15); color: var(--purple); }
+.mock-main { padding: 20px; overflow: hidden; }
+.mock-right { border-left: 1px solid var(--border); padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+.mock-card { background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 10px; padding: 12px; }
+.mock-bar { height: 5px; border-radius: 99px; background: rgba(255,255,255,0.06); overflow: hidden; margin-top: 6px; }
+.mock-bar-fill { height: 100%; border-radius: 99px; }
+.mock-title { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+.mock-val { font-size: 22px; font-weight: 800; }
+.mock-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.mock-mini { background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 8px; padding: 10px; }
+
+/* ── PROBLEMS ── */
+.problems { padding: 100px 0; }
+.section-label {
+  display: inline-block; font-size: 11px; font-weight: 700;
+  letter-spacing: 2px; text-transform: uppercase; color: var(--purple);
+  margin-bottom: 16px;
+}
+.section-title { font-size: clamp(28px,3.5vw,44px); font-weight: 800; line-height: 1.15; margin-bottom: 16px; }
+.section-sub { font-size: 16px; color: var(--soft); max-width: 520px; }
+
+.problems-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-top: 56px; }
+.problem-card {
+  background: var(--glass); border: 1px solid var(--border);
+  border-radius: 16px; padding: 28px 24px;
+  transition: all 0.3s;
+}
+.problem-card:hover { border-color: rgba(139,92,246,0.25); transform: translateY(-4px); box-shadow: 0 20px 40px rgba(0,0,0,0.3); }
+.problem-icon { font-size: 32px; margin-bottom: 16px; }
+.problem-title { font-size: 16px; font-weight: 700; margin-bottom: 8px; }
+.problem-desc { font-size: 13px; color: var(--soft); line-height: 1.6; }
+
+/* ── SOLUTION ── */
+.solution { padding: 100px 0; background: linear-gradient(180deg, transparent, rgba(139,92,246,0.04), transparent); }
+.solution-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center; margin-top: 60px; }
+.solution-features { display: flex; flex-direction: column; gap: 20px; }
+.feature-row {
+  display: flex; gap: 16px; align-items: flex-start;
+  padding: 18px; border-radius: 14px; background: var(--glass);
+  border: 1px solid var(--border); transition: all 0.25s;
+}
+.feature-row:hover { border-color: rgba(139,92,246,0.3); background: rgba(139,92,246,0.05); }
+.feature-icon {
+  width: 42px; height: 42px; border-radius: 10px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center; font-size: 18px;
+}
+.feature-title { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+.feature-desc { font-size: 12px; color: var(--soft); line-height: 1.5; }
+.solution-visual {
+  position: relative; display: flex; flex-direction: column; gap: 14px;
+}
+.sol-card {
+  background: var(--glass); border: 1px solid var(--border);
+  border-radius: 14px; padding: 18px; transition: all 0.3s;
+}
+.sol-card:hover { border-color: rgba(139,92,246,0.3); }
+.sol-card-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.sol-card-icon { font-size: 20px; }
+.sol-card-title { font-size: 13px; font-weight: 700; }
+.sol-bar { height: 6px; border-radius: 99px; background: rgba(255,255,255,0.06); overflow: hidden; margin-bottom: 4px; }
+.sol-bar-fill { height: 100%; border-radius: 99px; }
+.sol-label { font-size: 11px; color: var(--muted); display: flex; justify-content: space-between; }
+
+/* ── FEATURES GRID ── */
+.features { padding: 100px 0; }
+.features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-top: 56px; }
+.feat-card {
+  background: var(--glass); border: 1px solid var(--border);
+  border-radius: 18px; padding: 28px; transition: all 0.3s; position: relative; overflow: hidden;
+}
+.feat-card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--purple), transparent);
+  opacity: 0; transition: opacity 0.3s;
+}
+.feat-card:hover { border-color: rgba(139,92,246,0.25); transform: translateY(-4px); box-shadow: 0 24px 48px rgba(0,0,0,0.3); }
+.feat-card:hover::before { opacity: 1; }
+.feat-icon {
+  width: 48px; height: 48px; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px; margin-bottom: 16px;
+}
+.feat-title { font-size: 16px; font-weight: 700; margin-bottom: 8px; }
+.feat-desc { font-size: 13px; color: var(--soft); line-height: 1.6; }
+.feat-tag {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 10px; font-weight: 700; padding: 3px 10px; border-radius: 99px;
+  margin-top: 14px;
+}
+
+/* ── COUPLE ── */
+.couple-section { padding: 100px 0; }
+.couple-inner {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center;
+}
+.couple-text .tag-line { font-size: 13px; color: var(--soft); margin-bottom: 28px; line-height: 1.7; }
+.couple-feature { display: flex; gap: 12px; margin-bottom: 14px; }
+.couple-feat-icon { width: 36px; height: 36px; border-radius: 8px; background: rgba(139,92,246,0.15); display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
+.couple-visual {
+  background: var(--glass); border: 1px solid var(--border);
+  border-radius: 20px; padding: 32px;
+  box-shadow: 0 0 60px rgba(139,92,246,0.08);
+}
+.couple-users { display: flex; align-items: center; justify-content: center; gap: 20px; margin-bottom: 24px; }
+.c-user { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.c-avatar { width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 800; }
+.c-heart { font-size: 28px; animation: heartbeat 1.4s ease infinite; }
+@keyframes heartbeat { 0%,100%{transform:scale(1)} 14%{transform:scale(1.2)} 28%{transform:scale(1)} 42%{transform:scale(1.1)} 56%{transform:scale(1)} }
+.streak-pill { background: rgba(245,158,11,0.15); border: 1px solid rgba(245,158,11,0.3); border-radius: 99px; padding: 6px 16px; text-align: center; font-size: 13px; font-weight: 700; color: var(--amber); margin-bottom: 20px; }
+.couple-progress-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.c-prog-label { font-size: 12px; font-weight: 600; width: 40px; }
+.c-prog-bar { flex: 1; height: 6px; border-radius: 99px; background: rgba(255,255,255,0.06); overflow: hidden; }
+.c-prog-fill { height: 100%; border-radius: 99px; }
+.c-prog-val { font-size: 12px; font-weight: 700; width: 30px; text-align: right; }
+
+/* ── GAMIFICATION ── */
+.gamification { padding: 100px 0; background: linear-gradient(180deg, transparent, rgba(139,92,246,0.03), transparent); }
+.levels-row { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 48px; justify-content: center; }
+.level-item {
+  background: var(--glass); border: 1px solid var(--border);
+  border-radius: 14px; padding: 20px 24px; text-align: center;
+  transition: all 0.3s; min-width: 140px;
+}
+.level-item:hover { border-color: rgba(139,92,246,0.3); transform: translateY(-4px); }
+.level-item.featured { border-color: rgba(139,92,246,0.4); background: rgba(139,92,246,0.08); box-shadow: 0 0 30px rgba(139,92,246,0.15); }
+.level-num { font-size: 30px; font-weight: 900; }
+.level-name { font-size: 13px; font-weight: 700; margin-top: 6px; }
+.level-desc { font-size: 11px; color: var(--muted); margin-top: 4px; }
+
+/* ── TESTIMONIALS ── */
+.testimonials { padding: 100px 0; }
+.test-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-top: 48px; }
+.test-card {
+  background: var(--glass); border: 1px solid var(--border);
+  border-radius: 16px; padding: 28px; transition: all 0.3s;
+}
+.test-card:hover { border-color: rgba(139,92,246,0.2); }
+.test-stars { font-size: 14px; color: var(--amber); margin-bottom: 14px; }
+.test-text { font-size: 14px; color: var(--soft); line-height: 1.7; margin-bottom: 20px; font-style: italic; }
+.test-author { display: flex; align-items: center; gap: 10px; }
+.test-avatar { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; }
+.test-name { font-size: 13px; font-weight: 700; }
+.test-role { font-size: 11px; color: var(--muted); }
+
+/* ── CTA FINAL ── */
+.final-cta {
+  padding: 120px 0; text-align: center;
+  position: relative; overflow: hidden;
+}
+.final-cta::before {
+  content: ''; position: absolute; inset: 0;
+  background: radial-gradient(ellipse 60% 60% at 50% 50%, rgba(139,92,246,0.12) 0%, transparent 70%);
+}
+.final-cta h2 { font-size: clamp(32px, 4vw, 56px); font-weight: 900; line-height: 1.1; margin-bottom: 20px; position: relative; z-index: 1; }
+.final-cta p { font-size: 17px; color: var(--soft); margin-bottom: 40px; position: relative; z-index: 1; }
+.final-cta .ctas { display: flex; gap: 12px; justify-content: center; position: relative; z-index: 1; }
+
+/* ── FOOTER ── */
+footer {
+  border-top: 1px solid var(--border);
+  padding: 40px 60px; text-align: center;
+  color: var(--muted); font-size: 13px;
+}
+.footer-logo { font-size: 18px; font-weight: 900; letter-spacing: 2px; background: linear-gradient(90deg, var(--purple), var(--cyan)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 12px; }
+
+/* ── DIVIDER ── */
+.divider { height: 1px; background: linear-gradient(90deg, transparent, var(--border), transparent); margin: 0 60px; }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 900px) {
+  nav { padding: 16px 24px; }
+  nav .nav-links { display: none; }
+  .container { padding: 0 24px; }
+  .hero { padding: 100px 24px 60px; }
+  .problems-grid, .features-grid, .test-grid { grid-template-columns: 1fr; }
+  .solution-grid, .couple-inner { grid-template-columns: 1fr; gap: 40px; }
+  .mockup-content { grid-template-columns: 1fr; }
+  .mock-sidebar, .mock-right { display: none; }
+  footer { padding: 32px 24px; }
+}
+
+/* ── SCROLL ANIMATIONS ── */
+.reveal { opacity: 0; transform: translateY(24px); transition: all 0.7s ease; }
+.reveal.visible { opacity: 1; transform: translateY(0); }
+</style>
+
+<style>
+/* ════════════════════════════════════════
+   AUTH MODAL
+════════════════════════════════════════ */
+.modal-overlay {
+  position: fixed; inset: 0; z-index: 2000;
+  background: rgba(0,0,0,0.78);
+  backdrop-filter: blur(10px);
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px;
+  animation: fadein 0.2s ease;
+}
+.modal-overlay.hidden { display: none !important; }
+@keyframes fadein { from{opacity:0} to{opacity:1} }
+@keyframes slideup { from{opacity:0;transform:translateY(28px)} to{opacity:1;transform:translateY(0)} }
+@keyframes pulse-glow { 0%,100%{opacity:.5} 50%{opacity:1} }
+@keyframes spin-loader { to{transform:rotate(360deg)} }
+
+.auth-card {
+  background: rgba(13,17,30,0.99);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 24px;
+  padding: 40px;
+  width: 100%; max-width: 420px;
+  position: relative;
+  animation: slideup 0.3s ease;
+  box-shadow: 0 40px 80px rgba(0,0,0,0.7), 0 0 50px rgba(139,92,246,0.12);
+}
+
+.auth-logo {
+  display: flex; align-items: center; gap: 10px; justify-content: center;
+  font-size: 20px; font-weight: 900; letter-spacing: 2px;
+  background: linear-gradient(90deg, var(--purple), var(--cyan));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  margin-bottom: 6px;
+}
+.auth-logo-icon {
+  width: 30px; height: 30px;
+  background: linear-gradient(135deg, var(--purple), var(--blue));
+  border-radius: 8px; display: flex; align-items: center; justify-content: center;
+  font-size: 14px; -webkit-text-fill-color: white;
+}
+
+.auth-tabs {
+  display: flex;
+  background: rgba(255,255,255,0.04);
+  border-radius: 10px; padding: 4px;
+  margin: 20px 0 24px;
+}
+.auth-tab {
+  flex: 1; padding: 8px;
+  border: none; background: transparent;
+  color: var(--soft); font-size: 14px; font-weight: 600;
+  cursor: pointer; border-radius: 8px; transition: all 0.2s;
+  font-family: 'Inter', sans-serif;
+}
+.auth-tab.active {
+  background: var(--purple); color: #fff;
+  box-shadow: 0 2px 12px rgba(139,92,246,0.4);
+}
+
+.auth-form { display: flex; flex-direction: column; gap: 14px; }
+.auth-form.hidden { display: none; }
+
+.form-group { display: flex; flex-direction: column; gap: 6px; }
+.form-label {
+  font-size: 11px; font-weight: 700; color: var(--muted);
+  text-transform: uppercase; letter-spacing: 0.5px;
+}
+.form-input {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 10px; padding: 12px 14px;
+  color: var(--text); font-size: 14px; font-family: 'Inter', sans-serif;
+  transition: all 0.2s; outline: none; width: 100%;
+}
+.form-input:focus {
+  border-color: rgba(139,92,246,0.5);
+  background: rgba(139,92,246,0.05);
+  box-shadow: 0 0 0 3px rgba(139,92,246,0.1);
+}
+.form-input::placeholder { color: var(--muted); }
+.form-input option { background: #0f172a; color: var(--text); }
+
+.btn-submit {
+  background: var(--purple); color: #fff;
+  border: none; border-radius: 10px;
+  padding: 13px; font-size: 15px; font-weight: 700;
+  cursor: pointer; transition: all 0.2s;
+  font-family: 'Inter', sans-serif;
+  box-shadow: 0 0 20px rgba(139,92,246,0.3);
+  margin-top: 4px; width: 100%;
+}
+.btn-submit:hover:not(:disabled) { background: #7C3AED; transform: translateY(-1px); box-shadow: 0 0 32px rgba(139,92,246,0.5); }
+.btn-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.auth-divider {
+  display: flex; align-items: center; gap: 12px;
+  margin: 16px 0; color: var(--muted); font-size: 12px;
+}
+.auth-divider::before, .auth-divider::after {
+  content: ''; flex: 1; height: 1px; background: rgba(255,255,255,0.08);
+}
+
+.btn-google {
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 10px; padding: 12px;
+  color: var(--text); font-size: 14px; font-weight: 600;
+  cursor: pointer; transition: all 0.2s;
+  font-family: 'Inter', sans-serif; width: 100%;
+}
+.btn-google:hover { background: rgba(255,255,255,0.09); border-color: rgba(255,255,255,0.22); }
+
+.auth-error {
+  background: rgba(239,68,68,0.1);
+  border: 1px solid rgba(239,68,68,0.3);
+  border-radius: 8px; padding: 10px 14px;
+  font-size: 13px; color: #f87171; margin-top: 8px;
+}
+.auth-error.hidden { display: none; }
+
+.modal-close {
+  position: absolute; top: 14px; right: 14px;
+  background: rgba(255,255,255,0.06); border: none;
+  width: 30px; height: 30px; border-radius: 50%;
+  color: var(--soft); font-size: 16px; line-height: 1;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s;
+}
+.modal-close:hover { background: rgba(255,255,255,0.12); color: var(--text); }
+
+/* ════════════════════════════════════════
+   ONBOARDING WIZARD
+════════════════════════════════════════ */
+.onboarding-card {
+  background: rgba(9,9,11,0.99);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 28px;
+  width: 100%; max-width: 560px;
+  display: flex; flex-direction: column;
+  max-height: 92vh;
+  animation: slideup 0.35s ease;
+  box-shadow: 0 40px 90px rgba(0,0,0,0.75), 0 0 60px rgba(139,92,246,0.14);
+  overflow: hidden;
+}
+
+.ob-header {
+  flex-shrink: 0;
+  padding: 28px 36px 20px;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+
+.ob-steps-row { display: flex; gap: 5px; margin-bottom: 10px; }
+.ob-step-dot {
+  height: 4px; border-radius: 99px;
+  background: rgba(255,255,255,0.1);
+  transition: all 0.4s ease; flex: 1;
+}
+.ob-step-dot.active {
+  background: var(--purple);
+  box-shadow: 0 0 10px rgba(139,92,246,0.5);
+  flex: 2;
+}
+.ob-step-dot.done { background: rgba(139,92,246,0.4); }
+
+.ob-header-meta {
+  display: flex; justify-content: space-between; align-items: center;
+}
+.ob-header-title { font-size: 12px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+.ob-header-counter { font-size: 12px; color: var(--muted); }
+
+.ob-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 28px 36px;
+  -webkit-overflow-scrolling: touch;
+}
+.ob-body::-webkit-scrollbar { width: 4px; }
+.ob-body::-webkit-scrollbar-track { background: transparent; }
+.ob-body::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 99px; }
+
+.ob-step { display: none; animation: slideup 0.3s ease; }
+.ob-step.active { display: block; }
+
+.ob-step-title { font-size: 22px; font-weight: 800; margin-bottom: 6px; line-height: 1.2; }
+.ob-step-sub { font-size: 14px; color: var(--soft); margin-bottom: 24px; line-height: 1.65; }
+
+/* Option cards */
+.ob-options { display: grid; gap: 8px; }
+.ob-options.cols2 { grid-template-columns: 1fr 1fr; }
+
+.ob-option {
+  display: flex; align-items: center; gap: 12px;
+  background: rgba(255,255,255,0.03);
+  border: 1.5px solid rgba(255,255,255,0.08);
+  border-radius: 12px; padding: 13px 15px;
+  cursor: pointer; transition: all 0.2s; user-select: none;
+}
+.ob-option:hover { border-color: rgba(139,92,246,0.3); background: rgba(139,92,246,0.05); }
+.ob-option.selected {
+  border-color: rgba(139,92,246,0.6);
+  background: rgba(139,92,246,0.1);
+  box-shadow: 0 0 18px rgba(139,92,246,0.1);
+}
+.ob-opt-icon { font-size: 22px; flex-shrink: 0; }
+.ob-opt-body { flex: 1; }
+.ob-opt-label { font-size: 13px; font-weight: 700; }
+.ob-opt-desc { font-size: 11px; color: var(--soft); margin-top: 2px; }
+.ob-opt-check {
+  width: 18px; height: 18px; border-radius: 50%;
+  border: 2px solid rgba(255,255,255,0.15);
+  flex-shrink: 0; transition: all 0.2s;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 9px;
+}
+.ob-option.selected .ob-opt-check {
+  background: var(--purple); border-color: var(--purple); color: #fff;
+}
+.ob-option.selected .ob-opt-check::after { content: '✓'; font-weight: 900; }
+
+/* Chips */
+.ob-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.ob-chip {
+  padding: 7px 14px;
+  background: rgba(255,255,255,0.04);
+  border: 1.5px solid rgba(255,255,255,0.1);
+  border-radius: 99px; font-size: 12px; font-weight: 600;
+  cursor: pointer; transition: all 0.2s; color: var(--soft); user-select: none;
+}
+.ob-chip:hover { border-color: rgba(139,92,246,0.3); color: var(--text); }
+.ob-chip.selected {
+  border-color: rgba(139,92,246,0.55);
+  background: rgba(139,92,246,0.12);
+  color: #a78bfa;
+}
+
+/* Input pairs */
+.ob-input-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.ob-field { display: flex; flex-direction: column; gap: 6px; }
+.ob-field-label {
+  font-size: 11px; font-weight: 700; color: var(--muted);
+  text-transform: uppercase; letter-spacing: 0.5px;
+}
+.ob-field-input {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 10px; padding: 11px 13px;
+  color: var(--text); font-size: 16px; font-weight: 700;
+  font-family: 'Inter', sans-serif; outline: none;
+  transition: all 0.2s; text-align: center; width: 100%;
+}
+.ob-field-input:focus {
+  border-color: rgba(139,92,246,0.5);
+  background: rgba(139,92,246,0.05);
+  box-shadow: 0 0 0 3px rgba(139,92,246,0.1);
+}
+.ob-field-unit { font-size: 11px; color: var(--muted); text-align: center; }
+
+/* Stars */
+.ob-stars { display: flex; gap: 10px; }
+.ob-star {
+  font-size: 30px; cursor: pointer; transition: all 0.15s;
+  filter: grayscale(1) opacity(0.25);
+}
+.ob-star.on { filter: none; transform: scale(1.05); }
+.ob-star:hover { filter: none; transform: scale(1.12); }
+
+/* Stress scale 1–10 */
+.ob-scale { display: flex; gap: 6px; flex-wrap: wrap; }
+.ob-scale-btn {
+  width: 40px; height: 40px;
+  border-radius: 10px;
+  border: 1.5px solid rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.03);
+  color: var(--soft); font-size: 13px; font-weight: 700;
+  cursor: pointer; transition: all 0.2s;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Inter', sans-serif;
+}
+.ob-scale-btn:hover { border-color: rgba(139,92,246,0.3); color: var(--text); }
+.ob-scale-btn.sel {
+  border-color: rgba(139,92,246,0.65);
+  background: rgba(139,92,246,0.15);
+  color: #fff; box-shadow: 0 0 12px rgba(139,92,246,0.25);
+}
+
+/* Section separator inside step */
+.ob-section-label {
+  font-size: 11px; font-weight: 700; color: var(--muted);
+  text-transform: uppercase; letter-spacing: 0.8px;
+  margin: 20px 0 10px;
+}
+
+/* Footer */
+.ob-footer {
+  flex-shrink: 0;
+  border-top: 1px solid rgba(255,255,255,0.06);
+  padding: 14px 36px;
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px;
+}
+.ob-footer-left { display: flex; align-items: center; gap: 16px; }
+.ob-step-lbl { font-size: 12px; color: var(--muted); white-space: nowrap; }
+.ob-err {
+  font-size: 12px; color: #f87171;
+  flex: 1; text-align: center;
+}
+.ob-err.hidden { display: none; }
+
+.ob-btn-prev {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 9px; padding: 9px 18px;
+  color: var(--soft); font-size: 13px; font-weight: 600;
+  cursor: pointer; transition: all 0.2s; font-family: 'Inter', sans-serif;
+}
+.ob-btn-prev:hover { color: var(--text); border-color: rgba(255,255,255,0.2); }
+.ob-btn-prev.invisible { visibility: hidden; pointer-events: none; }
+
+.ob-btn-next {
+  background: var(--purple); color: #fff;
+  border: none; border-radius: 9px; padding: 9px 22px;
+  font-size: 14px; font-weight: 700;
+  cursor: pointer; transition: all 0.2s; font-family: 'Inter', sans-serif;
+  box-shadow: 0 0 16px rgba(139,92,246,0.35); white-space: nowrap;
+}
+.ob-btn-next:hover:not(:disabled) { background: #7C3AED; box-shadow: 0 0 28px rgba(139,92,246,0.55); transform: translateY(-1px); }
+.ob-btn-next:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+/* Couple mode card */
+.ob-couple-card {
+  background: rgba(139,92,246,0.07);
+  border: 1px solid rgba(139,92,246,0.22);
+  border-radius: 14px; padding: 16px 18px;
+  display: flex; align-items: flex-start; gap: 14px;
+  cursor: pointer; transition: all 0.2s; margin-top: 20px;
+}
+.ob-couple-card:hover { border-color: rgba(139,92,246,0.4); background: rgba(139,92,246,0.1); }
+.ob-couple-card input[type="checkbox"] {
+  width: 18px; height: 18px; accent-color: var(--purple);
+  cursor: pointer; flex-shrink: 0; margin-top: 2px;
+}
+
+/* Success state */
+.ob-success {
+  text-align: center; padding: 36px 0 20px;
+}
+.ob-success-icon { font-size: 72px; margin-bottom: 18px; display: block; animation: float 2s ease-in-out infinite; }
+.ob-success-title { font-size: 26px; font-weight: 900; margin-bottom: 12px; }
+.ob-success-desc { font-size: 15px; color: var(--soft); line-height: 1.75; margin-bottom: 28px; }
+.ob-loader {
+  width: 40px; height: 40px; border-radius: 50%;
+  border: 3px solid rgba(139,92,246,0.2);
+  border-top-color: var(--purple);
+  animation: spin-loader 0.9s linear infinite;
+  margin: 0 auto;
+}
+
+@media (max-width: 600px) {
+  .auth-card { padding: 28px 22px; }
+  .onboarding-card { border-radius: 20px; }
+  .ob-header, .ob-body { padding-left: 22px; padding-right: 22px; }
+  .ob-footer { padding: 12px 22px; }
+  .ob-options.cols2 { grid-template-columns: 1fr; }
+  .ob-input-row { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- PARTICLES -->
+<div id="particles"></div>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">
+    <div class="nav-logo-icon">⬡</div>
+    ASCEND
+  </div>
+  <div class="nav-links">
+    <a href="#funcionalidades">Funcionalidades</a>
+    <a href="#casal">Modo Casal</a>
+    <a href="#evolucao">Evolução</a>
+    <a href="#precos">Preços</a>
+  </div>
+  <div class="nav-cta">
+    <a href="/login" class="btn btn-ghost">Entrar</a>
+    <a href="/login?tab=register" class="btn btn-primary">Começar grátis</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-badge">✦ Sistema de evolução pessoal</div>
+  <h1>
+    Escape a<br>
+    <span class="gradient">rotina automática.</span>
+  </h1>
+  <p>ASCEND é uma plataforma premium de produtividade e autoevolução. Não é mais um app de hábitos — é o sistema operacional para reconstruir sua vida.</p>
+  <div class="hero-cta">
+    <a href="/app" class="btn btn-primary btn-lg">▶ Ver demo interativo</a>
+    <a href="#funcionalidades" class="btn btn-outline btn-lg">Explorar funcionalidades</a>
+  </div>
+  <div class="hero-stats">
+    <div class="hero-stat"><div class="num" style="background:linear-gradient(90deg,var(--purple),var(--blue));-webkit-background-clip:text;-webkit-text-fill-color:transparent">10+</div><div class="lbl">Módulos integrados</div></div>
+    <div class="hero-stat"><div class="num" style="background:linear-gradient(90deg,var(--blue),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent">IA</div><div class="lbl">Assistente inteligente</div></div>
+    <div class="hero-stat"><div class="num" style="background:linear-gradient(90deg,var(--cyan),var(--green));-webkit-background-clip:text;-webkit-text-fill-color:transparent">Casal</div><div class="lbl">Modo sincronizado</div></div>
+  </div>
+
+  <!-- APP MOCKUP -->
+  <div class="hero-mockup reveal">
+    <div class="mockup-window">
+      <div class="mockup-bar">
+        <div class="mockup-dot" style="background:#EF4444"></div>
+        <div class="mockup-dot" style="background:#F59E0B"></div>
+        <div class="mockup-dot" style="background:#22C55E"></div>
+        <div style="flex:1;text-align:center;font-size:11px;color:var(--muted)">ascend.app — Dashboard</div>
+      </div>
+      <div class="mockup-content">
+        <!-- Sidebar -->
+        <div class="mock-sidebar">
+          <div style="display:flex;align-items:center;gap:8px;padding:8px 10px;margin-bottom:12px">
+            <div style="width:26px;height:26px;background:linear-gradient(135deg,var(--purple),var(--blue));border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px">⬡</div>
+            <span style="font-size:13px;font-weight:800;background:linear-gradient(90deg,var(--purple),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:1px">ASCEND</span>
+          </div>
+          <div class="mock-nav active">⊞ Dashboard</div>
+          <div class="mock-nav">◷ Rotina</div>
+          <div class="mock-nav">◈ Hábitos</div>
+          <div class="mock-nav">◉ Fitness</div>
+          <div class="mock-nav">♡ Modo Casal</div>
+          <div class="mock-nav">◆ Evolução</div>
+          <div class="mock-nav">✦ Assistente IA</div>
+        </div>
+        <!-- Main -->
+        <div class="mock-main">
+          <div style="font-size:16px;font-weight:800;margin-bottom:14px">Dashboard</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px">
+            <div class="mock-mini"><div style="font-size:9px;color:var(--muted)">TREINO</div><div style="font-size:14px;font-weight:700;color:var(--green)">✓ Feito</div></div>
+            <div class="mock-mini"><div style="font-size:9px;color:var(--muted)">ÁGUA</div><div style="font-size:14px;font-weight:700;color:var(--cyan)">1,8L</div></div>
+            <div class="mock-mini"><div style="font-size:9px;color:var(--muted)">SONO</div><div style="font-size:14px;font-weight:700;color:var(--amber)">6h20</div></div>
+          </div>
+          <div class="mock-card">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+              <div style="width:28px;height:28px;border-radius:50%;background:radial-gradient(var(--purple),var(--blue));box-shadow:0 0 10px rgba(139,92,246,0.5);display:flex;align-items:center;justify-content:center;font-size:12px;animation:pulse 2s infinite">✦</div>
+              <div><div style="font-size:9px;font-weight:700;color:var(--purple);letter-spacing:0.5px">ASSISTENTE IA</div><div style="font-size:11px;color:var(--soft)">Seu sono está impactando a recuperação. Ajuste a rotina?</div></div>
+            </div>
+            <div style="display:flex;gap:8px">
+              <div style="background:var(--purple);border-radius:6px;padding:4px 10px;font-size:10px;font-weight:600;color:white">✓ Sim</div>
+              <div style="background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:6px;padding:4px 10px;font-size:10px;color:var(--soft)">Depois</div>
+            </div>
+          </div>
+          <div style="margin-top:12px">
+            <div style="font-size:9px;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:1px">Hábitos hoje</div>
+            <div style="display:flex;flex-direction:column;gap:5px">
+              <div style="display:flex;align-items:center;gap:8px;padding:5px 8px;background:rgba(255,255,255,0.02);border-radius:6px"><div style="width:14px;height:14px;border-radius:4px;background:var(--green);display:flex;align-items:center;justify-content:center;font-size:8px">✓</div><span style="font-size:11px">Meditação 10 min</span><span style="margin-left:auto;font-size:10px;color:var(--amber)">🔥12</span></div>
+              <div style="display:flex;align-items:center;gap:8px;padding:5px 8px;background:rgba(255,255,255,0.02);border-radius:6px"><div style="width:14px;height:14px;border-radius:4px;background:var(--green);display:flex;align-items:center;justify-content:center;font-size:8px">✓</div><span style="font-size:11px">Leitura 20 min</span><span style="margin-left:auto;font-size:10px;color:var(--amber)">🔥8</span></div>
+              <div style="display:flex;align-items:center;gap:8px;padding:5px 8px;background:rgba(255,255,255,0.02);border-radius:6px"><div style="width:14px;height:14px;border-radius:4px;border:1px solid rgba(255,255,255,0.1)"></div><span style="font-size:11px;color:var(--muted)">Cold shower</span></div>
+            </div>
+          </div>
+        </div>
+        <!-- Right -->
+        <div class="mock-right">
+          <div class="mock-card">
+            <div class="mock-title">Hidratação</div>
+            <div class="mock-val" style="color:var(--cyan)">1,8L</div>
+            <div class="mock-bar" style="margin-top:8px"><div class="mock-bar-fill" style="width:72%;background:linear-gradient(90deg,var(--cyan),var(--blue))"></div></div>
+          </div>
+          <div class="mock-card">
+            <div class="mock-title">Sequência</div>
+            <div class="mock-val" style="color:var(--amber)">🔥 12</div>
+            <div style="font-size:9px;color:var(--muted);margin-top:4px">dias consecutivos</div>
+          </div>
+          <div class="mock-card">
+            <div class="mock-title">Score Foco</div>
+            <div style="display:flex;align-items:center;gap:8px;margin-top:4px">
+              <svg viewBox="0 0 40 40" width="40" height="40" style="transform:rotate(-90deg)">
+                <circle cx="20" cy="20" r="16" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="4"/>
+                <circle cx="20" cy="20" r="16" fill="none" stroke="var(--purple)" stroke-width="4" stroke-dasharray="100" stroke-dashoffset="20" stroke-linecap="round"/>
+              </svg>
+              <div><div style="font-size:16px;font-weight:800;color:var(--purple)">80</div><div style="font-size:9px;color:var(--muted)">Bom</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PROBLEMS -->
+<section class="problems" id="problema">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-label">O problema</div>
+      <h2 class="section-title">A vida moderna está te<br>consumindo em automático</h2>
+      <p class="section-sub">Você acorda cansado, vai no piloto automático e chega na cama sem saber onde o dia foi.</p>
+    </div>
+    <div class="problems-grid">
+      <div class="problem-card reveal">
+        <div class="problem-icon">🔥</div>
+        <div class="problem-title">Burnout silencioso</div>
+        <div class="problem-desc">Você produz, produz e produz — mas sente que não está avançando de verdade. O corpo dá sinais, você ignora.</div>
+      </div>
+      <div class="problem-card reveal">
+        <div class="problem-icon">📱</div>
+        <div class="problem-title">Doomscrolling infinito</div>
+        <div class="problem-desc">Reels, TikTok, Twitter — seu cérebro está viciado em dopamina instantânea que destrói o foco profundo.</div>
+      </div>
+      <div class="problem-card reveal">
+        <div class="problem-icon">🧠</div>
+        <div class="problem-title">Falta de foco real</div>
+        <div class="problem-desc">Você abre o computador e 3 horas depois ainda não fez o que realmente importa. Distração virou padrão.</div>
+      </div>
+      <div class="problem-card reveal">
+        <div class="problem-icon">💪</div>
+        <div class="problem-title">Saúde negligenciada</div>
+        <div class="problem-desc">Treinos pulados, sono ruim, hidratação esquecida. Seu corpo é a fundação de tudo — e está sendo ignorado.</div>
+      </div>
+      <div class="problem-card reveal">
+        <div class="problem-icon">💑</div>
+        <div class="problem-title">Relacionamento à deriva</div>
+        <div class="problem-desc">Cada um na sua tela, cada um nos seus hábitos, sem direção conjunta. A evolução separada que afasta.</div>
+      </div>
+      <div class="problem-card reveal">
+        <div class="problem-icon">😶</div>
+        <div class="problem-title">Sem clareza</div>
+        <div class="problem-desc">Sem métricas, sem visibilidade, sem senso de progresso. Você não sabe onde está nem para onde vai.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- SOLUTION -->
+<section class="solution" id="solucao">
+  <div class="container">
+    <div class="reveal" style="text-align:center;margin-bottom:0">
+      <div class="section-label">A solução</div>
+      <h2 class="section-title">Um sistema completo de<br>reconstrução da sua vida</h2>
+      <p class="section-sub" style="margin:0 auto">ASCEND combina disciplina, tecnologia e inteligência artificial para criar estrutura onde havia caos.</p>
+    </div>
+    <div class="solution-grid">
+      <div class="solution-features reveal">
+        <div class="feature-row">
+          <div class="feature-icon" style="background:rgba(139,92,246,0.15)">🗓️</div>
+          <div><div class="feature-title">Rotina baseada em energia</div><div class="feature-desc">Blocos de tempo inteligentes que respeitam seus picos de energia ao longo do dia.</div></div>
+        </div>
+        <div class="feature-row">
+          <div class="feature-icon" style="background:rgba(34,197,94,0.12)">◈</div>
+          <div><div class="feature-title">Hábitos com sequência e XP</div><div class="feature-desc">Gamificação real que torna a consistência viciante — do jeito certo.</div></div>
+        </div>
+        <div class="feature-row">
+          <div class="feature-icon" style="background:rgba(59,130,246,0.12)">📵</div>
+          <div><div class="feature-title">Detox de dopamina</div><div class="feature-desc">Bloqueio de apps, contador de reels e score de foco para recuperar sua atenção.</div></div>
+        </div>
+        <div class="feature-row">
+          <div class="feature-icon" style="background:rgba(6,182,212,0.12)">✦</div>
+          <div><div class="feature-title">IA que entende você</div><div class="feature-desc">Assistente que analisa seus dados, detecta padrões e ajusta sua rotina automaticamente.</div></div>
+        </div>
+      </div>
+      <div class="solution-visual reveal">
+        <div class="sol-card">
+          <div class="sol-card-header">
+            <span class="sol-card-icon">⚡</span>
+            <span class="sol-card-title">Score do dia</span>
+            <span style="margin-left:auto;font-size:20px;font-weight:800;background:linear-gradient(90deg,var(--purple),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent">82</span>
+          </div>
+          <div class="sol-bar"><div class="sol-bar-fill" style="width:82%;background:linear-gradient(90deg,var(--purple),var(--blue))"></div></div>
+          <div class="sol-label"><span>↑ +6 vs. ontem</span><span>82/100</span></div>
+        </div>
+        <div class="sol-card">
+          <div class="sol-card-header"><span class="sol-card-icon">🔥</span><span class="sol-card-title">Sequência ativa</span><span style="margin-left:auto;font-size:18px;font-weight:800;color:var(--amber)">12 dias</span></div>
+          <div style="display:flex;gap:5px;margin-top:6px">
+            <div style="width:18px;height:18px;border-radius:4px;background:var(--purple);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700">S</div>
+            <div style="width:18px;height:18px;border-radius:4px;background:var(--purple);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700">T</div>
+            <div style="width:18px;height:18px;border-radius:4px;background:var(--purple);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700">Q</div>
+            <div style="width:18px;height:18px;border-radius:4px;background:var(--purple);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700">Q</div>
+            <div style="width:18px;height:18px;border-radius:4px;background:var(--purple);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700">S</div>
+            <div style="width:18px;height:18px;border-radius:4px;background:var(--purple);box-shadow:0 0 8px rgba(139,92,246,0.6);border:1px solid rgba(255,255,255,0.3);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700">S</div>
+            <div style="width:18px;height:18px;border-radius:4px;background:rgba(255,255,255,0.05);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:var(--muted)">D</div>
+          </div>
+        </div>
+        <div class="sol-card" style="background:linear-gradient(135deg,rgba(139,92,246,0.1),rgba(59,130,246,0.06));border-color:rgba(139,92,246,0.25)">
+          <div style="display:flex;gap:10px;align-items:center">
+            <div style="width:38px;height:38px;border-radius:50%;background:radial-gradient(var(--purple),var(--blue));box-shadow:0 0 16px rgba(139,92,246,0.5);display:flex;align-items:center;justify-content:center;font-size:16px;animation:pulse-orb 2s infinite">✦</div>
+            <div>
+              <div style="font-size:10px;font-weight:700;color:var(--purple);letter-spacing:0.5px;text-transform:uppercase">Assistente IA</div>
+              <div style="font-size:12px;color:var(--soft)">Ótimo progresso! Seu sono melhorou 18% essa semana.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- FEATURES -->
+<section class="features" id="funcionalidades">
+  <div class="container">
+    <div class="reveal" style="text-align:center">
+      <div class="section-label">Funcionalidades</div>
+      <h2 class="section-title">Tudo que você precisa,<br>em um só lugar</h2>
+    </div>
+    <div class="features-grid">
+      <div class="feat-card reveal">
+        <div class="feat-icon" style="background:rgba(139,92,246,0.15)">◷</div>
+        <div class="feat-title">Rotina diária inteligente</div>
+        <div class="feat-desc">Timeline arrastável com blocos de energia, rotinas geradas por IA e notificações precisas.</div>
+        <div class="feat-tag" style="background:rgba(139,92,246,0.12);color:var(--purple);border:1px solid rgba(139,92,246,0.2)">✦ IA incluída</div>
+      </div>
+      <div class="feat-card reveal">
+        <div class="feat-icon" style="background:rgba(34,197,94,0.12)">◈</div>
+        <div class="feat-title">Rastreador de hábitos</div>
+        <div class="feat-desc">Sequências com XP, visualização de consistência e análise de padrões semana a semana.</div>
+        <div class="feat-tag" style="background:rgba(34,197,94,0.1);color:var(--green);border:1px solid rgba(34,197,94,0.2)">🔥 Gamificado</div>
+      </div>
+      <div class="feat-card reveal">
+        <div class="feat-icon" style="background:rgba(59,130,246,0.12)">◉</div>
+        <div class="feat-title">Sistema de fitness</div>
+        <div class="feat-desc">Treinos, progresso de peso, fotos, calorias, hidratação e sugestões de recuperação.</div>
+        <div class="feat-tag" style="background:rgba(59,130,246,0.1);color:var(--blue);border:1px solid rgba(59,130,246,0.2)">💪 Completo</div>
+      </div>
+      <div class="feat-card reveal">
+        <div class="feat-icon" style="background:rgba(245,158,11,0.12)">📵</div>
+        <div class="feat-title">Detox digital</div>
+        <div class="feat-desc">Score de dopamina, bloqueio de apps, contador de reels e modo foco profundo.</div>
+        <div class="feat-tag" style="background:rgba(245,158,11,0.1);color:var(--amber);border:1px solid rgba(245,158,11,0.2)">🧠 Liberta o foco</div>
+      </div>
+      <div class="feat-card reveal">
+        <div class="feat-icon" style="background:rgba(239,68,68,0.12)">♡</div>
+        <div class="feat-title">Modo Casal</div>
+        <div class="feat-desc">Metas compartilhadas, desafios conjuntos, sincronização de rotinas e sequências de casal.</div>
+        <div class="feat-tag" style="background:rgba(239,68,68,0.1);color:#EF4444;border:1px solid rgba(239,68,68,0.2)">♡ Único no mercado</div>
+      </div>
+      <div class="feat-card reveal">
+        <div class="feat-icon" style="background:rgba(6,182,212,0.12)">✦</div>
+        <div class="feat-title">Assistente IA</div>
+        <div class="feat-desc">Estrategista pessoal que analisa seus dados, detecta burnout e adapta sua rotina em tempo real.</div>
+        <div class="feat-tag" style="background:rgba(6,182,212,0.1);color:var(--cyan);border:1px solid rgba(6,182,212,0.2)">✦ Sempre online</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- COUPLE MODE -->
+<section class="couple-section" id="casal">
+  <div class="container">
+    <div class="couple-inner">
+      <div class="couple-text reveal">
+        <div class="section-label">Modo Casal</div>
+        <h2 class="section-title">Crescer junto<br>muda tudo</h2>
+        <p class="tag-line">Não é sobre fazer as mesmas coisas. É sobre ter a mesma direção. ASCEND sincroniza a evolução de vocês dois — com metas compartilhadas, desafios conjuntos e progresso visível.</p>
+        <div class="couple-feature">
+          <div class="couple-feat-icon">🎯</div>
+          <div><div style="font-size:13px;font-weight:700">Metas compartilhadas</div><div style="font-size:12px;color:var(--soft)">Definam objetivos juntos e acompanhem o progresso em tempo real</div></div>
+        </div>
+        <div class="couple-feature">
+          <div class="couple-feat-icon">🔥</div>
+          <div><div style="font-size:13px;font-weight:700">Sequência de casal</div><div style="font-size:12px;color:var(--soft)">Quantidade de dias consecutivos evoluindo juntos</div></div>
+        </div>
+        <div class="couple-feature">
+          <div class="couple-feat-icon">⚡</div>
+          <div><div style="font-size:13px;font-weight:700">Desafios semanais</div><div style="font-size:12px;color:var(--soft)">Missões conjuntas que fortalecem o vínculo e a disciplina</div></div>
+        </div>
+        <div style="margin-top:28px">
+          <a href="/app" class="btn btn-primary">Ver modo casal na demo →</a>
+        </div>
+      </div>
+      <div class="couple-visual reveal">
+        <div class="couple-users">
+          <div class="c-user">
+            <div class="c-avatar" style="background:linear-gradient(135deg,var(--purple),var(--blue));box-shadow:0 0 20px rgba(139,92,246,0.4)">LB</div>
+            <div style="font-size:12px;font-weight:600">Luiz</div>
+            <div style="font-size:10px;color:var(--purple);font-weight:600">Nível 7</div>
+          </div>
+          <div class="c-heart">♥</div>
+          <div class="c-user">
+            <div class="c-avatar" style="background:linear-gradient(135deg,var(--cyan),var(--green));box-shadow:0 0 20px rgba(6,182,212,0.4)">AL</div>
+            <div style="font-size:12px;font-weight:600">Ana</div>
+            <div style="font-size:10px;color:var(--cyan);font-weight:600">Nível 6</div>
+          </div>
+        </div>
+        <div class="streak-pill">🔥 14 dias de sequência conjunta</div>
+        <div class="couple-progress-row">
+          <div class="c-prog-label" style="color:var(--purple)">Luiz</div>
+          <div class="c-prog-bar"><div class="c-prog-fill" style="width:82%;background:linear-gradient(90deg,var(--purple),var(--blue))"></div></div>
+          <div class="c-prog-val" style="color:var(--purple)">82%</div>
+        </div>
+        <div class="couple-progress-row">
+          <div class="c-prog-label" style="color:var(--cyan)">Ana</div>
+          <div class="c-prog-bar"><div class="c-prog-fill" style="width:74%;background:linear-gradient(90deg,var(--cyan),var(--green))"></div></div>
+          <div class="c-prog-val" style="color:var(--cyan)">74%</div>
+        </div>
+        <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border)">
+          <div style="font-size:11px;font-weight:600;color:var(--muted);margin-bottom:10px">DESAFIO DA SEMANA</div>
+          <div style="background:rgba(139,92,246,0.08);border:1px solid rgba(139,92,246,0.2);border-radius:12px;padding:12px">
+            <div style="font-size:13px;font-weight:700;margin-bottom:4px">🏃 Correr juntos 5km</div>
+            <div style="font-size:11px;color:var(--soft)">Sábado cedo · Parque</div>
+            <div style="margin-top:8px;height:5px;border-radius:99px;background:rgba(255,255,255,0.06)"><div style="width:0%;height:100%;border-radius:99px;background:var(--purple)"></div></div>
+            <div style="font-size:10px;color:var(--muted);margin-top:4px">Pendente</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- GAMIFICATION -->
+<section class="gamification" id="evolucao">
+  <div class="container" style="text-align:center">
+    <div class="reveal">
+      <div class="section-label">Evolução</div>
+      <h2 class="section-title">Você não usa um app.<br>Você evolui um personagem.</h2>
+      <p class="section-sub" style="margin:0 auto">XP, níveis, conquistas e rank de disciplina. Cada hábito cumprido, cada treino feito, cada dia consistente — tudo se acumula.</p>
+    </div>
+    <div class="levels-row reveal">
+      <div class="level-item">
+        <div class="level-num" style="color:var(--muted)">1</div>
+        <div class="level-name">Reset</div>
+        <div class="level-desc">O ponto de partida</div>
+      </div>
+      <div class="level-item">
+        <div class="level-num" style="color:var(--soft)">5</div>
+        <div class="level-name">Iniciante</div>
+        <div class="level-desc">Criando a base</div>
+      </div>
+      <div class="level-item featured">
+        <div class="level-num" style="background:linear-gradient(90deg,var(--purple),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent">10</div>
+        <div class="level-name" style="color:var(--purple)">Consistente</div>
+        <div class="level-desc">Hábito formado</div>
+      </div>
+      <div class="level-item">
+        <div class="level-num" style="color:var(--blue)">25</div>
+        <div class="level-name">Elite</div>
+        <div class="level-desc">Top 10%</div>
+      </div>
+      <div class="level-item">
+        <div class="level-num" style="background:linear-gradient(90deg,var(--amber),#F97316);-webkit-background-clip:text;-webkit-text-fill-color:transparent">50</div>
+        <div class="level-name" style="color:var(--amber)">Ascended</div>
+        <div class="level-desc">Evolução total</div>
+      </div>
+    </div>
+    <div style="margin-top:48px;display:flex;gap:24px;justify-content:center;flex-wrap:wrap" class="reveal">
+      <div style="text-align:center;padding:20px 28px;background:var(--glass);border:1px solid var(--border);border-radius:14px">
+        <div style="font-size:28px;margin-bottom:6px">⭐</div>
+        <div style="font-size:15px;font-weight:700">Score de disciplina</div>
+        <div style="font-size:12px;color:var(--soft)">Métrica exclusiva de consistência</div>
+      </div>
+      <div style="text-align:center;padding:20px 28px;background:var(--glass);border:1px solid var(--border);border-radius:14px">
+        <div style="font-size:28px;margin-bottom:6px">🏆</div>
+        <div style="font-size:15px;font-weight:700">32 conquistas</div>
+        <div style="font-size:12px;color:var(--soft)">Desbloqueie ao atingir metas</div>
+      </div>
+      <div style="text-align:center;padding:20px 28px;background:var(--glass);border:1px solid var(--border);border-radius:14px">
+        <div style="font-size:28px;margin-bottom:6px">🔥</div>
+        <div style="font-size:15px;font-weight:700">Sequências diárias</div>
+        <div style="font-size:12px;color:var(--soft)">Não quebre a corrente</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- TESTIMONIALS -->
+<section class="testimonials">
+  <div class="container">
+    <div class="reveal" style="text-align:center">
+      <div class="section-label">Depoimentos</div>
+      <h2 class="section-title">Quem já está evoluindo</h2>
+    </div>
+    <div class="test-grid">
+      <div class="test-card reveal">
+        <div class="test-stars">★★★★★</div>
+        <div class="test-text">"Nunca achei que um app conseguiria mudar minha rotina de verdade. Em 30 dias eu já dormia melhor, treinava consistente e tinha clareza do que fazer. O modo casal foi um diferencial enorme."</div>
+        <div class="test-author">
+          <div class="test-avatar" style="background:linear-gradient(135deg,var(--purple),var(--blue))">MF</div>
+          <div><div class="test-name">Marcos Ferreira</div><div class="test-role">Empreendedor · São Paulo</div></div>
+        </div>
+      </div>
+      <div class="test-card reveal">
+        <div class="test-stars">★★★★★</div>
+        <div class="test-text">"O assistente IA me surpreendeu. Ele notou que eu estava com sono ruim antes de eu perceber, sugeriu ajustar a rotina e em uma semana minha energia voltou. Parece que ele realmente te conhece."</div>
+        <div class="test-author">
+          <div class="test-avatar" style="background:linear-gradient(135deg,var(--cyan),var(--green))">RC</div>
+          <div><div class="test-name">Renata Costa</div><div class="test-role">Designer · Belo Horizonte</div></div>
+        </div>
+      </div>
+      <div class="test-card reveal">
+        <div class="test-stars">★★★★★</div>
+        <div class="test-text">"Eu e minha namorada usamos o modo casal há 2 meses. Nunca treinamos tanto juntos, os desafios semanais são incríveis. Além disso, o gamification me viciou do jeito positivo."</div>
+        <div class="test-author">
+          <div class="test-avatar" style="background:linear-gradient(135deg,var(--amber),#F97316)">GA</div>
+          <div><div class="test-name">Gabriel Alves</div><div class="test-role">Dev · Florianópolis</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- FINAL CTA -->
+<section class="final-cta">
+  <div class="container">
+    <h2>
+      Reconstrua sua vida.<br>
+      <span style="background:linear-gradient(90deg,var(--purple),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent">Comece agora.</span>
+    </h2>
+    <p>Você estava esperando o momento certo. Esse é ele.</p>
+    <div class="ctas">
+      <a href="/app" class="btn btn-primary btn-lg">▶ Explorar demo</a>
+      <a href="/login?tab=register" class="btn btn-outline btn-lg">Criar conta grátis</a>
+    </div>
+    <div style="margin-top:32px;font-size:12px;color:var(--muted)">Sem cartão de crédito · Gratuito para começar · Cancele quando quiser</div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">ASCEND</div>
+  <p>O sistema operacional para reconstruir sua vida.</p>
+  <div style="margin-top:16px;display:flex;gap:24px;justify-content:center;flex-wrap:wrap">
+    <a href="#" style="color:var(--muted);text-decoration:none;font-size:12px">Privacidade</a>
+    <a href="#" style="color:var(--muted);text-decoration:none;font-size:12px">Termos</a>
+    <a href="#" style="color:var(--muted);text-decoration:none;font-size:12px">Contato</a>
+    <a href="/app" style="color:var(--purple);text-decoration:none;font-size:12px;font-weight:600">→ Ver demo</a>
+  </div>
+  <div style="margin-top:24px;font-size:11px;color:rgba(100,116,139,0.6)">© 2026 ASCEND. Todos os direitos reservados.</div>
+</footer>
+
+<!-- ═══════════════════════════════════
+     AUTH MODAL
+═══════════════════════════════════ -->
+<div id="auth-overlay" class="modal-overlay hidden" onclick="handleOverlayClick(event)">
+  <div class="auth-card">
+    <button class="modal-close" onclick="closeAuthModal()" aria-label="Fechar">✕</button>
+
+    <div class="auth-logo">
+      <div class="auth-logo-icon">⬡</div>
+      ASCEND
+    </div>
+    <p style="text-align:center;font-size:13px;color:var(--muted);margin-bottom:0">Seu sistema de evolução pessoal</p>
+
+    <div class="auth-tabs">
+      <button class="auth-tab active" id="tab-login" onclick="switchTab('login')">Entrar</button>
+      <button class="auth-tab" id="tab-register" onclick="switchTab('register')">Criar conta</button>
+    </div>
+
+    <!-- Login -->
+    <form class="auth-form" id="login-form" onsubmit="handleLogin(event)">
+      <div class="form-group">
+        <label class="form-label" for="login-email">Email</label>
+        <input type="email" id="login-email" class="form-input" placeholder="seu@email.com" autocomplete="email" required>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="login-password">Senha</label>
+        <input type="password" id="login-password" class="form-input" placeholder="••••••••" autocomplete="current-password" required>
+      </div>
+      <button type="submit" id="login-btn" class="btn-submit">Entrar</button>
+    </form>
+
+    <!-- Register -->
+    <form class="auth-form hidden" id="register-form" onsubmit="handleRegister(event)">
+      <div class="form-group">
+        <label class="form-label" for="reg-name">Nome completo</label>
+        <input type="text" id="reg-name" class="form-input" placeholder="Seu nome" autocomplete="name" required>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="reg-email">Email</label>
+        <input type="email" id="reg-email" class="form-input" placeholder="seu@email.com" autocomplete="email" required>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="reg-password">Senha</label>
+        <input type="password" id="reg-password" class="form-input" placeholder="Mínimo 6 caracteres" autocomplete="new-password" required>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="reg-confirm">Confirmar senha</label>
+        <input type="password" id="reg-confirm" class="form-input" placeholder="Repita a senha" autocomplete="new-password" required>
+      </div>
+      <button type="submit" id="register-btn" class="btn-submit">Criar conta</button>
+    </form>
+
+    <div class="auth-divider">ou</div>
+
+    <button class="btn-google" onclick="signInGoogle()" type="button">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+        <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57C21.36 18.1 22.56 15.4 22.56 12.25z" fill="#4285F4"/>
+        <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+        <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
+        <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+      </svg>
+      Continuar com Google
+    </button>
+
+    <div id="auth-error" class="auth-error hidden"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════
+     ONBOARDING WIZARD
+═══════════════════════════════════ -->
+<div id="onboarding-overlay" class="modal-overlay hidden">
+  <div class="onboarding-card">
+
+    <!-- Header / progress -->
+    <div class="ob-header">
+      <div class="ob-steps-row">
+        <div class="ob-step-dot active" id="dot-1"></div>
+        <div class="ob-step-dot" id="dot-2"></div>
+        <div class="ob-step-dot" id="dot-3"></div>
+        <div class="ob-step-dot" id="dot-4"></div>
+        <div class="ob-step-dot" id="dot-5"></div>
+      </div>
+      <div class="ob-header-meta">
+        <span class="ob-header-title">Perfil de saúde</span>
+        <span class="ob-header-counter" id="ob-step-counter">1 de 5</span>
+      </div>
+    </div>
+
+    <!-- Body (scrollable) -->
+    <div class="ob-body">
+
+      <!-- STEP 1 — Identificação -->
+      <div class="ob-step active" id="ob-step-1">
+        <div class="ob-step-title">Bem-vindo ao ASCEND 🚀</div>
+        <div class="ob-step-sub">Vamos criar seu perfil personalizado. Essas informações nos ajudam a adaptar sua experiência de saúde e bem-estar.</div>
+        <div style="display:flex;flex-direction:column;gap:14px">
+          <div class="ob-field">
+            <label class="ob-field-label" for="ob-name">Como quer ser chamado?</label>
+            <input type="text" id="ob-name" class="form-input" placeholder="Seu primeiro nome" style="text-align:left" autocomplete="given-name">
+          </div>
+          <div class="ob-input-row">
+            <div class="ob-field">
+              <label class="ob-field-label" for="ob-age">Idade</label>
+              <input type="number" id="ob-age" class="ob-field-input" placeholder="25" min="13" max="100">
+              <div class="ob-field-unit">anos</div>
+            </div>
+            <div class="ob-field">
+              <label class="ob-field-label" for="ob-gender">Gênero</label>
+              <select id="ob-gender" class="ob-field-input" style="cursor:pointer;font-size:14px;font-weight:600">
+                <option value="">Selecione</option>
+                <option value="masculino">Masculino</option>
+                <option value="feminino">Feminino</option>
+                <option value="nao-binario">Não-binário</option>
+                <option value="nao-dizer">Prefiro não dizer</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 2 — Corpo -->
+      <div class="ob-step" id="ob-step-2">
+        <div class="ob-step-title">Seu corpo 💪</div>
+        <div class="ob-step-sub">Dados físicos para calcular métricas como IMC, TMB e personalizar suas metas de fitness.</div>
+
+        <div class="ob-input-row" style="margin-bottom:14px">
+          <div class="ob-field">
+            <label class="ob-field-label">Peso atual</label>
+            <input type="number" id="ob-weight" class="ob-field-input" placeholder="75" min="30" max="300" step="0.1">
+            <div class="ob-field-unit">kg</div>
+          </div>
+          <div class="ob-field">
+            <label class="ob-field-label">Altura</label>
+            <input type="number" id="ob-height" class="ob-field-input" placeholder="170" min="100" max="250">
+            <div class="ob-field-unit">cm</div>
+          </div>
+        </div>
+
+        <div class="ob-field" style="margin-bottom:22px">
+          <label class="ob-field-label">Meta de peso <span style="color:var(--muted);font-weight:400;text-transform:none;letter-spacing:0">(opcional)</span></label>
+          <div style="display:flex;align-items:center;gap:12px">
+            <input type="number" id="ob-goal-weight" class="ob-field-input" placeholder="70" min="30" max="300" step="0.1" style="max-width:120px">
+            <span style="font-size:13px;color:var(--soft)">kg — onde quer chegar</span>
+          </div>
+        </div>
+
+        <div class="ob-section-label">Objetivo com o corpo</div>
+        <div class="ob-options cols2">
+          <div class="ob-option" data-group="bodyGoal" data-value="perder-peso" onclick="selectOpt(this,'bodyGoal')">
+            <div class="ob-opt-icon">🔥</div>
+            <div class="ob-opt-body"><div class="ob-opt-label">Perder peso</div></div>
+            <div class="ob-opt-check"></div>
+          </div>
+          <div class="ob-option" data-group="bodyGoal" data-value="ganhar-massa" onclick="selectOpt(this,'bodyGoal')">
+            <div class="ob-opt-icon">💪</div>
+            <div class="ob-opt-body"><div class="ob-opt-label">Ganhar massa</div></div>
+            <div class="ob-opt-check"></div>
+          </div>
+          <div class="ob-option" data-group="bodyGoal" data-value="condicionamento" onclick="selectOpt(this,'bodyGoal')">
+            <div class="ob-opt-icon">🏃</div>
+            <div class="ob-opt-body"><div class="ob-opt-label">Condicionamento</div></div>
+            <div class="ob-opt-check"></div>
+          </div>
+          <div class="ob-option" data-group="bodyGoal" data-value="manter" onclick="selectOpt(this,'bodyGoal')">
+            <div class="ob-opt-icon">❤️</div>
+            <div class="ob-opt-body"><div class="ob-opt-label">Manter saúde</div></div>
+            <div class="ob-opt-check"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 3 — Atividade física -->
+      <div class="ob-step" id="ob-step-3">
+        <div class="ob-step-title">Atividade física 🏋️</div>
+        <div class="ob-step-sub">Com que frequência você pratica exercícios atualmente?</div>
+
+        <div class="ob-options" style="margin-bottom:24px">
+          <div class="ob-option" data-group="activityLevel" data-value="sedentario" onclick="selectOpt(this,'activityLevel')">
+            <div class="ob-opt-icon">🛋️</div>
+            <div class="ob-opt-body">
+              <div class="ob-opt-label">Sedentário</div>
+              <div class="ob-opt-desc">Não pratico exercícios regularmente</div>
+            </div>
+            <div class="ob-opt-check"></div>
+          </div>
+          <div class="ob-option" data-group="activityLevel" data-value="1-2x" onclick="selectOpt(this,'activityLevel')">
+            <div class="ob-opt-icon">🚶</div>
+            <div class="ob-opt-body">
+              <div class="ob-opt-label">1–2x por semana</div>
+              <div class="ob-opt-desc">Ativo ocasionalmente</div>
+            </div>
+            <div class="ob-opt-check"></div>
+          </div>
+          <div class="ob-option" data-group="activityLevel" data-value="3-4x" onclick="selectOpt(this,'activityLevel')">
+            <div class="ob-opt-icon">🏃</div>
+            <div class="ob-opt-body">
+              <div class="ob-opt-label">3–4x por semana</div>
+              <div class="ob-opt-desc">Moderadamente ativo</div>
+            </div>
+            <div class="ob-opt-check"></div>
+          </div>
+          <div class="ob-option" data-group="activityLevel" data-value="5x+" onclick="selectOpt(this,'activityLevel')">
+            <div class="ob-opt-icon">🏆</div>
+            <div class="ob-opt-body">
+              <div class="ob-opt-label">5+ vezes por semana</div>
+              <div class="ob-opt-desc">Muito ativo / atleta</div>
+            </div>
+            <div class="ob-opt-check"></div>
+          </div>
+        </div>
+
+        <div class="ob-section-label">Modalidades favoritas <span style="color:var(--muted);font-weight:400;text-transform:none;letter-spacing:0">(pode marcar vários)</span></div>
+        <div class="ob-chips">
+          <div class="ob-chip" data-group="workoutTypes" data-value="academia" onclick="toggleChip(this,'workoutTypes')">Academia</div>
+          <div class="ob-chip" data-group="workoutTypes" data-value="corrida" onclick="toggleChip(this,'workoutTypes')">Corrida</div>
+          <div class="ob-chip" data-group="workoutTypes" data-value="ciclismo" onclick="toggleChip(this,'workoutTypes')">Ciclismo</div>
+          <div class="ob-chip" data-group="workoutTypes" data-value="natacao" onclick="toggleChip(this,'workoutTypes')">Natação</div>
+          <div class="ob-chip" data-group="workoutTypes" data-value="yoga" onclick="toggleChip(this,'workoutTypes')">Yoga</div>
+          <div class="ob-chip" data-group="workoutTypes" data-value="pilates" onclick="toggleChip(this,'workoutTypes')">Pilates</div>
+          <div class="ob-chip" data-group="workoutTypes" data-value="funcional" onclick="toggleChip(this,'workoutTypes')">Funcional</div>
+          <div class="ob-chip" data-group="workoutTypes" data-value="crossfit" onclick="toggleChip(this,'workoutTypes')">Crossfit</div>
+          <div class="ob-chip" data-group="workoutTypes" data-value="em-casa" onclick="toggleChip(this,'workoutTypes')">Em casa</div>
+          <div class="ob-chip" data-group="workoutTypes" data-value="ao-ar-livre" onclick="toggleChip(this,'workoutTypes')">Ao ar livre</div>
+          <div class="ob-chip" data-group="workoutTypes" data-value="artes-marciais" onclick="toggleChip(this,'workoutTypes')">Artes marciais</div>
+        </div>
+      </div>
+
+      <!-- STEP 4 — Saúde mental -->
+      <div class="ob-step" id="ob-step-4">
+        <div class="ob-step-title">Saúde mental 🧠</div>
+        <div class="ob-step-sub">Entender seu estado emocional nos ajuda a sugerir práticas de bem-estar mais assertivas.</div>
+
+        <div class="ob-section-label">Nível de estresse no dia a dia</div>
+        <div class="ob-scale" id="ob-stress-scale"></div>
+        <div style="display:flex;justify-content:space-between;margin-top:5px;margin-bottom:22px">
+          <span style="font-size:11px;color:var(--muted)">😌 Bem tranquilo</span>
+          <span style="font-size:11px;color:var(--muted)">😤 Muito estressado</span>
+        </div>
+
+        <div class="ob-section-label">Qualidade do sono</div>
+        <div class="ob-stars" id="ob-sleep-stars">
+          <span class="ob-star" onclick="selectStar(1)">⭐</span>
+          <span class="ob-star" onclick="selectStar(2)">⭐</span>
+          <span class="ob-star" onclick="selectStar(3)">⭐</span>
+          <span class="ob-star" onclick="selectStar(4)">⭐</span>
+          <span class="ob-star" onclick="selectStar(5)">⭐</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-top:4px;margin-bottom:22px">
+          <span style="font-size:11px;color:var(--muted)">Péssimo</span>
+          <span style="font-size:11px;color:var(--muted)">Excelente</span>
+        </div>
+
+        <div class="ob-input-row" style="margin-bottom:22px">
+          <div class="ob-field">
+            <label class="ob-field-label">Horas de sono</label>
+            <input type="number" id="ob-sleep-hours" class="ob-field-input" placeholder="7" min="2" max="14" step="0.5">
+            <div class="ob-field-unit">h / noite</div>
+          </div>
+          <div class="ob-field">
+            <label class="ob-field-label">Humor predominante</label>
+            <select id="ob-mood" class="ob-field-input" style="cursor:pointer;font-size:13px;font-weight:600">
+              <option value="">Selecione</option>
+              <option value="muito-bem">😄 Muito bem</option>
+              <option value="bem">🙂 Bem</option>
+              <option value="neutro">😐 Neutro</option>
+              <option value="mal">😔 Mal</option>
+              <option value="muito-mal">😞 Muito mal</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="ob-section-label">Principais desafios mentais <span style="color:var(--muted);font-weight:400;text-transform:none;letter-spacing:0">(pode marcar vários)</span></div>
+        <div class="ob-chips">
+          <div class="ob-chip" data-group="mentalChallenges" data-value="ansiedade" onclick="toggleChip(this,'mentalChallenges')">Ansiedade</div>
+          <div class="ob-chip" data-group="mentalChallenges" data-value="foco" onclick="toggleChip(this,'mentalChallenges')">Falta de foco</div>
+          <div class="ob-chip" data-group="mentalChallenges" data-value="motivacao" onclick="toggleChip(this,'mentalChallenges')">Motivação</div>
+          <div class="ob-chip" data-group="mentalChallenges" data-value="procrastinacao" onclick="toggleChip(this,'mentalChallenges')">Procrastinação</div>
+          <div class="ob-chip" data-group="mentalChallenges" data-value="insonia" onclick="toggleChip(this,'mentalChallenges')">Insônia</div>
+          <div class="ob-chip" data-group="mentalChallenges" data-value="relacionamentos" onclick="toggleChip(this,'mentalChallenges')">Relacionamentos</div>
+          <div class="ob-chip" data-group="mentalChallenges" data-value="autoestima" onclick="toggleChip(this,'mentalChallenges')">Autoestima</div>
+          <div class="ob-chip" data-group="mentalChallenges" data-value="estresse-trabalho" onclick="toggleChip(this,'mentalChallenges')">Estresse no trabalho</div>
+          <div class="ob-chip" data-group="mentalChallenges" data-value="burnout" onclick="toggleChip(this,'mentalChallenges')">Burnout</div>
+        </div>
+      </div>
+
+      <!-- STEP 5 — Objetivo principal -->
+      <div class="ob-step" id="ob-step-5">
+        <div class="ob-step-title">Seu grande objetivo 🎯</div>
+        <div class="ob-step-sub">O que você quer transformar com o ASCEND? Isso guia toda a sua experiência personalizada.</div>
+
+        <div class="ob-options" style="margin-bottom:16px">
+          <div class="ob-option" data-group="mainGoal" data-value="emagrecer" onclick="selectOpt(this,'mainGoal')">
+            <div class="ob-opt-icon">⚖️</div>
+            <div class="ob-opt-body">
+              <div class="ob-opt-label">Emagrecer e ter mais saúde</div>
+              <div class="ob-opt-desc">Perda de peso com qualidade de vida</div>
+            </div>
+            <div class="ob-opt-check"></div>
+          </div>
+          <div class="ob-option" data-group="mainGoal" data-value="produtividade" onclick="selectOpt(this,'mainGoal')">
+            <div class="ob-opt-icon">⚡</div>
+            <div class="ob-opt-body">
+              <div class="ob-opt-label">Aumentar produtividade</div>
+              <div class="ob-opt-desc">Foco, deep work e resultados reais</div>
+            </div>
+            <div class="ob-opt-check"></div>
+          </div>
+          <div class="ob-option" data-group="mainGoal" data-value="habitos" onclick="selectOpt(this,'mainGoal')">
+            <div class="ob-opt-icon">🔁</div>
+            <div class="ob-opt-body">
+              <div class="ob-opt-label">Construir hábitos sólidos</div>
+              <div class="ob-opt-desc">Consistência que dura para sempre</div>
+            </div>
+            <div class="ob-opt-check"></div>
+          </div>
+          <div class="ob-option" data-group="mainGoal" data-value="saude-mental" onclick="selectOpt(this,'mainGoal')">
+            <div class="ob-opt-icon">🧘</div>
+            <div class="ob-opt-body">
+              <div class="ob-opt-label">Saúde mental e bem-estar</div>
+              <div class="ob-opt-desc">Menos estresse, mais equilíbrio</div>
+            </div>
+            <div class="ob-opt-check"></div>
+          </div>
+          <div class="ob-option" data-group="mainGoal" data-value="evolucao-total" onclick="selectOpt(this,'mainGoal')">
+            <div class="ob-opt-icon">🚀</div>
+            <div class="ob-opt-body">
+              <div class="ob-opt-label">Evolução total</div>
+              <div class="ob-opt-desc">Corpo, mente, trabalho e relacionamentos</div>
+            </div>
+            <div class="ob-opt-check"></div>
+          </div>
+        </div>
+
+        <label class="ob-couple-card" onclick="toggleCoupleMode(this)">
+          <input type="checkbox" id="ob-couple-chk" onclick="event.stopPropagation()">
+          <div>
+            <div style="font-size:13px;font-weight:700;margin-bottom:3px">♡ Ativar Modo Casal</div>
+            <div style="font-size:12px;color:var(--soft)">Evolua em sincronia com seu parceiro(a). Você pode ativar depois também.</div>
+          </div>
+        </label>
+      </div>
+
+    </div><!-- /ob-body -->
+
+    <!-- Footer -->
+    <div class="ob-footer" id="ob-footer">
+      <button class="ob-btn-prev invisible" id="ob-prev" onclick="obPrev()" type="button">← Anterior</button>
+      <span class="ob-err hidden" id="ob-err"></span>
+      <button class="ob-btn-next" id="ob-next" onclick="obNext()" type="button">Próximo →</button>
+    </div>
+
+  </div><!-- /onboarding-card -->
+</div><!-- /onboarding-overlay -->
+
+<script>
+// Particles
+(function(){
+  const container = document.getElementById('particles');
+  const colors = ['rgba(139,92,246,0.5)','rgba(59,130,246,0.4)','rgba(6,182,212,0.3)'];
+  for(let i=0;i<18;i++){
+    const p = document.createElement('div');
+    p.className = 'particle';
+    const size = Math.random()*4+2;
+    p.style.cssText = `
+      width:${size}px;height:${size}px;
+      left:${Math.random()*100}%;top:${Math.random()*100}%;
+      background:${colors[Math.floor(Math.random()*colors.length)]};
+      --dur:${Math.random()*6+6}s;--delay:${Math.random()*4}s;
+      position:fixed;pointer-events:none;z-index:0;
+    `;
+    container.appendChild(p);
+  }
+})();
+
+// Scroll reveal
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if(e.isIntersecting) { e.target.classList.add('visible'); }
+  });
+}, { threshold: 0.1 });
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+// Nav scroll effect
+window.addEventListener('scroll', () => {
+  const nav = document.querySelector('nav');
+  nav.style.background = window.scrollY > 50
+    ? 'rgba(9,9,11,0.95)'
+    : 'rgba(9,9,11,0.8)';
+});
+</script>
+
+<script>
+// ════════════════════════════════════════════════════════
+//  FIREBASE CONFIG
+//  ► Substitua com as credenciais do SEU projeto:
+//    console.firebase.google.com → Configurações do projeto
+//    → Seus apps → Web → Objeto firebaseConfig
+// ════════════════════════════════════════════════════════
+const firebaseConfig = {
+  apiKey:            "AIzaSyBqisol_yUJYmIudCLcw6EEF1AfdGhF_24",
+  authDomain:        "ascend-app-495cd.firebaseapp.com",
+  projectId:         "ascend-app-495cd",
+  storageBucket:     "ascend-app-495cd.firebasestorage.app",
+  messagingSenderId: "37765590660",
+  appId:             "1:37765590660:web:8abc19cc3caea9c48b5cd1",
+  measurementId:     "G-GM5R8CNTJY"
+};
+
+// ── INIT ─────────────────────────────────────────────────
+let _auth = null, _db = null;
+
+try {
+  firebase.initializeApp(firebaseConfig);
+  _auth = firebase.auth();
+  _db   = firebase.firestore();
+
+  _auth.onAuthStateChanged(async (user) => {
+    if (!user) return;
+    try {
+      const snap = await _db.collection('users').doc(user.uid).get();
+      if (snap.exists && snap.data().profileComplete) {
+        window.location.href = '/app';
+      } else {
+        closeAuthModal();
+        // Pre-fill name from Google/display name
+        const firstName = (user.displayName || '').split(' ')[0];
+        if (firstName) {
+          ob.data.name = firstName;
+          const el = document.getElementById('ob-name');
+          if (el) el.value = firstName;
+        }
+        showOnboarding();
+      }
+    } catch (e) {
+      console.error('Firestore check failed:', e);
+      window.location.href = '/app';
+    }
+  });
+} catch (e) {
+  console.warn('Firebase not configured – running in demo mode.');
+}
+
+// ── AUTH MODAL ───────────────────────────────────────────
+function openAuthModal(tab) {
+  document.getElementById('auth-overlay').classList.remove('hidden');
+  switchTab(tab || 'login');
+}
+
+function closeAuthModal() {
+  document.getElementById('auth-overlay').classList.add('hidden');
+  clearAuthErr();
+}
+
+function handleOverlayClick(e) {
+  if (e.target.id === 'auth-overlay') closeAuthModal();
+}
+
+function switchTab(tab) {
+  document.getElementById('login-form').classList.toggle('hidden', tab !== 'login');
+  document.getElementById('register-form').classList.toggle('hidden', tab !== 'register');
+  document.getElementById('tab-login').classList.toggle('active', tab === 'login');
+  document.getElementById('tab-register').classList.toggle('active', tab !== 'login');
+  clearAuthErr();
+}
+
+function showAuthErr(msg) {
+  const el = document.getElementById('auth-error');
+  el.textContent = msg; el.classList.remove('hidden');
+}
+function clearAuthErr() {
+  const el = document.getElementById('auth-error');
+  if (el) el.classList.add('hidden');
+}
+
+async function handleLogin(e) {
+  e.preventDefault();
+  if (!_auth) { window.location.href = '/app'; return; }
+  clearAuthErr();
+  const btn = document.getElementById('login-btn');
+  btn.disabled = true; btn.textContent = 'Entrando…';
+  try {
+    await _auth.signInWithEmailAndPassword(
+      document.getElementById('login-email').value.trim(),
+      document.getElementById('login-password').value
+    );
+  } catch (err) {
+    showAuthErr(fbErr(err.code));
+    btn.disabled = false; btn.textContent = 'Entrar';
+  }
+}
+
+async function handleRegister(e) {
+  e.preventDefault();
+  if (!_auth) { window.location.href = '/app'; return; }
+  clearAuthErr();
+  const btn = document.getElementById('register-btn');
+  btn.disabled = true; btn.textContent = 'Criando conta…';
+  const name     = document.getElementById('reg-name').value.trim();
+  const email    = document.getElementById('reg-email').value.trim();
+  const password = document.getElementById('reg-password').value;
+  const confirm  = document.getElementById('reg-confirm').value;
+  if (password !== confirm) {
+    showAuthErr('As senhas não coincidem.');
+    btn.disabled = false; btn.textContent = 'Criar conta'; return;
+  }
+  if (password.length < 6) {
+    showAuthErr('A senha deve ter no mínimo 6 caracteres.');
+    btn.disabled = false; btn.textContent = 'Criar conta'; return;
+  }
+  try {
+    const cred = await _auth.createUserWithEmailAndPassword(email, password);
+    await cred.user.updateProfile({ displayName: name });
+  } catch (err) {
+    showAuthErr(fbErr(err.code));
+    btn.disabled = false; btn.textContent = 'Criar conta';
+  }
+}
+
+async function signInGoogle() {
+  if (!_auth) { window.location.href = '/app'; return; }
+  clearAuthErr();
+  try {
+    const provider = new firebase.auth.GoogleAuthProvider();
+    await _auth.signInWithPopup(provider);
+  } catch (err) {
+    if (err.code !== 'auth/popup-closed-by-user') showAuthErr(fbErr(err.code));
+  }
+}
+
+function fbErr(code) {
+  const map = {
+    'auth/user-not-found':        'Usuário não encontrado.',
+    'auth/wrong-password':        'Senha incorreta.',
+    'auth/invalid-credential':    'Email ou senha incorretos.',
+    'auth/email-already-in-use':  'Este email já está cadastrado.',
+    'auth/invalid-email':         'Email inválido.',
+    'auth/weak-password':         'Senha muito fraca (mín. 6 caracteres).',
+    'auth/too-many-requests':     'Muitas tentativas. Tente mais tarde.',
+    'auth/network-request-failed':'Erro de conexão. Verifique sua internet.',
+  };
+  return map[code] || 'Erro ao autenticar. Tente novamente.';
+}
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') closeAuthModal();
+});
+
+// ── ONBOARDING STATE ─────────────────────────────────────
+const ob = {
+  step: 1,
+  total: 5,
+  data: {
+    name: '', age: '', gender: '',
+    weight: '', height: '', goalWeight: '', bodyGoal: '',
+    activityLevel: '', workoutTypes: [],
+    stressLevel: 5, sleepHours: '', sleepQuality: 3, moodLevel: '',
+    mentalChallenges: [],
+    mainGoal: '', enableCoupleMode: false,
+  }
+};
+
+function showOnboarding() {
+  document.getElementById('onboarding-overlay').classList.remove('hidden');
+  // Build stress scale 1-10
+  const scale = document.getElementById('ob-stress-scale');
+  if (scale && scale.children.length === 0) {
+    for (let i = 1; i <= 10; i++) {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'ob-scale-btn' + (i === 5 ? ' sel' : '');
+      b.textContent = i;
+      b.onclick = () => selectStress(i);
+      scale.appendChild(b);
+    }
+  }
+  selectStar(3); // default sleep quality
+  goStep(1);
+}
+
+function goStep(n) {
+  ob.step = n;
+  // Show/hide steps
+  document.querySelectorAll('.ob-step').forEach(s => s.classList.remove('active'));
+  document.getElementById('ob-step-' + n).classList.add('active');
+  // Dots
+  for (let i = 1; i <= ob.total; i++) {
+    const d = document.getElementById('dot-' + i);
+    d.classList.remove('active', 'done');
+    if (i === n)      d.classList.add('active');
+    else if (i < n)   d.classList.add('done');
+  }
+  // Counter
+  document.getElementById('ob-step-counter').textContent = n + ' de ' + ob.total;
+  // Prev button
+  const prev = document.getElementById('ob-prev');
+  if (n === 1) prev.classList.add('invisible');
+  else         prev.classList.remove('invisible');
+  // Next button
+  const next = document.getElementById('ob-next');
+  next.disabled = false;
+  next.textContent = n === ob.total ? '🚀 Começar minha jornada' : 'Próximo →';
+  hideObErr();
+}
+
+function obNext() {
+  collectStep(ob.step);
+  if (!validateStep(ob.step)) return;
+  if (ob.step < ob.total) {
+    goStep(ob.step + 1);
+  } else {
+    submitProfile();
+  }
+}
+
+function obPrev() {
+  if (ob.step > 1) goStep(ob.step - 1);
+}
+
+function collectStep(n) {
+  if (n === 1) {
+    ob.data.name   = (document.getElementById('ob-name').value || '').trim();
+    ob.data.age    = document.getElementById('ob-age').value;
+    ob.data.gender = document.getElementById('ob-gender').value;
+  }
+  if (n === 2) {
+    ob.data.weight     = document.getElementById('ob-weight').value;
+    ob.data.height     = document.getElementById('ob-height').value;
+    ob.data.goalWeight = document.getElementById('ob-goal-weight').value;
+  }
+  if (n === 4) {
+    ob.data.sleepHours = document.getElementById('ob-sleep-hours').value;
+    ob.data.moodLevel  = document.getElementById('ob-mood').value;
+  }
+}
+
+function validateStep(n) {
+  if (n === 1 && !document.getElementById('ob-name').value.trim()) {
+    showObErr('Informe como quer ser chamado.'); return false;
+  }
+  if (n === 5 && !ob.data.mainGoal) {
+    showObErr('Selecione seu objetivo principal.'); return false;
+  }
+  return true;
+}
+
+function showObErr(msg) {
+  const el = document.getElementById('ob-err');
+  el.textContent = msg; el.classList.remove('hidden');
+}
+function hideObErr() {
+  const el = document.getElementById('ob-err');
+  if (el) el.classList.add('hidden');
+}
+
+// ── OPTION SELECTORS ─────────────────────────────────────
+function selectOpt(el, group) {
+  document.querySelectorAll('[data-group="' + group + '"]').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+  ob.data[group] = el.dataset.value;
+  hideObErr();
+}
+
+function toggleChip(el, group) {
+  el.classList.toggle('selected');
+  const val = el.dataset.value;
+  const arr = ob.data[group];
+  const idx = arr.indexOf(val);
+  if (idx >= 0) arr.splice(idx, 1); else arr.push(val);
+}
+
+function selectStress(val) {
+  document.querySelectorAll('.ob-scale-btn').forEach((b, i) => {
+    b.classList.toggle('sel', i + 1 === val);
+  });
+  ob.data.stressLevel = val;
+}
+
+function selectStar(val) {
+  document.querySelectorAll('.ob-star').forEach((s, i) => {
+    s.classList.toggle('on', i < val);
+  });
+  ob.data.sleepQuality = val;
+}
+
+function toggleCoupleMode(card) {
+  const chk = document.getElementById('ob-couple-chk');
+  chk.checked = !chk.checked;
+  ob.data.enableCoupleMode = chk.checked;
+}
+
+// ── SUBMIT PROFILE ───────────────────────────────────────
+async function submitProfile() {
+  const btn = document.getElementById('ob-next');
+  btn.disabled = true; btn.textContent = 'Salvando…';
+  hideObErr();
+
+  // If Firebase not configured, go to demo
+  if (!_auth || !_db || !_auth.currentUser) {
+    showSuccessScreen(); return;
+  }
+
+  try {
+    const user = _auth.currentUser;
+    // Calculate BMI if we have weight and height
+    let bmi = null;
+    if (ob.data.weight && ob.data.height) {
+      const h = parseFloat(ob.data.height) / 100;
+      bmi = parseFloat((parseFloat(ob.data.weight) / (h * h)).toFixed(1));
+    }
+
+    await _db.collection('users').doc(user.uid).set({
+      ...ob.data,
+      bmi,
+      profileComplete: true,
+      uid: user.uid,
+      email: user.email,
+      displayName: user.displayName || ob.data.name,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+    });
+    showSuccessScreen();
+  } catch (e) {
+    console.error('Save profile error:', e);
+    btn.disabled = false; btn.textContent = '🚀 Começar minha jornada';
+    showObErr('Erro ao salvar perfil. Tente novamente.');
+  }
+}
+
+function showSuccessScreen() {
+  const firstName = ob.data.name || 'atleta';
+  document.getElementById('ob-step-5').innerHTML = `
+    <div style="text-align:center;padding:24px 0 12px">
+      <span style="font-size:72px;display:block;margin-bottom:18px;animation:float 2s ease-in-out infinite">🚀</span>
+      <div style="font-size:26px;font-weight:900;margin-bottom:12px">Tudo pronto, ${firstName}!</div>
+      <div style="font-size:15px;color:var(--soft);line-height:1.75;margin-bottom:28px">
+        Perfil de saúde configurado com sucesso.<br>
+        Preparando sua experiência personalizada…
+      </div>
+      <div class="ob-loader"></div>
+    </div>
+  `;
+  // Mark all dots done
+  for (let i = 1; i <= ob.total; i++) {
+    const d = document.getElementById('dot-' + i);
+    if (d) { d.classList.remove('active'); d.classList.add('done'); }
+  }
+  document.getElementById('ob-footer').style.display = 'none';
+  setTimeout(() => { window.location.href = '/app'; }, 2600);
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,2085 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>ASCEND — Seu Sistema de Evolução</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg-deep: #09090B;
+    --bg-dark: #111827;
+    --bg-card: #0F172A;
+    --purple: #8B5CF6;
+    --purple-dim: rgba(139,92,246,0.15);
+    --blue: #3B82F6;
+    --blue-dim: rgba(59,130,246,0.15);
+    --cyan: #06B6D4;
+    --cyan-dim: rgba(6,182,212,0.12);
+    --green: #22C55E;
+    --green-dim: rgba(34,197,94,0.12);
+    --amber: #F59E0B;
+    --red: #EF4444;
+    --text: #F1F5F9;
+    --text-muted: #64748B;
+    --text-soft: #94A3B8;
+    --glass: rgba(255,255,255,0.04);
+    --glass-border: rgba(255,255,255,0.08);
+    --sidebar-w: 220px;
+    --right-w: 260px;
+  }
+
+  html, body {
+    height: 100%;
+    background: var(--bg-deep);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    overflow: hidden;
+  }
+
+  /* ── LAYOUT ── */
+  .app {
+    display: grid;
+    grid-template-columns: var(--sidebar-w) 1fr var(--right-w);
+    grid-template-rows: 100vh;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  /* ── SIDEBAR ── */
+  .sidebar {
+    background: rgba(15,23,42,0.9);
+    border-right: 1px solid var(--glass-border);
+    backdrop-filter: blur(20px);
+    display: flex;
+    flex-direction: column;
+    padding: 24px 12px;
+    overflow-y: auto;
+    z-index: 10;
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0 8px 28px;
+  }
+  .logo-icon {
+    width: 36px; height: 36px;
+    background: linear-gradient(135deg, var(--purple), var(--blue));
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+    box-shadow: 0 0 16px rgba(139,92,246,0.5);
+    flex-shrink: 0;
+  }
+  .logo-text { font-size: 18px; font-weight: 800; letter-spacing: 2px; background: linear-gradient(90deg, var(--purple), var(--cyan)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+
+  .nav-section-label {
+    font-size: 10px; font-weight: 600; letter-spacing: 1.5px;
+    color: var(--text-muted); text-transform: uppercase;
+    padding: 0 10px 8px; margin-top: 8px;
+  }
+
+  .nav-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 12px; border-radius: 10px;
+    cursor: pointer; transition: all 0.2s;
+    color: var(--text-soft); font-weight: 500;
+    margin-bottom: 2px; border: 1px solid transparent;
+    user-select: none;
+  }
+  .nav-item:hover { background: var(--glass); color: var(--text); }
+  .nav-item.active {
+    background: var(--purple-dim);
+    color: var(--purple);
+    border-color: rgba(139,92,246,0.25);
+    box-shadow: 0 0 12px rgba(139,92,246,0.1);
+  }
+  .nav-item .nav-icon { font-size: 16px; width: 20px; text-align: center; flex-shrink: 0; }
+  .nav-item .nav-label { font-size: 13px; }
+  .nav-badge {
+    margin-left: auto; background: var(--purple);
+    color: white; font-size: 10px; font-weight: 700;
+    padding: 1px 6px; border-radius: 99px;
+  }
+
+  .sidebar-footer {
+    margin-top: auto; padding-top: 16px;
+    border-top: 1px solid var(--glass-border);
+  }
+  .user-mini {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 12px; border-radius: 10px;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .user-mini:hover { background: var(--glass); }
+  .avatar {
+    width: 32px; height: 32px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--purple), var(--blue));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 700; flex-shrink: 0;
+  }
+  .user-info { flex: 1; min-width: 0; }
+  .user-name { font-size: 12px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .user-level { font-size: 10px; color: var(--purple); font-weight: 500; }
+
+  /* ── MAIN ── */
+  .main {
+    overflow-y: auto;
+    padding: 28px;
+    background: var(--bg-deep);
+    scrollbar-width: thin;
+    scrollbar-color: var(--glass-border) transparent;
+  }
+  .main::-webkit-scrollbar { width: 4px; }
+  .main::-webkit-scrollbar-track { background: transparent; }
+  .main::-webkit-scrollbar-thumb { background: var(--glass-border); border-radius: 4px; }
+
+  .section { display: none; animation: fadeIn 0.3s ease; }
+  .section.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* ── PAGE HEADER ── */
+  .page-header { margin-bottom: 24px; }
+  .page-header h1 { font-size: 24px; font-weight: 800; margin-bottom: 4px; }
+  .page-header p { color: var(--text-soft); font-size: 13px; }
+  .greeting-time { font-size: 12px; color: var(--text-muted); }
+
+  /* ── CARDS ── */
+  .card {
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
+    border-radius: 16px;
+    padding: 20px;
+    backdrop-filter: blur(10px);
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .card:hover { border-color: rgba(139,92,246,0.2); box-shadow: 0 0 20px rgba(139,92,246,0.05); }
+  .card-title { font-size: 11px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 12px; }
+
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+  .grid-4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 14px; margin-bottom: 16px; }
+  .mb-16 { margin-bottom: 16px; }
+  .mb-24 { margin-bottom: 24px; }
+
+  /* ── METRIC CARDS ── */
+  .metric-card {
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
+    border-radius: 14px;
+    padding: 18px;
+    display: flex; flex-direction: column; gap: 8px;
+    transition: all 0.2s;
+  }
+  .metric-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.3); }
+  .metric-label { font-size: 11px; font-weight: 600; letter-spacing: 0.8px; text-transform: uppercase; color: var(--text-muted); }
+  .metric-value { font-size: 28px; font-weight: 800; line-height: 1; }
+  .metric-sub { font-size: 11px; color: var(--text-soft); }
+  .metric-icon { font-size: 20px; margin-bottom: 2px; }
+  .metric-change { font-size: 11px; font-weight: 600; }
+  .metric-change.up { color: var(--green); }
+  .metric-change.down { color: var(--red); }
+
+  /* ── PROGRESS BAR ── */
+  .progress-bar {
+    background: rgba(255,255,255,0.06);
+    border-radius: 99px; height: 6px; overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%; border-radius: 99px;
+    background: linear-gradient(90deg, var(--purple), var(--blue));
+    transition: width 1s ease;
+    position: relative;
+  }
+  .progress-fill::after {
+    content: ''; position: absolute; right: 0; top: 50%;
+    transform: translate(50%, -50%);
+    width: 10px; height: 10px; border-radius: 50%;
+    background: white; box-shadow: 0 0 6px var(--purple);
+  }
+
+  /* ── HABIT ITEM ── */
+  .habit-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px; border-radius: 12px;
+    background: var(--glass); border: 1px solid var(--glass-border);
+    margin-bottom: 8px; cursor: pointer; transition: all 0.2s;
+  }
+  .habit-item:hover { background: rgba(139,92,246,0.06); border-color: rgba(139,92,246,0.2); }
+  .habit-check {
+    width: 22px; height: 22px; border-radius: 6px;
+    border: 2px solid var(--glass-border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; flex-shrink: 0; transition: all 0.2s;
+  }
+  .habit-check.done { background: var(--green); border-color: var(--green); box-shadow: 0 0 8px rgba(34,197,94,0.4); }
+  .habit-name { font-size: 13px; font-weight: 500; flex: 1; }
+  .habit-streak { font-size: 11px; color: var(--amber); font-weight: 600; }
+
+  /* ── TIMELINE ── */
+  .timeline { position: relative; padding-left: 32px; }
+  .timeline::before {
+    content: ''; position: absolute; left: 10px; top: 0; bottom: 0;
+    width: 1px; background: linear-gradient(180deg, var(--purple), transparent);
+  }
+  .timeline-item {
+    position: relative; padding: 12px 0; cursor: pointer;
+  }
+  .timeline-item::before {
+    content: ''; position: absolute; left: -26px; top: 18px;
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--glass-border); border: 1px solid var(--glass-border);
+    transition: all 0.2s;
+  }
+  .timeline-item.done::before { background: var(--green); border-color: var(--green); box-shadow: 0 0 6px var(--green); }
+  .timeline-item.active-now::before { background: var(--purple); border-color: var(--purple); box-shadow: 0 0 8px var(--purple); width: 12px; height: 12px; left: -28px; top: 16px; }
+  .timeline-block {
+    background: var(--glass); border: 1px solid var(--glass-border);
+    border-radius: 12px; padding: 12px 14px;
+    transition: all 0.2s;
+  }
+  .timeline-item:hover .timeline-block { border-color: rgba(139,92,246,0.25); }
+  .timeline-item.done .timeline-block { border-color: rgba(34,197,94,0.2); }
+  .timeline-item.active-now .timeline-block { border-color: rgba(139,92,246,0.4); background: var(--purple-dim); box-shadow: 0 0 16px rgba(139,92,246,0.1); }
+  .timeline-time { font-size: 11px; font-weight: 700; color: var(--text-muted); margin-bottom: 2px; }
+  .timeline-label { font-size: 13px; font-weight: 600; }
+  .timeline-desc { font-size: 11px; color: var(--text-soft); margin-top: 2px; }
+
+  /* ── AI INSIGHT ── */
+  .ai-card {
+    background: linear-gradient(135deg, rgba(139,92,246,0.12), rgba(59,130,246,0.08));
+    border: 1px solid rgba(139,92,246,0.25);
+    border-radius: 16px; padding: 20px;
+    display: flex; gap: 16px; align-items: flex-start;
+    margin-bottom: 16px;
+  }
+  .ai-orb {
+    width: 40px; height: 40px; border-radius: 50%;
+    background: radial-gradient(circle, var(--purple), var(--blue));
+    box-shadow: 0 0 20px rgba(139,92,246,0.6);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; flex-shrink: 0;
+    animation: pulse-orb 2s ease-in-out infinite;
+  }
+  @keyframes pulse-orb {
+    0%, 100% { box-shadow: 0 0 20px rgba(139,92,246,0.6); }
+    50% { box-shadow: 0 0 32px rgba(139,92,246,0.9), 0 0 60px rgba(139,92,246,0.3); }
+  }
+  .ai-content { flex: 1; }
+  .ai-title { font-size: 12px; font-weight: 700; color: var(--purple); letter-spacing: 0.8px; text-transform: uppercase; margin-bottom: 6px; }
+  .ai-text { font-size: 13px; line-height: 1.6; color: var(--text-soft); }
+
+  /* ── SCORE RING ── */
+  .score-ring-wrap { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+  .score-ring { position: relative; width: 80px; height: 80px; }
+  .score-ring svg { transform: rotate(-90deg); }
+  .score-ring-val {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    font-size: 18px; font-weight: 800;
+    line-height: 1;
+  }
+  .score-ring-val span { font-size: 10px; font-weight: 500; color: var(--text-muted); }
+  .score-label { font-size: 11px; color: var(--text-soft); text-align: center; font-weight: 500; }
+
+  /* ── COUPLE ── */
+  .couple-header {
+    display: flex; align-items: center; justify-content: center; gap: 24px;
+    margin-bottom: 24px;
+  }
+  .couple-avatar-wrap { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+  .couple-avatar {
+    width: 64px; height: 64px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 24px; font-weight: 800;
+    border: 2px solid var(--glass-border);
+  }
+  .couple-avatar.you { background: linear-gradient(135deg, var(--purple), var(--blue)); box-shadow: 0 0 20px rgba(139,92,246,0.4); border-color: var(--purple); }
+  .couple-avatar.them { background: linear-gradient(135deg, var(--cyan), var(--green)); box-shadow: 0 0 20px rgba(6,182,212,0.4); border-color: var(--cyan); }
+  .couple-name { font-size: 12px; font-weight: 600; }
+  .couple-heart { font-size: 28px; animation: heartbeat 1.4s ease infinite; }
+  @keyframes heartbeat { 0%,100%{transform:scale(1)} 14%{transform:scale(1.2)} 28%{transform:scale(1)} 42%{transform:scale(1.15)} 56%{transform:scale(1)} }
+
+  /* ── EVOLUTION / XP ── */
+  .level-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: linear-gradient(135deg, var(--purple-dim), var(--blue-dim));
+    border: 1px solid rgba(139,92,246,0.3);
+    border-radius: 12px; padding: 12px 20px;
+    font-size: 15px; font-weight: 700;
+  }
+  .xp-bar { height: 8px; border-radius: 99px; background: rgba(255,255,255,0.06); overflow: hidden; margin-top: 8px; }
+  .xp-fill { height: 100%; border-radius: 99px; background: linear-gradient(90deg, var(--purple), var(--cyan)); transition: width 1s ease; }
+
+  .achievement {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 14px; border-radius: 12px;
+    background: var(--glass); border: 1px solid var(--glass-border);
+    margin-bottom: 8px; transition: all 0.2s;
+  }
+  .achievement:hover { border-color: rgba(139,92,246,0.3); }
+  .achievement.locked { opacity: 0.4; }
+  .ach-icon { font-size: 22px; width: 38px; text-align: center; }
+  .ach-info { flex: 1; }
+  .ach-name { font-size: 13px; font-weight: 600; }
+  .ach-desc { font-size: 11px; color: var(--text-soft); }
+  .ach-badge { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 99px; }
+  .ach-badge.done { background: rgba(34,197,94,0.2); color: var(--green); }
+  .ach-badge.locked { background: rgba(100,116,139,0.2); color: var(--text-muted); }
+
+  /* ── TAGS / BADGES ── */
+  .tag { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 99px; }
+  .tag-purple { background: var(--purple-dim); color: var(--purple); border: 1px solid rgba(139,92,246,0.25); }
+  .tag-green { background: var(--green-dim); color: var(--green); border: 1px solid rgba(34,197,94,0.2); }
+  .tag-blue { background: var(--blue-dim); color: var(--blue); border: 1px solid rgba(59,130,246,0.2); }
+  .tag-cyan { background: var(--cyan-dim); color: var(--cyan); border: 1px solid rgba(6,182,212,0.2); }
+  .tag-amber { background: rgba(245,158,11,0.12); color: var(--amber); border: 1px solid rgba(245,158,11,0.2); }
+
+  /* ── BUTTON ── */
+  .btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 9px 18px; border-radius: 10px; font-size: 13px; font-weight: 600;
+    cursor: pointer; transition: all 0.2s; border: none; font-family: 'Inter', sans-serif;
+  }
+  .btn-primary { background: var(--purple); color: white; box-shadow: 0 0 16px rgba(139,92,246,0.35); }
+  .btn-primary:hover { background: #7C3AED; box-shadow: 0 0 24px rgba(139,92,246,0.55); transform: translateY(-1px); }
+  .btn-ghost { background: var(--glass); color: var(--text-soft); border: 1px solid var(--glass-border); }
+  .btn-ghost:hover { background: rgba(255,255,255,0.07); color: var(--text); }
+
+  /* ── RIGHT PANEL ── */
+  .right-panel {
+    border-left: 1px solid var(--glass-border);
+    background: rgba(15,23,42,0.6);
+    backdrop-filter: blur(20px);
+    padding: 24px 16px;
+    overflow-y: auto;
+    display: flex; flex-direction: column; gap: 14px;
+    scrollbar-width: none;
+  }
+  .right-panel::-webkit-scrollbar { display: none; }
+  .widget {
+    background: var(--glass); border: 1px solid var(--glass-border);
+    border-radius: 14px; padding: 16px;
+  }
+  .widget-title { font-size: 10px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 12px; }
+  .widget-value { font-size: 26px; font-weight: 800; margin-bottom: 2px; }
+  .widget-sub { font-size: 11px; color: var(--text-soft); }
+
+  .streak-row { display: flex; gap: 4px; margin-top: 10px; }
+  .streak-day {
+    width: 18px; height: 18px; border-radius: 4px;
+    background: rgba(255,255,255,0.06);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 9px; font-weight: 700; color: var(--text-muted);
+    transition: all 0.2s;
+  }
+  .streak-day.done { background: var(--purple); color: white; box-shadow: 0 0 6px rgba(139,92,246,0.4); }
+  .streak-day.today { background: var(--purple); color: white; box-shadow: 0 0 10px rgba(139,92,246,0.6); border: 1px solid rgba(255,255,255,0.3); }
+
+  .mood-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin-top: 8px; }
+  .mood-btn {
+    aspect-ratio: 1; border-radius: 8px; background: var(--glass); border: 1px solid var(--glass-border);
+    display: flex; align-items: center; justify-content: center; font-size: 18px;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .mood-btn:hover { transform: scale(1.15); border-color: rgba(139,92,246,0.3); }
+  .mood-btn.selected { background: var(--purple-dim); border-color: var(--purple); box-shadow: 0 0 10px rgba(139,92,246,0.3); }
+
+  .water-dots { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
+  .water-dot {
+    width: 28px; height: 28px; border-radius: 8px;
+    border: 1px solid var(--glass-border); background: var(--glass);
+    display: flex; align-items: center; justify-content: center; font-size: 14px;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .water-dot.filled { background: var(--cyan-dim); border-color: var(--cyan); box-shadow: 0 0 8px rgba(6,182,212,0.3); }
+  .water-dot:hover { transform: scale(1.1); }
+
+  /* ── CHAT / IA ── */
+  .chat-area {
+    height: 320px; overflow-y: auto; padding: 16px; gap: 12px;
+    display: flex; flex-direction: column;
+    background: rgba(0,0,0,0.2); border-radius: 12px; margin-bottom: 12px;
+    scrollbar-width: thin; scrollbar-color: var(--glass-border) transparent;
+  }
+  .msg { max-width: 80%; }
+  .msg.ai { align-self: flex-start; }
+  .msg.user { align-self: flex-end; }
+  .msg-bubble {
+    padding: 10px 14px; border-radius: 14px; font-size: 13px; line-height: 1.5;
+  }
+  .msg.ai .msg-bubble { background: var(--purple-dim); border: 1px solid rgba(139,92,246,0.2); color: var(--text-soft); border-radius: 14px 14px 14px 4px; }
+  .msg.user .msg-bubble { background: var(--purple); color: white; border-radius: 14px 14px 4px 14px; }
+  .msg-time { font-size: 10px; color: var(--text-muted); margin-top: 4px; padding: 0 4px; }
+  .chat-input-row { display: flex; gap: 8px; }
+  .chat-input {
+    flex: 1; background: var(--glass); border: 1px solid var(--glass-border);
+    border-radius: 10px; padding: 10px 14px; color: var(--text); font-size: 13px;
+    font-family: 'Inter', sans-serif; outline: none; transition: border-color 0.2s;
+  }
+  .chat-input:focus { border-color: rgba(139,92,246,0.4); }
+  .chat-input::placeholder { color: var(--text-muted); }
+
+  /* ── STAT NUMBER COUNTER ── */
+  .counter { transition: all 0.4s; }
+
+  /* ── TOP BAR (inside main) ── */
+  .top-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px; }
+  .top-date { font-size: 12px; color: var(--text-muted); }
+  .top-actions { display: flex; gap: 8px; align-items: center; }
+  .icon-btn {
+    width: 34px; height: 34px; border-radius: 8px; background: var(--glass); border: 1px solid var(--glass-border);
+    display: flex; align-items: center; justify-content: center; font-size: 15px; cursor: pointer; transition: all 0.2s;
+  }
+  .icon-btn:hover { background: var(--purple-dim); border-color: rgba(139,92,246,0.3); }
+
+  /* ── FITNESS ── */
+  .workout-card {
+    background: linear-gradient(135deg, rgba(139,92,246,0.1), rgba(59,130,246,0.08));
+    border: 1px solid rgba(139,92,246,0.2);
+    border-radius: 16px; padding: 20px; margin-bottom: 16px;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .workout-info h3 { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+  .workout-stats { display: flex; gap: 16px; margin-top: 12px; }
+  .workout-stat { text-align: center; }
+  .workout-stat .val { font-size: 18px; font-weight: 700; }
+  .workout-stat .lbl { font-size: 10px; color: var(--text-muted); }
+  .play-btn {
+    width: 52px; height: 52px; border-radius: 50%;
+    background: var(--purple); box-shadow: 0 0 20px rgba(139,92,246,0.5);
+    display: flex; align-items: center; justify-content: center; font-size: 20px;
+    cursor: pointer; transition: all 0.2s; border: none; color: white;
+  }
+  .play-btn:hover { transform: scale(1.1); box-shadow: 0 0 30px rgba(139,92,246,0.7); }
+
+  .chart-wrap { position: relative; height: 180px; }
+
+  /* ── SETTINGS ── */
+  .setting-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 0; border-bottom: 1px solid var(--glass-border);
+  }
+  .setting-row:last-child { border-bottom: none; }
+  .setting-label { font-size: 13px; font-weight: 500; }
+  .setting-desc { font-size: 11px; color: var(--text-soft); }
+  .toggle {
+    width: 40px; height: 22px; border-radius: 99px; background: rgba(255,255,255,0.1);
+    position: relative; cursor: pointer; transition: all 0.3s; flex-shrink: 0;
+  }
+  .toggle.on { background: var(--purple); box-shadow: 0 0 10px rgba(139,92,246,0.4); }
+  .toggle::after {
+    content: ''; position: absolute; width: 16px; height: 16px; border-radius: 50%;
+    background: white; top: 3px; left: 3px; transition: all 0.3s;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+  }
+  .toggle.on::after { left: 21px; }
+
+  /* ── SPARKLINE ── */
+  .mini-chart { height: 40px; }
+
+  /* scrollbar global */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-thumb { background: var(--glass-border); border-radius: 4px; }
+
+  /* ── PRODUTIVIDADE ── */
+  .focus-timer {
+    background: linear-gradient(135deg, rgba(139,92,246,0.12), rgba(59,130,246,0.08));
+    border: 1px solid rgba(139,92,246,0.3); border-radius: 20px; padding: 28px;
+    display: flex; flex-direction: column; align-items: center; gap: 16px; margin-bottom: 16px;
+  }
+  .timer-circle {
+    width: 160px; height: 160px; border-radius: 50%; position: relative;
+    background: conic-gradient(var(--purple) 0% 62%, rgba(255,255,255,0.05) 62%);
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 0 40px rgba(139,92,246,0.25);
+  }
+  .timer-circle::before {
+    content: ''; position: absolute; inset: 10px; border-radius: 50%;
+    background: var(--bg-deep);
+  }
+  .timer-inner { position: relative; z-index: 1; text-align: center; }
+  .timer-value { font-size: 36px; font-weight: 900; line-height: 1; }
+  .timer-label { font-size: 11px; color: var(--text-muted); font-weight: 600; }
+  .goal-row {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 14px; border-radius: 12px;
+    background: var(--glass); border: 1px solid var(--glass-border); margin-bottom: 8px;
+    transition: all 0.2s;
+  }
+  .goal-row:hover { border-color: rgba(139,92,246,0.25); }
+  .goal-check { width: 20px; height: 20px; border-radius: 50%; border: 2px solid var(--glass-border); flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 10px; transition: all 0.2s; cursor: pointer; }
+  .goal-check.done { background: var(--purple); border-color: var(--purple); box-shadow: 0 0 8px rgba(139,92,246,0.4); }
+  .goal-text { flex: 1; font-size: 13px; font-weight: 500; }
+  .goal-priority { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 99px; }
+
+  /* ── DETOX ── */
+  .detox-score {
+    font-size: 64px; font-weight: 900; text-align: center;
+    background: linear-gradient(135deg, var(--purple), var(--cyan));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    line-height: 1;
+  }
+  .app-row {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 14px; border-radius: 12px;
+    background: var(--glass); border: 1px solid var(--glass-border); margin-bottom: 8px;
+  }
+  .app-icon { font-size: 22px; width: 36px; text-align: center; }
+  .app-name { flex: 1; font-size: 13px; font-weight: 600; }
+  .app-time { font-size: 12px; font-weight: 700; }
+  .app-bar { height: 3px; border-radius: 99px; background: rgba(255,255,255,0.06); margin-top: 4px; overflow: hidden; }
+  .app-bar-fill { height: 100%; border-radius: 99px; }
+
+  /* ── PERFIL ── */
+  .profile-hero {
+    text-align: center; padding: 28px;
+    background: linear-gradient(135deg, rgba(139,92,246,0.1), rgba(59,130,246,0.06));
+    border: 1px solid rgba(139,92,246,0.2); border-radius: 20px; margin-bottom: 16px;
+  }
+  .profile-avatar-big {
+    width: 80px; height: 80px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--purple), var(--blue));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 28px; font-weight: 800; margin: 0 auto 14px;
+    box-shadow: 0 0 30px rgba(139,92,246,0.4);
+    border: 3px solid rgba(139,92,246,0.4);
+  }
+
+  /* ── MOBILE ── */
+  .mobile-bottom-nav {
+    display: none;
+    position: fixed; bottom: 0; left: 0; right: 0; z-index: 200;
+    background: rgba(15,23,42,0.92);
+    backdrop-filter: blur(24px);
+    border-top: 1px solid var(--glass-border);
+    padding: 10px 0 env(safe-area-inset-bottom);
+  }
+  .mobile-nav-inner { display: flex; justify-content: space-around; align-items: center; }
+  .mob-nav-btn {
+    display: flex; flex-direction: column; align-items: center; gap: 3px;
+    padding: 6px 12px; border-radius: 12px; cursor: pointer; transition: all 0.2s;
+    color: var(--text-muted); min-width: 52px;
+  }
+  .mob-nav-btn.active { color: var(--purple); background: var(--purple-dim); }
+  .mob-nav-btn .mob-icon { font-size: 20px; }
+  .mob-nav-btn .mob-label { font-size: 9px; font-weight: 600; }
+
+  @media (max-width: 768px) {
+    :root { --sidebar-w: 0px; --right-w: 0px; }
+    html, body { overflow: hidden; }
+    .app {
+      grid-template-columns: 1fr;
+      grid-template-rows: 1fr;
+      height: 100dvh;
+    }
+    .sidebar { display: none; }
+    .right-panel { display: none; }
+    .main {
+      padding: 16px 16px 80px;
+      height: 100dvh;
+    }
+    .top-bar { margin-bottom: 16px; }
+    .top-bar .btn { display: none; }
+    .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr 1fr; }
+    .grid-4 { grid-template-columns: 1fr 1fr; }
+    .mobile-bottom-nav { display: block; }
+    .page-header h1 { font-size: 20px; }
+    .score-ring-wrap { display: none; }
+    .score-ring-wrap:first-child { display: flex; }
+    .ai-card { flex-direction: column; }
+    .couple-header { gap: 14px; }
+    .mockup-content { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 480px) {
+    .grid-2 { grid-template-columns: 1fr; }
+    .grid-3 { grid-template-columns: 1fr; }
+    .grid-4 { grid-template-columns: 1fr 1fr; }
+    .workout-card { flex-direction: column; gap: 14px; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ═══════════ SIDEBAR ═══════════ -->
+  <aside class="sidebar">
+    <div class="logo">
+      <div class="logo-icon">⬡</div>
+      <div class="logo-text">ASCEND</div>
+    </div>
+
+    <div class="nav-section-label">Principal</div>
+    <div class="nav-item active" onclick="navigate('dashboard', this)">
+      <span class="nav-icon">⊞</span><span class="nav-label">Dashboard</span>
+    </div>
+    <div class="nav-item" onclick="navigate('rotina', this)">
+      <span class="nav-icon">◷</span><span class="nav-label">Rotina</span>
+    </div>
+    <div class="nav-item" onclick="navigate('habitos', this)">
+      <span class="nav-icon">◈</span><span class="nav-label">Hábitos</span>
+      <span class="nav-badge">5</span>
+    </div>
+    <div class="nav-item" onclick="navigate('fitness', this)">
+      <span class="nav-icon">◉</span><span class="nav-label">Fitness</span>
+    </div>
+    <div class="nav-item" onclick="navigate('produtividade', this)">
+      <span class="nav-icon">◎</span><span class="nav-label">Produtividade</span>
+    </div>
+
+    <div class="nav-section-label" style="margin-top:12px">Conexão</div>
+    <div class="nav-item" onclick="navigate('casal', this)">
+      <span class="nav-icon">♡</span><span class="nav-label">Modo Casal</span>
+    </div>
+    <div class="nav-item" onclick="navigate('evolucao', this)">
+      <span class="nav-icon">◆</span><span class="nav-label">Evolução</span>
+    </div>
+    <div class="nav-item" onclick="navigate('detox', this)">
+      <span class="nav-icon">📵</span><span class="nav-label">Detox Digital</span>
+    </div>
+
+    <div class="nav-section-label" style="margin-top:12px">Inteligência</div>
+    <div class="nav-item" onclick="navigate('ia', this)">
+      <span class="nav-icon">✦</span><span class="nav-label">Assistente IA</span>
+    </div>
+    <div class="nav-item" onclick="navigate('config', this)">
+      <span class="nav-icon">⊙</span><span class="nav-label">Configurações</span>
+    </div>
+
+    <div class="sidebar-footer">
+      <div class="user-mini">
+        <div class="avatar">LB</div>
+        <div class="user-info">
+          <div class="user-name">Luiz Borba</div>
+          <div class="user-level">✦ Nível 7 — Consistente</div>
+        </div>
+        <span style="font-size:12px;color:var(--text-muted)">›</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ═══════════ MAIN ═══════════ -->
+  <main class="main">
+
+    <!-- TOP BAR -->
+    <div class="top-bar">
+      <div>
+        <div style="font-size:13px; font-weight:600; color:var(--text-soft)" id="greeting">Bom dia, Luiz 👋</div>
+        <div class="top-date" id="today-date"></div>
+      </div>
+      <div class="top-actions">
+        <div class="icon-btn" title="Notificações">🔔</div>
+        <div class="icon-btn" title="Buscar">⌕</div>
+        <button class="btn btn-primary" style="font-size:12px;padding:8px 14px">+ Novo bloco</button>
+      </div>
+    </div>
+
+    <!-- ════ DASHBOARD ════ -->
+    <div class="section active" id="section-dashboard">
+      <div class="page-header">
+        <h1>Dashboard</h1>
+        <p>Seu progresso de hoje — Quinta-feira, 22 de Maio de 2026</p>
+      </div>
+
+      <!-- Pontuações -->
+      <div style="display:flex; gap:16px; margin-bottom:20px; background:var(--glass); border:1px solid var(--glass-border); border-radius:16px; padding:20px; align-items:center; flex-wrap:wrap;">
+        <div style="flex:1; min-width:200px;">
+          <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text-muted);margin-bottom:4px">Pontuação do Dia</div>
+          <div style="font-size:42px; font-weight:900; background: linear-gradient(90deg, var(--purple), var(--cyan)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; line-height:1">82</div>
+          <div style="font-size:12px;color:var(--text-soft);margin-top:4px">↑ +6 pontos vs. ontem</div>
+          <div class="progress-bar" style="margin-top:12px; height:8px;">
+            <div class="progress-fill" style="width:82%"></div>
+          </div>
+        </div>
+        <div style="display:flex; gap:24px; flex-wrap:wrap;">
+          <div class="score-ring-wrap">
+            <div class="score-ring">
+              <svg viewBox="0 0 80 80" width="80" height="80">
+                <circle cx="40" cy="40" r="32" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="6"/>
+                <circle cx="40" cy="40" r="32" fill="none" stroke="var(--purple)" stroke-width="6" stroke-dasharray="201" stroke-dashoffset="40" stroke-linecap="round"/>
+              </svg>
+              <div class="score-ring-val">80<span>foco</span></div>
+            </div>
+            <div class="score-label">Foco</div>
+          </div>
+          <div class="score-ring-wrap">
+            <div class="score-ring">
+              <svg viewBox="0 0 80 80" width="80" height="80">
+                <circle cx="40" cy="40" r="32" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="6"/>
+                <circle cx="40" cy="40" r="32" fill="none" stroke="var(--green)" stroke-width="6" stroke-dasharray="201" stroke-dashoffset="50" stroke-linecap="round"/>
+              </svg>
+              <div class="score-ring-val" style="color:var(--green)">75<span>saúde</span></div>
+            </div>
+            <div class="score-label">Saúde</div>
+          </div>
+          <div class="score-ring-wrap">
+            <div class="score-ring">
+              <svg viewBox="0 0 80 80" width="80" height="80">
+                <circle cx="40" cy="40" r="32" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="6"/>
+                <circle cx="40" cy="40" r="32" fill="none" stroke="var(--cyan)" stroke-width="6" stroke-dasharray="201" stroke-dashoffset="60" stroke-linecap="round"/>
+              </svg>
+              <div class="score-ring-val" style="color:var(--cyan)">70<span>prod</span></div>
+            </div>
+            <div class="score-label">Produtividade</div>
+          </div>
+          <div class="score-ring-wrap">
+            <div class="score-ring">
+              <svg viewBox="0 0 80 80" width="80" height="80">
+                <circle cx="40" cy="40" r="32" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="6"/>
+                <circle cx="40" cy="40" r="32" fill="none" stroke="var(--amber)" stroke-width="6" stroke-dasharray="201" stroke-dashoffset="80" stroke-linecap="round"/>
+              </svg>
+              <div class="score-ring-val" style="color:var(--amber)">60<span>sono</span></div>
+            </div>
+            <div class="score-label">Sono</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Métricas -->
+      <div class="grid-4 mb-16">
+        <div class="metric-card">
+          <div class="metric-icon">⚡</div>
+          <div class="metric-label">Treino</div>
+          <div class="metric-value" style="color:var(--green)">Feito</div>
+          <div class="metric-sub">45 min · Costas</div>
+          <span class="tag tag-green">✓ Concluído</span>
+        </div>
+        <div class="metric-card">
+          <div class="metric-icon">💧</div>
+          <div class="metric-label">Hidratação</div>
+          <div class="metric-value" style="color:var(--cyan)">1,8L</div>
+          <div class="metric-sub">Meta: 2,5L</div>
+          <div class="progress-bar" style="margin-top:6px"><div class="progress-fill" style="width:72%; background: linear-gradient(90deg, var(--cyan), var(--blue))"></div></div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-icon">😴</div>
+          <div class="metric-label">Sono</div>
+          <div class="metric-value" style="color:var(--amber)">6h 20m</div>
+          <div class="metric-sub">Meta: 8h</div>
+          <span class="tag tag-amber">Abaixo da meta</span>
+        </div>
+        <div class="metric-card">
+          <div class="metric-icon">⚖️</div>
+          <div class="metric-label">Peso</div>
+          <div class="metric-value">83,2<span style="font-size:14px;font-weight:400"> kg</span></div>
+          <div class="metric-sub">Meta: 80 kg</div>
+          <div class="metric-change down">↓ -0,3 kg esta semana</div>
+        </div>
+      </div>
+
+      <!-- Insight IA + Hábitos -->
+      <div class="grid-2 mb-16">
+        <div>
+          <div class="ai-card">
+            <div class="ai-orb">✦</div>
+            <div class="ai-content">
+              <div class="ai-title">Assistente ASCEND</div>
+              <div class="ai-text">Você está 3 dias consecutivos batendo sua meta de treino. Seu sono ainda está abaixo do ideal — que tal ajustar seu bloco de tela noturna para às 22h?</div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-title">Próximo na rotina</div>
+            <div class="timeline-item active-now" style="margin:0">
+              <div class="timeline-time">20:00 — Agora</div>
+              <div class="timeline-label">🏋️ Treino de Costas</div>
+              <div class="timeline-desc">45 min · Academia · Prioridade alta</div>
+              <div style="margin-top:10px; display:flex; gap:8px;">
+                <button class="btn btn-primary" style="font-size:12px;padding:7px 14px">▶ Iniciar</button>
+                <button class="btn btn-ghost" style="font-size:12px;padding:7px 14px">Adiar 15min</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">Hábitos de hoje</div>
+          <div class="habit-item" onclick="toggleHabit(this)">
+            <div class="habit-check done">✓</div>
+            <div class="habit-name">Meditação 10 min</div>
+            <div class="habit-streak">🔥 12 dias</div>
+          </div>
+          <div class="habit-item" onclick="toggleHabit(this)">
+            <div class="habit-check done">✓</div>
+            <div class="habit-name">Leitura 20 min</div>
+            <div class="habit-streak">🔥 8 dias</div>
+          </div>
+          <div class="habit-item" onclick="toggleHabit(this)">
+            <div class="habit-check done">✓</div>
+            <div class="habit-name">Sem álcool</div>
+            <div class="habit-streak">🔥 21 dias</div>
+          </div>
+          <div class="habit-item" onclick="toggleHabit(this)">
+            <div class="habit-check"></div>
+            <div class="habit-name">Sem redes sociais após 21h</div>
+            <div class="habit-streak" style="color:var(--text-muted)">— pendente</div>
+          </div>
+          <div class="habit-item" onclick="toggleHabit(this)">
+            <div class="habit-check"></div>
+            <div class="habit-name">Cold shower</div>
+            <div class="habit-streak" style="color:var(--text-muted)">— pendente</div>
+          </div>
+          <div style="display:flex; align-items:center; justify-content:space-between; margin-top:10px; padding-top:10px; border-top:1px solid var(--glass-border)">
+            <div style="font-size:12px;color:var(--text-soft)">3 de 5 concluídos</div>
+            <div class="progress-bar" style="width:120px"><div class="progress-fill" style="width:60%"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Gráfico semanal -->
+      <div class="card mb-16">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+          <div class="card-title" style="margin:0">Progresso semanal</div>
+          <div style="display:flex;gap:6px">
+            <span class="tag tag-purple">Foco</span>
+            <span class="tag tag-green">Saúde</span>
+            <span class="tag tag-cyan">Humor</span>
+          </div>
+        </div>
+        <div class="chart-wrap">
+          <canvas id="weeklyChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════ ROTINA ════ -->
+    <div class="section" id="section-rotina">
+      <div class="page-header">
+        <h1>Minha Rotina</h1>
+        <p>Quinta-feira, 22 de Maio · <span style="color:var(--purple)">8 blocos programados</span></p>
+      </div>
+
+      <div class="grid-2 mb-16">
+        <div class="card">
+          <div class="card-title">Progresso do dia</div>
+          <div style="font-size:32px;font-weight:800;margin-bottom:4px">3<span style="font-size:16px;font-weight:400;color:var(--text-muted)">/8 blocos</span></div>
+          <div class="progress-bar" style="margin-bottom:8px"><div class="progress-fill" style="width:37%"></div></div>
+          <div style="font-size:12px;color:var(--text-soft)">Você está no caminho certo 🔥</div>
+        </div>
+        <div class="card">
+          <div class="card-title">Energia estimada</div>
+          <div style="display:flex;gap:16px;margin-top:4px">
+            <div><div style="font-size:11px;color:var(--text-muted)">Manhã</div><div style="font-size:20px;font-weight:700;color:var(--green)">Alta ⬆</div></div>
+            <div><div style="font-size:11px;color:var(--text-muted)">Tarde</div><div style="font-size:20px;font-weight:700;color:var(--amber)">Média →</div></div>
+            <div><div style="font-size:11px;color:var(--text-muted)">Noite</div><div style="font-size:20px;font-weight:700;color:var(--purple)">Foco ◎</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card mb-16">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+          <div class="card-title" style="margin:0">Timeline do dia</div>
+          <button class="btn btn-ghost" style="font-size:12px;padding:7px 12px">✦ Gerar com IA</button>
+        </div>
+        <div class="timeline">
+          <div class="timeline-item done">
+            <div class="timeline-block">
+              <div class="timeline-time">05:00</div>
+              <div class="timeline-label">☀️ Despertar</div>
+              <div class="timeline-desc">Alarme, alongamento, respiração</div>
+            </div>
+          </div>
+          <div class="timeline-item done">
+            <div class="timeline-block">
+              <div class="timeline-time">05:30</div>
+              <div class="timeline-label">🧘 Meditação matinal</div>
+              <div class="timeline-desc">10 min · Mindfulness · App Calm</div>
+            </div>
+          </div>
+          <div class="timeline-item done">
+            <div class="timeline-block">
+              <div class="timeline-time">06:00</div>
+              <div class="timeline-label">📚 Leitura</div>
+              <div class="timeline-desc">20 min · "Atomic Habits"</div>
+            </div>
+          </div>
+          <div class="timeline-item active-now">
+            <div class="timeline-block">
+              <div style="display:flex;align-items:center;justify-content:space-between">
+                <div class="timeline-time">20:00 · <span style="color:var(--purple);font-size:10px;font-weight:700">AGORA</span></div>
+                <span class="tag tag-purple">Ativo</span>
+              </div>
+              <div class="timeline-label">🏋️ Treino — Costas</div>
+              <div class="timeline-desc">45 min · Academia · Alta intensidade</div>
+              <div style="margin-top:10px;display:flex;gap:8px">
+                <button class="btn btn-primary" style="font-size:12px;padding:7px 14px">▶ Iniciar treino</button>
+                <button class="btn btn-ghost" style="font-size:12px;padding:7px 14px">Pular</button>
+              </div>
+            </div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-block">
+              <div class="timeline-time">21:00</div>
+              <div class="timeline-label">🍽️ Jantar + hidratação</div>
+              <div class="timeline-desc">Refeição leve · Completar 2,5L de água</div>
+            </div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-block">
+              <div class="timeline-time">22:00</div>
+              <div class="timeline-label">📵 Modo sem telas</div>
+              <div class="timeline-desc">Bloquear apps · Leitura física</div>
+            </div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-block">
+              <div class="timeline-time">22:30</div>
+              <div class="timeline-label">🌙 Dormir</div>
+              <div class="timeline-desc">Meta: 8 horas de sono</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════ HÁBITOS ════ -->
+    <div class="section" id="section-habitos">
+      <div class="page-header">
+        <h1>Hábitos</h1>
+        <p>Construindo disciplina dia após dia</p>
+      </div>
+
+      <div class="grid-3 mb-16">
+        <div class="metric-card" style="text-align:center">
+          <div class="metric-icon" style="font-size:28px">🔥</div>
+          <div class="metric-value" style="color:var(--amber)">21</div>
+          <div class="metric-label">Maior sequência</div>
+        </div>
+        <div class="metric-card" style="text-align:center">
+          <div class="metric-icon" style="font-size:28px">✓</div>
+          <div class="metric-value" style="color:var(--green)">87%</div>
+          <div class="metric-label">Taxa essa semana</div>
+        </div>
+        <div class="metric-card" style="text-align:center">
+          <div class="metric-icon" style="font-size:28px">◈</div>
+          <div class="metric-value" style="color:var(--purple)">5</div>
+          <div class="metric-label">Hábitos ativos</div>
+        </div>
+      </div>
+
+      <div class="card mb-16">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+          <div class="card-title" style="margin:0">Hábitos de hoje</div>
+          <button class="btn btn-ghost" style="font-size:12px;padding:7px 12px">+ Novo hábito</button>
+        </div>
+        <div class="habit-item" onclick="toggleHabit(this)">
+          <div class="habit-check done">✓</div>
+          <div style="flex:1">
+            <div class="habit-name">🧘 Meditação 10 min</div>
+            <div style="font-size:11px;color:var(--text-muted)">Toda manhã · 05:30</div>
+          </div>
+          <div class="habit-streak">🔥 12 dias</div>
+        </div>
+        <div class="habit-item" onclick="toggleHabit(this)">
+          <div class="habit-check done">✓</div>
+          <div style="flex:1">
+            <div class="habit-name">📚 Leitura 20 min</div>
+            <div style="font-size:11px;color:var(--text-muted)">Toda manhã · 06:00</div>
+          </div>
+          <div class="habit-streak">🔥 8 dias</div>
+        </div>
+        <div class="habit-item" onclick="toggleHabit(this)">
+          <div class="habit-check done">✓</div>
+          <div style="flex:1">
+            <div class="habit-name">🚫 Sem álcool</div>
+            <div style="font-size:11px;color:var(--text-muted)">Detox · Reforço diário</div>
+          </div>
+          <div class="habit-streak">🔥 21 dias</div>
+        </div>
+        <div class="habit-item" onclick="toggleHabit(this)">
+          <div class="habit-check"></div>
+          <div style="flex:1">
+            <div class="habit-name">📵 Sem redes após 21h</div>
+            <div style="font-size:11px;color:var(--text-muted)">Detox digital · Noturno</div>
+          </div>
+          <div class="habit-streak" style="color:var(--text-muted)">5 dias</div>
+        </div>
+        <div class="habit-item" onclick="toggleHabit(this)">
+          <div class="habit-check"></div>
+          <div style="flex:1">
+            <div class="habit-name">🚿 Cold shower</div>
+            <div style="font-size:11px;color:var(--text-muted)">Toda manhã · 3 min</div>
+          </div>
+          <div class="habit-streak" style="color:var(--text-muted)">3 dias</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Consistência — Últimas 4 semanas</div>
+        <div class="chart-wrap">
+          <canvas id="habitChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════ FITNESS ════ -->
+    <div class="section" id="section-fitness">
+      <div class="page-header">
+        <h1>Fitness</h1>
+        <p>Evolução física e consistência</p>
+      </div>
+
+      <div class="grid-4 mb-16">
+        <div class="metric-card">
+          <div class="metric-icon">⚖️</div>
+          <div class="metric-label">Peso atual</div>
+          <div class="metric-value">83,2<span style="font-size:14px"> kg</span></div>
+          <div class="metric-change down">↓ -0,3 kg</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-icon">🏋️</div>
+          <div class="metric-label">Treinos/semana</div>
+          <div class="metric-value" style="color:var(--purple)">4</div>
+          <div class="metric-sub">Meta: 5 treinos</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-icon">🔥</div>
+          <div class="metric-label">Calorias queimadas</div>
+          <div class="metric-value" style="color:var(--amber)">2.340</div>
+          <div class="metric-sub">Esta semana</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-icon">👣</div>
+          <div class="metric-label">Passos hoje</div>
+          <div class="metric-value" style="color:var(--green)">7.842</div>
+          <div class="metric-sub">Meta: 10.000</div>
+        </div>
+      </div>
+
+      <div class="workout-card mb-16">
+        <div class="workout-info">
+          <div style="display:flex;gap:8px;margin-bottom:8px">
+            <span class="tag tag-purple">Próximo treino</span>
+            <span class="tag tag-green">Hoje · 20:00</span>
+          </div>
+          <h3>Costas & Bíceps</h3>
+          <div style="font-size:12px;color:var(--text-soft)">Hipertrofia · Volume alto · 6 exercícios</div>
+          <div class="workout-stats">
+            <div class="workout-stat"><div class="val">6</div><div class="lbl">Exercícios</div></div>
+            <div class="workout-stat"><div class="val">45</div><div class="lbl">Minutos</div></div>
+            <div class="workout-stat"><div class="val">~320</div><div class="lbl">Cal</div></div>
+          </div>
+        </div>
+        <button class="play-btn" onclick="alert('Treino iniciado! 💪')">▶</button>
+      </div>
+
+      <div class="grid-2 mb-16">
+        <div class="card">
+          <div class="card-title">Evolução de peso — 8 semanas</div>
+          <div class="chart-wrap">
+            <canvas id="weightChart"></canvas>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">Treinos realizados</div>
+          <div class="chart-wrap">
+            <canvas id="workoutChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Grupos musculares esta semana</div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:4px">
+          <div style="text-align:center;padding:14px;background:var(--glass);border:1px solid rgba(34,197,94,0.2);border-radius:12px">
+            <div style="font-size:24px">✓</div>
+            <div style="font-size:12px;font-weight:600;color:var(--green);margin-top:4px">Peito</div>
+            <div style="font-size:10px;color:var(--text-muted)">Segunda</div>
+          </div>
+          <div style="text-align:center;padding:14px;background:var(--glass);border:1px solid rgba(34,197,94,0.2);border-radius:12px">
+            <div style="font-size:24px">✓</div>
+            <div style="font-size:12px;font-weight:600;color:var(--green);margin-top:4px">Pernas</div>
+            <div style="font-size:10px;color:var(--text-muted)">Terça</div>
+          </div>
+          <div style="text-align:center;padding:14px;background:var(--glass);border:1px solid rgba(139,92,246,0.2);border-radius:12px">
+            <div style="font-size:24px">◷</div>
+            <div style="font-size:12px;font-weight:600;color:var(--purple);margin-top:4px">Costas</div>
+            <div style="font-size:10px;color:var(--text-muted)">Hoje · 20h</div>
+          </div>
+          <div style="text-align:center;padding:14px;background:var(--glass);border:1px solid var(--glass-border);border-radius:12px;opacity:0.5">
+            <div style="font-size:24px">○</div>
+            <div style="font-size:12px;font-weight:600;margin-top:4px">Ombros</div>
+            <div style="font-size:10px;color:var(--text-muted)">Sexta</div>
+          </div>
+          <div style="text-align:center;padding:14px;background:var(--glass);border:1px solid var(--glass-border);border-radius:12px;opacity:0.5">
+            <div style="font-size:24px">○</div>
+            <div style="font-size:12px;font-weight:600;margin-top:4px">Bíceps</div>
+            <div style="font-size:10px;color:var(--text-muted)">Sexta</div>
+          </div>
+          <div style="text-align:center;padding:14px;background:var(--glass);border:1px solid rgba(6,182,212,0.2);border-radius:12px;opacity:0.7">
+            <div style="font-size:24px">🏃</div>
+            <div style="font-size:12px;font-weight:600;color:var(--cyan);margin-top:4px">Cardio</div>
+            <div style="font-size:10px;color:var(--text-muted)">Sábado</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════ MODO CASAL ════ -->
+    <div class="section" id="section-casal">
+      <div class="page-header">
+        <h1>Modo Casal</h1>
+        <p>Crescendo juntos, um dia de cada vez</p>
+      </div>
+
+      <div class="couple-header">
+        <div class="couple-avatar-wrap">
+          <div class="couple-avatar you">LB</div>
+          <div class="couple-name">Luiz</div>
+          <span class="tag tag-purple">Nível 7</span>
+        </div>
+        <div style="text-align:center">
+          <div class="couple-heart">♥</div>
+          <div style="font-size:11px;color:var(--text-muted);margin-top:4px">Sequência conjunta</div>
+          <div style="font-size:22px;font-weight:800;color:var(--amber)">🔥 14 dias</div>
+        </div>
+        <div class="couple-avatar-wrap">
+          <div class="couple-avatar them">AL</div>
+          <div class="couple-name">Ana</div>
+          <span class="tag tag-cyan">Nível 6</span>
+        </div>
+      </div>
+
+      <div class="grid-2 mb-16">
+        <div class="card">
+          <div class="card-title">Progresso do casal hoje</div>
+          <div style="margin-bottom:14px">
+            <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+              <span style="font-size:12px;font-weight:600">Luiz</span>
+              <span style="font-size:12px;color:var(--purple);font-weight:700">82%</span>
+            </div>
+            <div class="progress-bar"><div class="progress-fill" style="width:82%"></div></div>
+          </div>
+          <div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+              <span style="font-size:12px;font-weight:600">Ana</span>
+              <span style="font-size:12px;color:var(--cyan);font-weight:700">74%</span>
+            </div>
+            <div class="progress-bar"><div class="progress-fill" style="width:74%; background: linear-gradient(90deg, var(--cyan), var(--green))"></div></div>
+          </div>
+          <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--glass-border);display:flex;justify-content:space-between;align-items:center">
+            <span style="font-size:12px;color:var(--text-soft)">Progresso conjunto</span>
+            <span style="font-size:14px;font-weight:700;color:var(--amber)">78% 🔥</span>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Desafio da semana</div>
+          <div style="background:linear-gradient(135deg,rgba(139,92,246,0.1),rgba(6,182,212,0.08));border:1px solid rgba(139,92,246,0.2);border-radius:12px;padding:14px;margin-bottom:12px">
+            <div style="font-size:14px;font-weight:700;margin-bottom:4px">🏃 Correr juntos 5km</div>
+            <div style="font-size:12px;color:var(--text-soft)">Sábado cedo · Parque do Ibirapuera</div>
+            <div class="progress-bar" style="margin-top:10px"><div class="progress-fill" style="width:0%"></div></div>
+            <div style="font-size:11px;color:var(--text-muted);margin-top:4px">Pendente para sábado</div>
+          </div>
+          <div style="background:linear-gradient(135deg,rgba(34,197,94,0.08),rgba(6,182,212,0.05));border:1px solid rgba(34,197,94,0.15);border-radius:12px;padding:14px">
+            <div style="font-size:14px;font-weight:700;margin-bottom:4px">💧 Ambos bater 2,5L de água</div>
+            <div style="font-size:12px;color:var(--text-soft)">Todos os dias da semana</div>
+            <div class="progress-bar" style="margin-top:10px"><div class="progress-fill" style="width:60%;background:linear-gradient(90deg,var(--green),var(--cyan))"></div></div>
+            <div style="font-size:11px;color:var(--text-muted);margin-top:4px">3 de 5 dias</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card mb-16">
+        <div class="card-title">Metas compartilhadas</div>
+        <div class="habit-item">
+          <div class="habit-check done">✓</div>
+          <div style="flex:1"><div class="habit-name">🏋️ Ir à academia 4x/semana</div><div style="font-size:11px;color:var(--text-muted)">Luiz: 3/4 · Ana: 2/4</div></div>
+          <span class="tag tag-amber">Em andamento</span>
+        </div>
+        <div class="habit-item">
+          <div class="habit-check done">✓</div>
+          <div style="flex:1"><div class="habit-name">📱 Detox digital noturno</div><div style="font-size:11px;color:var(--text-muted)">Ambos desligam às 22h</div></div>
+          <span class="tag tag-green">✓ Hoje</span>
+        </div>
+        <div class="habit-item">
+          <div class="habit-check"></div>
+          <div style="flex:1"><div class="habit-name">🍎 Comer saudável 6x/semana</div><div style="font-size:11px;color:var(--text-muted)">Meta nutricional conjunta</div></div>
+          <span class="tag tag-purple">Em progresso</span>
+        </div>
+      </div>
+
+      <div class="ai-card">
+        <div class="ai-orb">♥</div>
+        <div class="ai-content">
+          <div class="ai-title">Insight do casal</div>
+          <div class="ai-text">Vocês dois têm mantido uma consistência acima de 70% esta semana — isso é top 15% dos casais no ASCEND! A Ana está indo especialmente bem em hidratação. Que tal combinar um treino junto no sábado para impulsionar a sequência?</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════ EVOLUÇÃO ════ -->
+    <div class="section" id="section-evolucao">
+      <div class="page-header">
+        <h1>Evolução</h1>
+        <p>Sua jornada de disciplina e crescimento</p>
+      </div>
+
+      <div class="card mb-16">
+        <div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap">
+          <div>
+            <div class="level-badge">
+              <span style="font-size:22px">◆</span>
+              <div>
+                <div style="font-size:11px;color:var(--text-muted);font-weight:500">Nível atual</div>
+                <div>7 — Consistente</div>
+              </div>
+            </div>
+          </div>
+          <div style="flex:1;min-width:200px">
+            <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+              <span style="font-size:12px;color:var(--text-soft)">XP atual</span>
+              <span style="font-size:12px;font-weight:700">3.420 / 4.000 XP</span>
+            </div>
+            <div class="xp-bar"><div class="xp-fill" style="width:85%"></div></div>
+            <div style="font-size:11px;color:var(--text-muted);margin-top:6px">580 XP para o Nível 8 — Focado</div>
+          </div>
+          <div style="text-align:center">
+            <div style="font-size:11px;color:var(--text-muted)">XP hoje</div>
+            <div style="font-size:24px;font-weight:800;color:var(--purple)">+180</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid-3 mb-16">
+        <div class="metric-card" style="text-align:center;border-color:rgba(245,158,11,0.2)">
+          <div style="font-size:28px">🔥</div>
+          <div class="metric-value" style="color:var(--amber)">12</div>
+          <div class="metric-label">Sequência atual</div>
+          <div class="metric-sub">dias consecutivos</div>
+        </div>
+        <div class="metric-card" style="text-align:center;border-color:rgba(139,92,246,0.2)">
+          <div style="font-size:28px">⭐</div>
+          <div class="metric-value" style="color:var(--purple)">87</div>
+          <div class="metric-label">Score Disciplina</div>
+          <div class="metric-sub">Top 20% dos usuários</div>
+        </div>
+        <div class="metric-card" style="text-align:center;border-color:rgba(34,197,94,0.2)">
+          <div style="font-size:28px">🏆</div>
+          <div class="metric-value" style="color:var(--green)">11</div>
+          <div class="metric-label">Conquistas</div>
+          <div class="metric-sub">de 32 desbloqueadas</div>
+        </div>
+      </div>
+
+      <div class="card mb-16">
+        <div style="display:flex;justify-content:space-between;margin-bottom:16px;align-items:center">
+          <div class="card-title" style="margin:0">Trilha de níveis</div>
+          <span class="tag tag-purple">Nível 7</span>
+        </div>
+        <div style="display:flex;gap:0;overflow-x:auto;padding-bottom:8px">
+          <div style="display:flex;align-items:center;gap:0;white-space:nowrap">
+            <div style="text-align:center;padding:0 10px;opacity:0.5">
+              <div style="width:32px;height:32px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;margin:0 auto;box-shadow:0 0 8px var(--green)">1</div>
+              <div style="font-size:9px;color:var(--text-muted);margin-top:4px">Reset</div>
+            </div>
+            <div style="flex:1;height:2px;background:var(--green);min-width:20px"></div>
+            <div style="text-align:center;padding:0 10px;opacity:0.5">
+              <div style="width:32px;height:32px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;margin:0 auto;box-shadow:0 0 8px var(--green)">5</div>
+              <div style="font-size:9px;color:var(--text-muted);margin-top:4px">Iniciante</div>
+            </div>
+            <div style="flex:1;height:2px;background:var(--purple);min-width:20px"></div>
+            <div style="text-align:center;padding:0 10px">
+              <div style="width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--purple),var(--blue));display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;margin:0 auto;box-shadow:0 0 16px rgba(139,92,246,0.6);border:2px solid white">7</div>
+              <div style="font-size:9px;color:var(--purple);margin-top:4px;font-weight:700">VOCÊ</div>
+            </div>
+            <div style="flex:1;height:2px;background:rgba(255,255,255,0.1);min-width:20px"></div>
+            <div style="text-align:center;padding:0 10px;opacity:0.4">
+              <div style="width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;margin:0 auto;border:1px solid rgba(255,255,255,0.1)">10</div>
+              <div style="font-size:9px;color:var(--text-muted);margin-top:4px">Consistente</div>
+            </div>
+            <div style="flex:1;height:2px;background:rgba(255,255,255,0.1);min-width:20px"></div>
+            <div style="text-align:center;padding:0 10px;opacity:0.3">
+              <div style="width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;margin:0 auto;border:1px solid rgba(255,255,255,0.06)">25</div>
+              <div style="font-size:9px;color:var(--text-muted);margin-top:4px">Elite</div>
+            </div>
+            <div style="flex:1;height:2px;background:rgba(255,255,255,0.1);min-width:20px"></div>
+            <div style="text-align:center;padding:0 10px;opacity:0.3">
+              <div style="width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,0.04);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;margin:0 auto;border:1px solid rgba(255,255,255,0.04)">50</div>
+              <div style="font-size:9px;color:var(--text-muted);margin-top:4px">Ascended</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Conquistas</div>
+        <div class="achievement">
+          <div class="ach-icon">🔥</div>
+          <div class="ach-info"><div class="ach-name">Sequência de 10 dias</div><div class="ach-desc">Manteve hábitos por 10 dias seguidos</div></div>
+          <span class="ach-badge done">Desbloqueado</span>
+        </div>
+        <div class="achievement">
+          <div class="ach-icon">🏋️</div>
+          <div class="ach-info"><div class="ach-name">20 treinos realizados</div><div class="ach-desc">Consistência no gym</div></div>
+          <span class="ach-badge done">Desbloqueado</span>
+        </div>
+        <div class="achievement">
+          <div class="ach-icon">📚</div>
+          <div class="ach-info"><div class="ach-name">Leitor Consistente</div><div class="ach-desc">7 dias seguidos de leitura</div></div>
+          <span class="ach-badge done">Desbloqueado</span>
+        </div>
+        <div class="achievement locked">
+          <div class="ach-icon">⚡</div>
+          <div class="ach-info"><div class="ach-name">Mês Perfeito</div><div class="ach-desc">30 dias sem falhar nenhum hábito</div></div>
+          <span class="ach-badge locked">18 dias restantes</span>
+        </div>
+        <div class="achievement locked">
+          <div class="ach-icon">👑</div>
+          <div class="ach-info"><div class="ach-name">Elite</div><div class="ach-desc">Atingir o Nível 25</div></div>
+          <span class="ach-badge locked">Nível 25</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════ ASSISTENTE IA ════ -->
+    <div class="section" id="section-ia">
+      <div class="page-header">
+        <h1>Assistente IA</h1>
+        <p>Seu estrategista pessoal de evolução</p>
+      </div>
+
+      <div style="display:flex;gap:24px;margin-bottom:20px;align-items:flex-start">
+        <div style="flex:1">
+          <div class="ai-card" style="margin-bottom:0">
+            <div class="ai-orb" style="width:52px;height:52px;font-size:22px">✦</div>
+            <div class="ai-content">
+              <div class="ai-title">ASCEND IA · Online</div>
+              <div class="ai-text">Olá, Luiz! Analisei sua semana. Você está no caminho certo, mas seu sono está 1h40min abaixo da meta. Isso pode comprometer sua recuperação muscular. Quer que eu ajuste sua rotina?</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card mb-16">
+        <div class="chat-area" id="chatArea">
+          <div class="msg ai">
+            <div class="msg-bubble">Olá! Sou o assistente ASCEND. Estou aqui para te ajudar a evoluir. Como posso te ajudar hoje?</div>
+            <div class="msg-time">10:02</div>
+          </div>
+          <div class="msg user">
+            <div class="msg-bubble">Qual o meu ponto mais fraco essa semana?</div>
+            <div class="msg-time">10:03</div>
+          </div>
+          <div class="msg ai">
+            <div class="msg-bubble">Analisando seus dados... Seu ponto mais fraco essa semana foi o <strong>sono</strong>. Você dormiu uma média de 6h20min, bem abaixo das 8h ideais para sua rotina de treinos. Isso pode estar afetando sua energia e recuperação muscular. Quer dicas para melhorar?</div>
+            <div class="msg-time">10:03</div>
+          </div>
+          <div class="msg user">
+            <div class="msg-bubble">Sim! Me sugere uma rotina noturna</div>
+            <div class="msg-time">10:04</div>
+          </div>
+          <div class="msg ai">
+            <div class="msg-bubble">Claro! Aqui está uma rotina noturna otimizada para você:<br><br>🌙 <strong>21:30</strong> — Jantar leve<br>📵 <strong>22:00</strong> — Modo sem telas (ativado automaticamente)<br>📖 <strong>22:00</strong> — Leitura física por 20 min<br>🧘 <strong>22:20</strong> — Respiração 4-7-8 por 5 min<br>💤 <strong>22:30</strong> — Dormir<br><br>Quer que eu adicione isso à sua rotina?</div>
+            <div class="msg-time">10:04</div>
+          </div>
+        </div>
+        <div class="chat-input-row">
+          <input class="chat-input" id="chatInput" placeholder="Pergunte algo ao seu assistente..." onkeypress="handleChat(event)"/>
+          <button class="btn btn-primary" onclick="sendChat()">✦ Enviar</button>
+        </div>
+      </div>
+
+      <div class="grid-3">
+        <div class="card" style="cursor:pointer" onclick="quickChat('Me sugere uma rotina para amanhã')">
+          <div style="font-size:20px;margin-bottom:8px">📅</div>
+          <div style="font-size:13px;font-weight:600;margin-bottom:4px">Planejar amanhã</div>
+          <div style="font-size:11px;color:var(--text-muted)">IA monta sua rotina ideal</div>
+        </div>
+        <div class="card" style="cursor:pointer" onclick="quickChat('Detecta sinais de burnout nos meus dados')">
+          <div style="font-size:20px;margin-bottom:8px">⚡</div>
+          <div style="font-size:13px;font-weight:600;margin-bottom:4px">Detectar burnout</div>
+          <div style="font-size:11px;color:var(--text-muted)">Análise de sinais de esgotamento</div>
+        </div>
+        <div class="card" style="cursor:pointer" onclick="quickChat('Me motiva para o treino de hoje')">
+          <div style="font-size:20px;margin-bottom:8px">🔥</div>
+          <div style="font-size:13px;font-weight:600;margin-bottom:4px">Me motivar</div>
+          <div style="font-size:11px;color:var(--text-muted)">Um empurrão personalizado</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════ CONFIGURAÇÕES ════ -->
+    <div class="section" id="section-config">
+      <div class="page-header">
+        <h1>Configurações</h1>
+        <p>Personalize sua experiência ASCEND</p>
+      </div>
+
+      <div class="grid-2 mb-16">
+        <div class="card">
+          <div class="card-title">Perfil</div>
+          <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid var(--glass-border)">
+            <div class="avatar" style="width:52px;height:52px;font-size:18px">LB</div>
+            <div>
+              <div style="font-size:15px;font-weight:700">Luiz Borba</div>
+              <div style="font-size:12px;color:var(--text-muted)">luiz.borba@jumplabel.com.br</div>
+            </div>
+            <button class="btn btn-ghost" style="margin-left:auto;font-size:12px;padding:7px 12px">Editar</button>
+          </div>
+          <div class="setting-row">
+            <div><div class="setting-label">Modo casal</div><div class="setting-desc">Conectado com Ana Lima</div></div>
+            <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+          </div>
+          <div class="setting-row">
+            <div><div class="setting-label">Tema escuro</div><div class="setting-desc">Sempre ativo no ASCEND</div></div>
+            <div class="toggle on"></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Notificações</div>
+          <div class="setting-row">
+            <div><div class="setting-label">Lembretes de rotina</div><div class="setting-desc">Notificar blocos da timeline</div></div>
+            <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+          </div>
+          <div class="setting-row">
+            <div><div class="setting-label">Alertas de hábitos</div><div class="setting-desc">Lembrar hábitos pendentes</div></div>
+            <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+          </div>
+          <div class="setting-row">
+            <div><div class="setting-label">Insights da IA</div><div class="setting-desc">Análises diárias do assistente</div></div>
+            <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+          </div>
+          <div class="setting-row">
+            <div><div class="setting-label">Atualizações do casal</div><div class="setting-desc">Progresso e conquistas da Ana</div></div>
+            <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card mb-16">
+        <div class="card-title">Metas pessoais</div>
+        <div class="setting-row">
+          <div><div class="setting-label">Meta de sono</div><div class="setting-desc">Horas de sono por noite</div></div>
+          <div style="font-size:15px;font-weight:700;color:var(--purple)">8h</div>
+        </div>
+        <div class="setting-row">
+          <div><div class="setting-label">Meta de água</div><div class="setting-desc">Litros por dia</div></div>
+          <div style="font-size:15px;font-weight:700;color:var(--cyan)">2,5L</div>
+        </div>
+        <div class="setting-row">
+          <div><div class="setting-label">Meta de peso</div><div class="setting-desc">Peso alvo</div></div>
+          <div style="font-size:15px;font-weight:700;color:var(--green)">80 kg</div>
+        </div>
+        <div class="setting-row">
+          <div><div class="setting-label">Treinos por semana</div><div class="setting-desc">Frequência semanal</div></div>
+          <div style="font-size:15px;font-weight:700;color:var(--purple)">5x</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Detox digital</div>
+        <div class="setting-row">
+          <div><div class="setting-label">Bloqueio noturno</div><div class="setting-desc">Bloquear apps após 22:00</div></div>
+          <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+        </div>
+        <div class="setting-row">
+          <div><div class="setting-label">Contador de Reels</div><div class="setting-desc">Rastrear tempo em vídeos curtos</div></div>
+          <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+        </div>
+        <div class="setting-row">
+          <div><div class="setting-label">Modo foco profundo</div><div class="setting-desc">Bloquear notificações durante deep work</div></div>
+          <div class="toggle" onclick="this.classList.toggle('on')"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════ PRODUTIVIDADE ════ -->
+    <div class="section" id="section-produtividade">
+      <div class="page-header">
+        <h1>Produtividade</h1>
+        <p>Foco profundo, metas claras, resultados reais</p>
+      </div>
+
+      <div class="grid-4 mb-16">
+        <div class="metric-card">
+          <div class="metric-icon">⏱️</div>
+          <div class="metric-label">Deep Work hoje</div>
+          <div class="metric-value" style="color:var(--purple)">2h 10m</div>
+          <div class="metric-sub">Meta: 4 horas</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-icon">✓</div>
+          <div class="metric-label">Tarefas concluídas</div>
+          <div class="metric-value" style="color:var(--green)">4</div>
+          <div class="metric-sub">de 7 hoje</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-icon">🎯</div>
+          <div class="metric-label">Metas da semana</div>
+          <div class="metric-value" style="color:var(--blue)">2/5</div>
+          <div class="metric-sub">Em andamento</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-icon">⚡</div>
+          <div class="metric-label">Sessões de foco</div>
+          <div class="metric-value" style="color:var(--cyan)">3</div>
+          <div class="metric-sub">Esta semana</div>
+        </div>
+      </div>
+
+      <!-- Pomodoro Timer -->
+      <div class="focus-timer">
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--purple)">🎯 Sessão de foco ativa</div>
+        <div class="timer-circle">
+          <div class="timer-inner">
+            <div class="timer-value">18:43</div>
+            <div class="timer-label">restantes</div>
+          </div>
+        </div>
+        <div style="font-size:13px;color:var(--text-soft)">Desenvolvimento ASCEND · Pomodoro 2 de 4</div>
+        <div style="display:flex;gap:10px">
+          <button class="btn btn-primary">⏸ Pausar</button>
+          <button class="btn btn-ghost">⏭ Pular</button>
+          <button class="btn btn-ghost">✕ Encerrar</button>
+        </div>
+        <div style="display:flex;gap:8px">
+          <div style="width:24px;height:6px;border-radius:99px;background:var(--purple);box-shadow:0 0 6px rgba(139,92,246,0.5)"></div>
+          <div style="width:24px;height:6px;border-radius:99px;background:var(--purple);box-shadow:0 0 6px rgba(139,92,246,0.5)"></div>
+          <div style="width:24px;height:6px;border-radius:99px;background:rgba(255,255,255,0.1)"></div>
+          <div style="width:24px;height:6px;border-radius:99px;background:rgba(255,255,255,0.1)"></div>
+        </div>
+      </div>
+
+      <div class="grid-2 mb-16">
+        <!-- Tarefas do dia -->
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+            <div class="card-title" style="margin:0">Tarefas de hoje</div>
+            <button class="btn btn-ghost" style="font-size:11px;padding:6px 10px">+ Adicionar</button>
+          </div>
+          <div class="goal-row" onclick="this.querySelector('.goal-check').classList.toggle('done')">
+            <div class="goal-check done">✓</div>
+            <div style="flex:1"><div class="goal-text">Revisar design do Dashboard</div><div style="font-size:10px;color:var(--text-muted)">ASCEND · 30 min</div></div>
+            <span class="goal-priority" style="background:rgba(239,68,68,0.12);color:#EF4444;border:1px solid rgba(239,68,68,0.2)">Alta</span>
+          </div>
+          <div class="goal-row" onclick="this.querySelector('.goal-check').classList.toggle('done')">
+            <div class="goal-check done">✓</div>
+            <div style="flex:1"><div class="goal-text">Escrever master prompt v2</div><div style="font-size:10px;color:var(--text-muted)">Produto · 45 min</div></div>
+            <span class="goal-priority" style="background:rgba(239,68,68,0.12);color:#EF4444;border:1px solid rgba(239,68,68,0.2)">Alta</span>
+          </div>
+          <div class="goal-row" onclick="this.querySelector('.goal-check').classList.toggle('done')">
+            <div class="goal-check done">✓</div>
+            <div style="flex:1"><div class="goal-text">Agendar reunião com investidor</div><div style="font-size:10px;color:var(--text-muted)">Negócios · 15 min</div></div>
+            <span class="goal-priority" style="background:rgba(139,92,246,0.12);color:var(--purple);border:1px solid rgba(139,92,246,0.2)">Média</span>
+          </div>
+          <div class="goal-row" onclick="this.querySelector('.goal-check').classList.toggle('done')">
+            <div class="goal-check done">✓</div>
+            <div style="flex:1"><div class="goal-text">Responder e-mails importantes</div><div style="font-size:10px;color:var(--text-muted)">Administrativo</div></div>
+            <span class="goal-priority" style="background:rgba(100,116,139,0.12);color:var(--text-muted);border:1px solid rgba(100,116,139,0.2)">Baixa</span>
+          </div>
+          <div class="goal-row" onclick="this.querySelector('.goal-check').classList.toggle('done')">
+            <div class="goal-check"></div>
+            <div style="flex:1"><div class="goal-text">Revisar código do backend</div><div style="font-size:10px;color:var(--text-muted)">Dev · 2 horas</div></div>
+            <span class="goal-priority" style="background:rgba(239,68,68,0.12);color:#EF4444;border:1px solid rgba(239,68,68,0.2)">Alta</span>
+          </div>
+          <div class="goal-row" onclick="this.querySelector('.goal-check').classList.toggle('done')">
+            <div class="goal-check"></div>
+            <div style="flex:1"><div class="goal-text">Preparar pitch deck</div><div style="font-size:10px;color:var(--text-muted)">Produto · 1 hora</div></div>
+            <span class="goal-priority" style="background:rgba(139,92,246,0.12);color:var(--purple);border:1px solid rgba(139,92,246,0.2)">Média</span>
+          </div>
+          <div class="goal-row" onclick="this.querySelector('.goal-check').classList.toggle('done')">
+            <div class="goal-check"></div>
+            <div style="flex:1"><div class="goal-text">Ler 20 páginas do livro</div><div style="font-size:10px;color:var(--text-muted)">Pessoal · 20 min</div></div>
+            <span class="goal-priority" style="background:rgba(100,116,139,0.12);color:var(--text-muted);border:1px solid rgba(100,116,139,0.2)">Baixa</span>
+          </div>
+        </div>
+
+        <!-- Metas semanais -->
+        <div>
+          <div class="card mb-16">
+            <div class="card-title">Metas da semana</div>
+            <div style="margin-bottom:12px">
+              <div style="display:flex;justify-content:space-between;margin-bottom:5px"><span style="font-size:12px;font-weight:600">🚀 Lançar MVP do ASCEND</span><span style="font-size:11px;color:var(--text-muted)">35%</span></div>
+              <div class="progress-bar"><div class="progress-fill" style="width:35%"></div></div>
+            </div>
+            <div style="margin-bottom:12px">
+              <div style="display:flex;justify-content:space-between;margin-bottom:5px"><span style="font-size:12px;font-weight:600">📣 Criar estratégia de marketing</span><span style="font-size:11px;color:var(--text-muted)">60%</span></div>
+              <div class="progress-bar"><div class="progress-fill" style="width:60%"></div></div>
+            </div>
+            <div style="margin-bottom:12px">
+              <div style="display:flex;justify-content:space-between;margin-bottom:5px"><span style="font-size:12px;font-weight:600">🤝 Fechar 3 parcerias</span><span style="font-size:11px;color:var(--text-muted)">0%</span></div>
+              <div class="progress-bar"><div class="progress-fill" style="width:0%"></div></div>
+            </div>
+          </div>
+          <div class="ai-card" style="margin-bottom:0">
+            <div class="ai-orb" style="width:36px;height:36px;font-size:14px">✦</div>
+            <div class="ai-content">
+              <div class="ai-title">Sugestão de foco</div>
+              <div class="ai-text">Sua energia está alta agora. Ideal para revisão de código — tarefa de alta exigência cognitiva. Quer iniciar uma sessão de deep work de 90 min?</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════ DETOX DIGITAL ════ -->
+    <div class="section" id="section-detox">
+      <div class="page-header">
+        <h1>Detox Digital</h1>
+        <p>Recupere sua atenção. Elimine a dependência de dopamina fácil.</p>
+      </div>
+
+      <div class="card mb-16" style="text-align:center;padding:32px">
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--text-muted);margin-bottom:8px">Score de Dopamina Hoje</div>
+        <div class="detox-score">74</div>
+        <div style="font-size:13px;color:var(--text-soft);margin-top:6px">Controlado — você está acima da média</div>
+        <div class="progress-bar" style="max-width:320px;margin:14px auto 0;height:8px"><div class="progress-fill" style="width:74%"></div></div>
+        <div style="display:flex;justify-content:space-between;max-width:320px;margin:6px auto 0;font-size:10px;color:var(--text-muted)"><span>Viciado</span><span>Controlado</span><span>Livre</span></div>
+      </div>
+
+      <div class="grid-2 mb-16">
+        <div class="card">
+          <div class="card-title">Uso de apps hoje</div>
+          <div class="app-row">
+            <div class="app-icon">📸</div>
+            <div style="flex:1"><div class="app-name">Instagram</div><div class="app-bar"><div class="app-bar-fill" style="width:80%;background:var(--red)"></div></div></div>
+            <div class="app-time" style="color:var(--red)">48 min</div>
+          </div>
+          <div class="app-row">
+            <div class="app-icon">🎵</div>
+            <div style="flex:1"><div class="app-name">TikTok</div><div class="app-bar"><div class="app-bar-fill" style="width:25%;background:var(--amber)"></div></div></div>
+            <div class="app-time" style="color:var(--amber)">18 min</div>
+          </div>
+          <div class="app-row">
+            <div class="app-icon">🐦</div>
+            <div style="flex:1"><div class="app-name">Twitter / X</div><div class="app-bar"><div class="app-bar-fill" style="width:15%;background:var(--green)"></div></div></div>
+            <div class="app-time" style="color:var(--green)">12 min</div>
+          </div>
+          <div class="app-row">
+            <div class="app-icon">▶️</div>
+            <div style="flex:1"><div class="app-name">YouTube</div><div class="app-bar"><div class="app-bar-fill" style="width:20%;background:var(--green)"></div></div></div>
+            <div class="app-time" style="color:var(--green)">22 min</div>
+          </div>
+          <div style="padding-top:10px;border-top:1px solid var(--glass-border);margin-top:8px;display:flex;justify-content:space-between;font-size:12px">
+            <span style="color:var(--text-soft)">Total hoje</span><span style="font-weight:700;color:var(--amber)">1h 40min</span>
+          </div>
+        </div>
+        <div>
+          <div class="card mb-16">
+            <div class="card-title">Contador de Reels/Shorts</div>
+            <div style="display:flex;gap:16px;align-items:center">
+              <div style="text-align:center;flex:1"><div style="font-size:36px;font-weight:900;color:var(--amber)">23</div><div style="font-size:11px;color:var(--text-muted)">vídeos hoje</div></div>
+              <div style="width:1px;height:50px;background:var(--glass-border)"></div>
+              <div style="flex:1"><div style="font-size:12px;color:var(--text-soft);margin-bottom:8px">Meta: máximo 15/dia</div><div class="progress-bar"><div class="progress-fill" style="width:100%;background:linear-gradient(90deg,var(--amber),var(--red))"></div></div><div style="font-size:11px;color:var(--red);margin-top:4px;font-weight:600">↑ 8 acima da meta</div></div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-title">Controles de foco</div>
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px"><div><div style="font-size:13px;font-weight:600">Bloquear apps durante work</div><div style="font-size:11px;color:var(--text-soft)">Ativa durante sessões de foco</div></div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px"><div><div style="font-size:13px;font-weight:600">Bloqueio noturno (22h)</div><div style="font-size:11px;color:var(--text-soft)">Redes sociais bloqueadas</div></div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+            <div style="display:flex;align-items:center;justify-content:space-between"><div><div style="font-size:13px;font-weight:600">Modo tela cinza</div><div style="font-size:11px;color:var(--text-soft)">Remove o apelo visual</div></div><div class="toggle" onclick="this.classList.toggle('on')"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card mb-16">
+        <div class="card-title">Score dopamina — 7 dias</div>
+        <div class="chart-wrap"><canvas id="detoxChart"></canvas></div>
+      </div>
+
+      <div class="ai-card">
+        <div class="ai-orb">📵</div>
+        <div class="ai-content">
+          <div class="ai-title">Diagnóstico IA</div>
+          <div class="ai-text">Seu uso do Instagram está 60% acima do ideal. Isso está correlacionado com seus piores dias de foco. Tente o desafio de 3 dias: sem abrir o app antes das 18h. Você conseguiu isso em Março — e foi seu melhor mês.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════ PERFIL ════ -->
+    <div class="section" id="section-perfil">
+      <div class="page-header">
+        <h1>Perfil</h1>
+        <p>Sua identidade no ASCEND</p>
+      </div>
+
+      <div class="profile-hero">
+        <div class="profile-avatar-big">LB</div>
+        <div style="font-size:20px;font-weight:800;margin-bottom:4px">Luiz Borba</div>
+        <div style="font-size:13px;color:var(--text-soft);margin-bottom:12px">luiz.borba@jumplabel.com.br</div>
+        <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+          <span class="tag tag-purple">◆ Nível 7 — Consistente</span>
+          <span class="tag tag-amber">🔥 12 dias de sequência</span>
+          <span class="tag tag-green">⭐ Score 87</span>
+        </div>
+        <button class="btn btn-ghost" style="margin-top:16px;font-size:12px">✎ Editar perfil</button>
+      </div>
+
+      <div class="grid-3 mb-16">
+        <div class="metric-card" style="text-align:center"><div style="font-size:26px;margin-bottom:6px">🏆</div><div class="metric-value" style="color:var(--purple)">11</div><div class="metric-label">Conquistas</div></div>
+        <div class="metric-card" style="text-align:center"><div style="font-size:26px;margin-bottom:6px">◈</div><div class="metric-value" style="color:var(--green)">5</div><div class="metric-label">Hábitos ativos</div></div>
+        <div class="metric-card" style="text-align:center"><div style="font-size:26px;margin-bottom:6px">📅</div><div class="metric-value" style="color:var(--cyan)">47</div><div class="metric-label">Dias no ASCEND</div></div>
+      </div>
+
+      <div class="grid-2 mb-16">
+        <div class="card">
+          <div class="card-title">Estatísticas pessoais</div>
+          <div class="setting-row"><div><div class="setting-label">Treinos realizados</div></div><div style="font-size:15px;font-weight:700;color:var(--green)">28</div></div>
+          <div class="setting-row"><div><div class="setting-label">Horas de foco profundo</div></div><div style="font-size:15px;font-weight:700;color:var(--purple)">94h</div></div>
+          <div class="setting-row"><div><div class="setting-label">Peso perdido</div></div><div style="font-size:15px;font-weight:700;color:var(--cyan)">3,3 kg</div></div>
+          <div class="setting-row"><div><div class="setting-label">Melhor sequência</div></div><div style="font-size:15px;font-weight:700;color:var(--amber)">21 dias</div></div>
+          <div class="setting-row"><div><div class="setting-label">XP total acumulado</div></div><div style="font-size:15px;font-weight:700;color:var(--purple)">3.420</div></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Modo Casal</div>
+          <div style="display:flex;align-items:center;gap:14px;padding:14px;background:linear-gradient(135deg,rgba(139,92,246,0.08),rgba(6,182,212,0.06));border:1px solid rgba(139,92,246,0.2);border-radius:14px;margin-bottom:12px">
+            <div style="font-size:28px">♥</div>
+            <div><div style="font-size:14px;font-weight:700">Conectado com Ana Lima</div><div style="font-size:11px;color:var(--text-soft)">14 dias de sequência conjunta · Nível 6</div></div>
+          </div>
+          <div class="setting-row"><div><div class="setting-label">Desafios completados</div></div><div style="font-size:15px;font-weight:700;color:var(--green)">8</div></div>
+          <div class="setting-row"><div><div class="setting-label">Metas compartilhadas</div></div><div style="font-size:15px;font-weight:700;color:var(--purple)">5</div></div>
+          <div style="margin-top:14px"><button class="btn btn-ghost" style="width:100%;justify-content:center;font-size:12px">♡ Ver perfil do casal</button></div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ═══════════ RIGHT PANEL ═══════════ -->
+  <aside class="right-panel">
+
+    <!-- Água -->
+    <div class="widget">
+      <div class="widget-title">Hidratação</div>
+      <div style="display:flex;align-items:baseline;gap:4px">
+        <div class="widget-value" style="color:var(--cyan)" id="waterAmount">1,8L</div>
+        <div class="widget-sub">/ 2,5L</div>
+      </div>
+      <div class="water-dots" id="waterDots"></div>
+      <div class="progress-bar" style="margin-top:10px;height:4px">
+        <div class="progress-fill" id="waterBar" style="width:72%;background:linear-gradient(90deg,var(--cyan),var(--blue))"></div>
+      </div>
+    </div>
+
+    <!-- Humor -->
+    <div class="widget">
+      <div class="widget-title">Humor de hoje</div>
+      <div class="widget-sub" id="moodLabel" style="margin-bottom:2px">Como você está se sentindo?</div>
+      <div class="mood-grid">
+        <div class="mood-btn" onclick="selectMood(this,'😫')">😫</div>
+        <div class="mood-btn" onclick="selectMood(this,'😕')">😕</div>
+        <div class="mood-btn selected" onclick="selectMood(this,'😐')">😐</div>
+        <div class="mood-btn" onclick="selectMood(this,'🙂')">🙂</div>
+        <div class="mood-btn" onclick="selectMood(this,'😄')">😄</div>
+      </div>
+    </div>
+
+    <!-- Sequência -->
+    <div class="widget">
+      <div class="widget-title">Sequência ativa</div>
+      <div style="display:flex;align-items:baseline;gap:4px">
+        <div class="widget-value" style="color:var(--amber)">🔥 12</div>
+        <div class="widget-sub">dias</div>
+      </div>
+      <div class="streak-row" id="streakRow"></div>
+      <div style="font-size:11px;color:var(--text-muted);margin-top:8px">Maior sequência: 21 dias</div>
+    </div>
+
+    <!-- Sono -->
+    <div class="widget">
+      <div class="widget-title">Sono ontem</div>
+      <div style="display:flex;align-items:baseline;gap:4px">
+        <div class="widget-value" style="color:var(--amber)">6h 20m</div>
+      </div>
+      <div class="widget-sub">Meta: 8 horas</div>
+      <div class="progress-bar" style="margin-top:10px;height:4px">
+        <div class="progress-fill" style="width:79%;background:linear-gradient(90deg,var(--amber),#F97316)"></div>
+      </div>
+      <div style="font-size:10px;color:var(--text-muted);margin-top:6px">Dormiu às 23:15 · Acordou às 05:35</div>
+    </div>
+
+    <!-- Score foco -->
+    <div class="widget">
+      <div class="widget-title">Foco de hoje</div>
+      <div style="display:flex;align-items:center;gap:14px">
+        <div class="score-ring">
+          <svg viewBox="0 0 80 80" width="72" height="72">
+            <circle cx="40" cy="40" r="32" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="7"/>
+            <circle cx="40" cy="40" r="32" fill="none" stroke="var(--purple)" stroke-width="7" stroke-dasharray="201" stroke-dashoffset="40" stroke-linecap="round"/>
+          </svg>
+          <div class="score-ring-val" style="font-size:16px">80<span>%</span></div>
+        </div>
+        <div>
+          <div style="font-size:13px;font-weight:700;color:var(--purple)">Bom</div>
+          <div style="font-size:11px;color:var(--text-soft)">2h de deep work</div>
+          <div style="font-size:10px;color:var(--text-muted);margin-top:4px">↑ +8 vs. ontem</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dopamina -->
+    <div class="widget">
+      <div class="widget-title">Score dopamina</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <div style="font-size:13px;font-weight:600">Redes sociais</div>
+        <span class="tag tag-green">Controlado</span>
+      </div>
+      <div style="display:flex;gap:8px;font-size:11px;color:var(--text-soft)">
+        <div style="flex:1;background:var(--glass);border-radius:8px;padding:8px;text-align:center;border:1px solid rgba(245,158,11,0.2)">
+          <div style="font-size:16px;font-weight:700;color:var(--amber)">18</div>
+          <div>min reels</div>
+        </div>
+        <div style="flex:1;background:var(--glass);border-radius:8px;padding:8px;text-align:center;border:1px solid rgba(34,197,94,0.2)">
+          <div style="font-size:16px;font-weight:700;color:var(--green)">+5</div>
+          <div>score hoje</div>
+        </div>
+      </div>
+    </div>
+
+  </aside>
+</div>
+
+<!-- ═══════════ MOBILE BOTTOM NAV ═══════════ -->
+<nav class="mobile-bottom-nav">
+  <div class="mobile-nav-inner">
+    <div class="mob-nav-btn active" onclick="mobileNav('dashboard', this)"><span class="mob-icon">⊞</span><span class="mob-label">Home</span></div>
+    <div class="mob-nav-btn" onclick="mobileNav('rotina', this)"><span class="mob-icon">◷</span><span class="mob-label">Rotina</span></div>
+    <div class="mob-nav-btn" onclick="mobileNav('fitness', this)"><span class="mob-icon">◉</span><span class="mob-label">Fitness</span></div>
+    <div class="mob-nav-btn" onclick="mobileNav('casal', this)"><span class="mob-icon">♡</span><span class="mob-label">Casal</span></div>
+    <div class="mob-nav-btn" onclick="mobileNav('perfil', this)"><span class="mob-icon">◎</span><span class="mob-label">Perfil</span></div>
+  </div>
+</nav>
+
+<script>
+// ── DATE / GREETING ──
+(function(){
+  const d = new Date();
+  const dias = ['Domingo','Segunda','Terça','Quarta','Quinta','Sexta','Sábado'];
+  const meses = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  document.getElementById('today-date').textContent = `${dias[d.getDay()]}, ${d.getDate()} de ${meses[d.getMonth()]} de ${d.getFullYear()}`;
+  const h = d.getHours();
+  const greet = h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite';
+  document.getElementById('greeting').textContent = `${greet}, Luiz 👋`;
+})();
+
+// ── NAVIGATION (desktop) ──
+function navigate(id, el) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('section-' + id).classList.add('active');
+  if (el) el.classList.add('active');
+  setTimeout(() => initCharts(id), 50);
+}
+
+// ── NAVIGATION (mobile) ──
+function mobileNav(id, el) {
+  document.querySelectorAll('.mob-nav-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.getElementById('section-' + id).classList.add('active');
+  setTimeout(() => initCharts(id), 50);
+  document.querySelector('.main').scrollTop = 0;
+}
+
+// ── HABITS TOGGLE ──
+function toggleHabit(el) {
+  const check = el.querySelector('.habit-check');
+  check.classList.toggle('done');
+  check.textContent = check.classList.contains('done') ? '✓' : '';
+}
+
+// ── MOOD SELECT ──
+function selectMood(el, emoji) {
+  document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('selected'));
+  el.classList.add('selected');
+  const labels = {'😫':'Muito mal','😕':'Mal','😐':'Neutro','🙂':'Bem','😄':'Ótimo!'};
+  document.getElementById('moodLabel').textContent = labels[emoji] || '';
+}
+
+// ── WATER TRACKER ──
+let waterCount = 5;
+const totalWater = 7;
+function buildWater() {
+  const c = document.getElementById('waterDots');
+  c.innerHTML = '';
+  for (let i = 0; i < totalWater; i++) {
+    const d = document.createElement('div');
+    d.className = 'water-dot' + (i < waterCount ? ' filled' : '');
+    d.textContent = '💧';
+    d.onclick = () => { waterCount = i < waterCount ? i : i + 1; buildWater(); updateWaterDisplay(); };
+    c.appendChild(d);
+  }
+}
+function updateWaterDisplay() {
+  const l = (waterCount * 0.35).toFixed(1).replace('.', ',');
+  document.getElementById('waterAmount').textContent = l + 'L';
+  document.getElementById('waterBar').style.width = Math.round(waterCount/totalWater*100) + '%';
+}
+buildWater();
+
+// ── STREAK ROW ──
+(function(){
+  const days = ['S','T','Q','Q','S','S','D'];
+  const done = [true,true,true,true,true,true,false];
+  const row = document.getElementById('streakRow');
+  days.forEach((d,i) => {
+    const el = document.createElement('div');
+    el.className = 'streak-day' + (done[i] ? (i===5?' today':' done') : '');
+    el.textContent = d;
+    row.appendChild(el);
+  });
+})();
+
+// ── CHARTS ──
+let charts = {};
+function initCharts(section) {
+  if (section === 'dashboard' && !charts.weekly) {
+    const ctx = document.getElementById('weeklyChart');
+    if (!ctx) return;
+    charts.weekly = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'],
+        datasets: [{
+          label: 'Foco', data: [72, 68, 80, 82, 75, 0, 0],
+          borderColor: '#8B5CF6', backgroundColor: 'rgba(139,92,246,0.1)',
+          tension: 0.4, fill: true, pointBackgroundColor: '#8B5CF6', pointRadius: 4
+        },{
+          label: 'Saúde', data: [65, 70, 73, 75, 78, 0, 0],
+          borderColor: '#22C55E', backgroundColor: 'rgba(34,197,94,0.08)',
+          tension: 0.4, fill: true, pointBackgroundColor: '#22C55E', pointRadius: 4
+        },{
+          label: 'Humor', data: [60, 55, 68, 72, 70, 0, 0],
+          borderColor: '#06B6D4', backgroundColor: 'rgba(6,182,212,0.08)',
+          tension: 0.4, fill: true, pointBackgroundColor: '#06B6D4', pointRadius: 4
+        }]
+      },
+      options: chartOpts()
+    });
+  }
+  if (section === 'habitos' && !charts.habit) {
+    const ctx = document.getElementById('habitChart');
+    if (!ctx) return;
+    charts.habit = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: ['Semana 1','Semana 2','Semana 3','Semana 4'],
+        datasets: [{
+          label: 'Hábitos concluídos (%)',
+          data: [65, 78, 82, 87],
+          backgroundColor: ['rgba(139,92,246,0.5)','rgba(139,92,246,0.6)','rgba(139,92,246,0.75)','rgba(139,92,246,0.9)'],
+          borderColor: '#8B5CF6', borderWidth: 1, borderRadius: 8
+        }]
+      },
+      options: chartOpts(true)
+    });
+  }
+  if (section === 'detox' && !charts.detox) {
+    const ctx = document.getElementById('detoxChart');
+    if (!ctx) return;
+    charts.detox = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: ['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'],
+        datasets: [{
+          label: 'Score dopamina',
+          data: [55, 62, 48, 70, 68, 80, 74],
+          borderColor: '#8B5CF6', backgroundColor: 'rgba(139,92,246,0.1)',
+          tension: 0.4, fill: true, pointBackgroundColor: '#8B5CF6', pointRadius: 5
+        }]
+      },
+      options: chartOpts()
+    });
+  }
+  if (section === 'fitness') {
+    if (!charts.weight) {
+      const ctx = document.getElementById('weightChart');
+      if (ctx) charts.weight = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: ['Sem1','Sem2','Sem3','Sem4','Sem5','Sem6','Sem7','Sem8'],
+          datasets: [{
+            label: 'Peso (kg)', data: [86.5, 85.8, 85.2, 84.7, 84.1, 83.8, 83.5, 83.2],
+            borderColor: '#8B5CF6', backgroundColor: 'rgba(139,92,246,0.1)',
+            tension: 0.4, fill: true, pointBackgroundColor: '#8B5CF6', pointRadius: 4
+          }]
+        },
+        options: chartOpts()
+      });
+    }
+    if (!charts.workout) {
+      const ctx = document.getElementById('workoutChart');
+      if (ctx) charts.workout = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: ['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'],
+          datasets: [{
+            label: 'Minutos de treino',
+            data: [50, 45, 0, 45, 0, 0, 0],
+            backgroundColor: (ctx) => ctx.raw > 0 ? 'rgba(34,197,94,0.7)' : 'rgba(255,255,255,0.05)',
+            borderColor: (ctx) => ctx.raw > 0 ? '#22C55E' : 'transparent',
+            borderWidth: 1, borderRadius: 8
+          }]
+        },
+        options: chartOpts(true)
+      });
+    }
+  }
+}
+
+function chartOpts(isBar = false) {
+  return {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false }, tooltip: {
+      backgroundColor: 'rgba(15,23,42,0.95)', borderColor: 'rgba(139,92,246,0.3)', borderWidth: 1,
+      titleColor: '#F1F5F9', bodyColor: '#94A3B8', padding: 10
+    }},
+    scales: {
+      x: { grid: { color: 'rgba(255,255,255,0.04)', drawBorder: false }, ticks: { color: '#64748B', font: { size: 11 } } },
+      y: { grid: { color: 'rgba(255,255,255,0.04)', drawBorder: false }, ticks: { color: '#64748B', font: { size: 11 } } }
+    }
+  };
+}
+
+setTimeout(() => initCharts('dashboard'), 200);
+
+// ── CHAT IA ──
+const aiResponses = {
+  default: [
+    "Entendido! Baseado nos seus dados, vejo que você está progredindo bem. Continue assim!",
+    "Ótima pergunta. Analisando sua rotina, sugiro focar em consistência antes de intensidade.",
+    "Seus dados mostram que a noite é seu ponto fraco. Ajustar o horário de dormir pode transformar sua performance.",
+    "Você está no top 20% dos usuários ASCEND em disciplina esta semana. Continue!",
+    "Identifiquei uma oportunidade: seus melhores dias são quando você medita de manhã. Quer que eu priorize esse bloco?",
+  ],
+  rotina: ["Vou montar uma rotina ideal para amanhã com base nos seus níveis de energia: Alta de manhã para trabalho profundo, foco à tarde, e treino à noite quando sua adrenalina está elevada."],
+  burnout: ["Analisando sinais de burnout... Sua pontuação de sono está abaixo do ideal há 5 dias. Seu score de humor também caiu 12% na quarta-feira. Recomendo uma sessão de recovery amanhã — sem treino pesado, apenas caminhada e meditação."],
+  motiva: ["VOCÊ JÁ FEZ ISSO ANTES. Você treinou 4 vezes essa semana com 83,2 kg nas costas. Esse treino de hoje é só mais um tijolo. Vá. 💪🔥"],
+};
+
+function handleChat(e) { if (e.key === 'Enter') sendChat(); }
+function quickChat(msg) {
+  navigate('ia', document.querySelector('.nav-item[onclick*="ia"]'));
+  setTimeout(() => { document.getElementById('chatInput').value = msg; sendChat(); }, 150);
+}
+
+function sendChat() {
+  const input = document.getElementById('chatInput');
+  const msg = input.value.trim();
+  if (!msg) return;
+  const area = document.getElementById('chatArea');
+  const now = new Date();
+  const time = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+  area.innerHTML += `<div class="msg user"><div class="msg-bubble">${msg}</div><div class="msg-time">${time}</div></div>`;
+  input.value = '';
+  area.scrollTop = area.scrollHeight;
+  setTimeout(() => {
+    let resp;
+    const lower = msg.toLowerCase();
+    if (lower.includes('rotina') || lower.includes('amanhã')) resp = aiResponses.rotina[0];
+    else if (lower.includes('burnout') || lower.includes('cansaço') || lower.includes('esgot')) resp = aiResponses.burnout[0];
+    else if (lower.includes('motiv') || lower.includes('treino')) resp = aiResponses.motiva[0];
+    else resp = aiResponses.default[Math.floor(Math.random() * aiResponses.default.length)];
+    area.innerHTML += `<div class="msg ai"><div class="msg-bubble">${resp}</div><div class="msg-time">${time}</div></div>`;
+    area.scrollTop = area.scrollHeight;
+  }, 800);
+}
+</script>
+</body>
+</html>
