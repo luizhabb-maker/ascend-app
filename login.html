@@ -623,10 +623,11 @@ try {
     if (!user) return;
     try {
       const snap = await _db.collection('users').doc(user.uid).get();
-      if (snap.exists && snap.data().onboardingComplete) {
+      if (snap.exists && snap.data().profileComplete) {
         window.location.href = '/app';
       } else {
-        window.location.href = '/app';
+        // Nova conta ou perfil incompleto — vai para index que abre o onboarding
+        window.location.href = '/';
       }
     } catch {
       window.location.href = '/app';
