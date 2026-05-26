@@ -2328,11 +2328,17 @@ async function carregarGoals() {
   if (!_uid || !_db) return;
   try {
     const snap = await _db.collection('users').doc(_uid).get();
-    const g = snap.exists ? (snap.data().goals || {}) : {};
+    const d = snap.exists ? snap.data() : {};
+    const g = d.goals || {};
+    // Fallback para dados salvos pelo onboarding no nível raiz
     _goals.sleep    = g.sleep    || 8;
-    _goals.weight   = g.weight   || 80;
-    _goals.height   = g.height   || 170;
+    _goals.weight   = g.weight   || parseFloat(d.goalWeight) || 80;
+    _goals.height   = g.height   || parseFloat(d.height)     || 170;
     _goals.workouts = g.workouts || 5;
+    // Se ainda não tem lastWeight mas onboarding salvou weight, usar como ponto de partida
+    if (!d.lastWeight && d.weight) {
+      aplicarPeso(parseFloat(d.weight));
+    }
     // Aplicar nos inputs de config
     const el = (id) => document.getElementById(id);
     if (el('goal-sleep'))    el('goal-sleep').value    = _goals.sleep;
@@ -2993,8 +2999,9 @@ try {
       const createdAt = d.createdAt || Date.now();
       renderEvolution(xp, lv, d.xpToday || 0, streak, createdAt);
       renderStreak(streak);
-      // Ultimo peso
+      // Ultimo peso (lastWeight = registrado no app; weight = salvo pelo onboarding)
       if (d.lastWeight) aplicarPeso(d.lastWeight);
+      else if (d.weight) aplicarPeso(parseFloat(d.weight));
     } catch(e) { applyUserProfile(user, null); }
 
     // Goals
