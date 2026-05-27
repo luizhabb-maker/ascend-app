@@ -2116,7 +2116,30 @@
         style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:11px 14px;color:#F1F5F9;font-size:14px;font-family:inherit;outline:none;margin-bottom:12px;transition:border-color .2s"
         onfocus="this.style.borderColor='rgba(139,92,246,.5)'" onblur="this.style.borderColor='rgba(255,255,255,0.1)'">
 
-      <label style="font-size:11px;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:8px">Macros (por porção)</label>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
+        <div>
+          <label style="font-size:11px;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px">Quantidade</label>
+          <input id="ref-qtd" type="number" min="1" max="9999" placeholder="Ex: 150"
+            style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:10px 12px;color:#F1F5F9;font-size:14px;font-family:inherit;outline:none;transition:border-color .2s"
+            oninput="recalcRefMacros()" onfocus="this.style.borderColor='rgba(139,92,246,.5)'" onblur="this.style.borderColor='rgba(255,255,255,0.1)'">
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px">Unidade</label>
+          <select id="ref-unidade" onchange="recalcRefMacros()"
+            style="width:100%;background:#0d1120;border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:10px 12px;color:#F1F5F9;font-size:13px;font-family:inherit;outline:none;cursor:pointer;transition:border-color .2s"
+            onfocus="this.style.borderColor='rgba(139,92,246,.5)'" onblur="this.style.borderColor='rgba(255,255,255,0.1)'">
+            <option value="g">gramas (g)</option>
+            <option value="ml">mililitros (ml)</option>
+            <option value="un">unidade(s)</option>
+            <option value="pedaco">pedaço(s)</option>
+            <option value="fatia">fatia(s)</option>
+            <option value="col">colher(es)</option>
+            <option value="xic">xícara(s)</option>
+            <option value="porcao">porção</option>
+          </select>
+        </div>
+      </div>
+      <label style="font-size:11px;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:8px" id="ref-macro-label">Macros (da porção)</label>
       <div class="ref-macros-row">
         <div class="ref-macro-inp"><label>Kcal</label><input id="ref-calorias"   type="number" min="0" max="9999" placeholder="0"></div>
         <div class="ref-macro-inp"><label>Prot g</label><input id="ref-prot-inp" type="number" min="0" max="999"  placeholder="0"></div>
@@ -3974,9 +3997,10 @@ initCharts = function(section) {
 // ══════════════════════════════════════
 //  REFEIÇÃO / NUTRIÇÃO
 // ══════════════════════════════════════
-let _refData = [];       // refeições do dia
-let _refTipo = 'cafe';   // tipo selecionado no modal
-let _refFavs = [];       // alimentos favoritos
+let _refData   = [];     // refeições do dia
+let _refTipo   = 'cafe'; // tipo selecionado no modal
+let _refFavs   = [];     // alimentos favoritos
+let _refPer100g = null;  // macros por 100g do alimento buscado (para recalc automático)
 
 const REF_TIPOS = {
   cafe:   { label:'Café da manhã', emoji:'🍳' },
@@ -4022,17 +4046,44 @@ function refGetAIMensagem() {
 }
 
 function openRefeicaoModal(tipo) {
-  _refTipo = tipo || 'cafe';
+  _refTipo    = tipo || 'cafe';
+  _refPer100g = null;
   document.getElementById('refeicao-overlay').style.display = 'flex';
   ['ref-descricao','ref-calorias','ref-prot-inp','ref-carb-inp','ref-gord-inp','ref-fibras-inp'].forEach(id => {
     const el = document.getElementById(id); if (el) el.value = '';
   });
+  const qtd = document.getElementById('ref-qtd');
+  if (qtd) qtd.value = '';
+  const unid = document.getElementById('ref-unidade');
+  if (unid) unid.value = 'g';
+  const lbl = document.getElementById('ref-macro-label');
+  if (lbl) lbl.textContent = 'Macros (da porção)';
   const errEl = document.getElementById('ref-modal-error');
   if (errEl) errEl.style.display = 'none';
   document.querySelectorAll('#ref-tipo-btns .ref-tipo-btn').forEach(b => b.classList.toggle('selected', b.dataset.t === _refTipo));
   selectRefTab(document.querySelector('.ref-tab'), 'manual');
   const favBtn = document.getElementById('btn-ref-fav');
   if (favBtn) { favBtn.textContent = '⭐ Favoritar'; favBtn.style.background = ''; }
+}
+
+function recalcRefMacros() {
+  if (!_refPer100g) return;
+  const qtdEl  = document.getElementById('ref-qtd');
+  const unidEl = document.getElementById('ref-unidade');
+  if (!qtdEl || !unidEl) return;
+  const unit = unidEl.value;
+  if (unit !== 'g' && unit !== 'ml') return; // só recalcula para unidades de peso/volume
+  const qtd    = parseFloat(qtdEl.value) || 0;
+  if (qtd <= 0) return;
+  const factor = qtd / 100;
+  const set = (id, v) => { const el = document.getElementById(id); if (el) el.value = v > 0 ? Math.round(v * 10) / 10 : '0'; };
+  set('ref-calorias',   _refPer100g.kcal  * factor);
+  set('ref-prot-inp',   _refPer100g.prot  * factor);
+  set('ref-carb-inp',   _refPer100g.carb  * factor);
+  set('ref-gord-inp',   _refPer100g.gord  * factor);
+  set('ref-fibras-inp', _refPer100g.fibras * factor);
+  const lbl = document.getElementById('ref-macro-label');
+  if (lbl) lbl.textContent = `Macros (${qtd}${unit})`;
 }
 
 function openRefModal(tipo, e) {
@@ -4168,14 +4219,24 @@ async function buscarAlimento() {
 }
 
 function preencherAlimentoBusca(nome, kcal, prot, carb, gord, fibras) {
+  // Salva valores por 100g para recálculo automático
+  _refPer100g = { kcal, prot, carb, gord, fibras };
   document.getElementById('ref-descricao').value    = nome;
+  // Define 100g como quantidade padrão
+  const qtdEl = document.getElementById('ref-qtd');
+  if (qtdEl) qtdEl.value = '100';
+  const unidEl = document.getElementById('ref-unidade');
+  if (unidEl) unidEl.value = 'g';
+  // Preenche macros para 100g
   document.getElementById('ref-calorias').value     = kcal   || '';
   document.getElementById('ref-prot-inp').value     = prot   || '';
   document.getElementById('ref-carb-inp').value     = carb   || '';
   document.getElementById('ref-gord-inp').value     = gord   || '';
   document.getElementById('ref-fibras-inp').value   = fibras || '';
+  const lbl = document.getElementById('ref-macro-label');
+  if (lbl) lbl.textContent = 'Macros (100g) — altere a quantidade para recalcular';
   selectRefTab(document.querySelector('.ref-tab'), 'manual');
-  showToast('Alimento selecionado! Ajuste a porção se necessário.');
+  showToast('Alimento selecionado! Ajuste a quantidade em gramas.');
 }
 
 async function escaneiarCodigo() {
@@ -4218,10 +4279,15 @@ async function salvarRefeicao() {
   }
   if (errEl) errEl.style.display = 'none';
   const getVal = (id, fn) => { const el = document.getElementById(id); return el ? (fn(el.value) || 0) : 0; };
+  const getStr = (id) => { const el = document.getElementById(id); return el ? el.value : ''; };
+  const qtd    = parseFloat(getStr('ref-qtd')) || null;
+  const unid   = getStr('ref-unidade') || 'g';
   const ref = {
     id:     Date.now().toString(),
     tipo:   _refTipo || 'cafe',
     desc,
+    qtd,
+    unid,
     cal:    getVal('ref-calorias',   parseInt),
     prot:   getVal('ref-prot-inp',   parseFloat),
     carb:   getVal('ref-carb-inp',   parseFloat),
@@ -4277,8 +4343,9 @@ function renderRefeicoes() {
       items.forEach(r => {
         const el = document.createElement('div');
         el.className = 'ref-meal-item';
+        const qtdLabel = r.qtd ? ` (${r.qtd}${r.unid || 'g'})` : '';
         el.innerHTML = `
-          <div class="ref-meal-item-name">${r.desc}</div>
+          <div class="ref-meal-item-name">${r.desc}<span style="font-size:11px;color:#64748B">${qtdLabel}</span></div>
           ${r.prot ? `<div style="font-size:11px;color:#94A3B8;white-space:nowrap">P:${r.prot}g</div>` : ''}
           <div class="ref-meal-item-cal">${r.cal||0} kcal</div>
           <button onclick="deletarRefeicao('${r.id}',event)" type="button" style="background:none;border:none;color:#f87171;cursor:pointer;font-size:12px;padding:2px 6px;opacity:0;transition:opacity .2s" class="ref-del">✕</button>`;
