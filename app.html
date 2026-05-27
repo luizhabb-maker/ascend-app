@@ -2155,6 +2155,7 @@
           style="flex:1;background:linear-gradient(135deg,#22C55E,#16A34A);color:#fff;border:none;border-radius:11px;padding:12px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;box-shadow:0 0 20px rgba(34,197,94,.25)">Registrar</button>
       </div>
       <div id="ref-modal-error" style="color:#f87171;font-size:12px;margin-top:8px;display:none"></div>
+      <div id="ref-modal-success" style="display:none;margin-top:10px;padding:11px 14px;background:rgba(34,197,94,0.12);border:1px solid rgba(34,197,94,0.35);border-radius:10px;color:#4ADE80;font-size:13px;font-weight:700;text-align:center"></div>
     </div>
 
     <!-- Tab: Busca (Open Food Facts) -->
@@ -4060,6 +4061,8 @@ function openRefeicaoModal(tipo) {
   if (lbl) lbl.textContent = 'Macros (da porção)';
   const errEl = document.getElementById('ref-modal-error');
   if (errEl) errEl.style.display = 'none';
+  const succReset = document.getElementById('ref-modal-success');
+  if (succReset) succReset.style.display = 'none';
   document.querySelectorAll('#ref-tipo-btns .ref-tipo-btn').forEach(b => b.classList.toggle('selected', b.dataset.t === _refTipo));
   selectRefTab(document.querySelector('.ref-tab'), 'manual');
   const favBtn = document.getElementById('btn-ref-fav');
@@ -4303,26 +4306,40 @@ async function salvarRefeicao() {
     } catch(e) { console.warn('salvarRefeicao Firestore:', e); }
   }
 
-  // Adiciona localmente e fecha o modal
+  // Adiciona localmente
   _refData.push(ref);
-  closeRefeicaoModal();
+
+  // Limpa o formulário para o próximo item (mas mantém modal aberto e pesquisa intacta)
+  ['ref-descricao','ref-calorias','ref-prot-inp','ref-carb-inp','ref-gord-inp','ref-fibras-inp','ref-qtd'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.value = '';
+  });
+  _refPer100g = null;
+  const unidResetEl = document.getElementById('ref-unidade');
+  if (unidResetEl) unidResetEl.value = 'g';
+  const lblEl = document.getElementById('ref-macro-label');
+  if (lblEl) lblEl.textContent = 'Macros (da porção)';
+
+  // Confirmação verde visível dentro do modal
+  const tipoInfo = REF_TIPOS[ref.tipo] || { emoji:'🍽️', label:'Refeição' };
+  const porcao   = qtd ? ` ${qtd}${unid}` : '';
+  const cals     = ref.cal > 0 ? ` · ${ref.cal} kcal` : '';
+  const succEl   = document.getElementById('ref-modal-success');
+  if (succEl) {
+    succEl.textContent = `✓ ${tipoInfo.emoji} ${desc}${porcao}${cals} adicionado!`;
+    succEl.style.display = '';
+    setTimeout(() => { if (succEl) succEl.style.display = 'none'; }, 4000);
+  }
 
   // Força abertura do accordion da refeição correta
   const body    = document.getElementById('ref-body-' + ref.tipo);
   const chevron = document.getElementById('chevron-' + ref.tipo);
-  if (body) {
+  if (body && !body.classList.contains('open')) {
     body.classList.add('open');
     if (chevron) chevron.classList.add('open');
   }
 
-  // Atualiza a tela
-  renderRefeicoes();
-
-  // Confirmação visível com detalhes do que foi registrado
-  const tipoInfo = REF_TIPOS[ref.tipo] || { emoji:'🍽️', label:'Refeição' };
-  const porcao   = qtd ? ` ${qtd}${unid}` : '';
-  const cals     = ref.cal > 0 ? ` · ${ref.cal} kcal` : '';
-  showToast(`${tipoInfo.emoji} ${desc}${porcao}${cals} ✓`);
+  // Atualiza a tela por trás do modal
+  try { renderRefeicoes(); } catch(e) { console.warn('renderRefeicoes:', e); }
 }
 
 async function carregarRefeicoes(prefetchedUserData) {
