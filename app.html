@@ -1813,7 +1813,7 @@
 </nav>
 
 <!-- ═══ MODAL NOVO BLOCO ═══ -->
-<div id="bloco-overlay" style="display:none;position:fixed;inset:0;z-index:3000;background:rgba(0,0,0,0.75);backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;padding:20px">
+<div id="bloco-overlay" style="display:none;position:fixed;inset:0;z-index:3000;background:rgba(0,0,0,0.75);backdrop-filter:blur(8px);align-items:center;justify-content:center;padding:20px">
   <div style="background:#0d1120;border:1px solid rgba(255,255,255,0.1);border-radius:20px;padding:32px;width:100%;max-width:420px;animation:slideup 0.25s ease;box-shadow:0 40px 80px rgba(0,0,0,0.6)">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px">
       <div style="font-size:17px;font-weight:800">+ Novo bloco de rotina</div>
@@ -1826,17 +1826,17 @@
       </div>
       <div>
         <label style="font-size:11px;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px">Emoji</label>
-        <div style="display:flex;gap:8px;flex-wrap:wrap" id="bloco-emoji-btns">
-          <button onclick="selectEmoji(this,'☀️')" class="emoji-pick selected">☀️</button>
-          <button onclick="selectEmoji(this,'🧘')" class="emoji-pick">🧘</button>
-          <button onclick="selectEmoji(this,'📚')" class="emoji-pick">📚</button>
-          <button onclick="selectEmoji(this,'🏋️')" class="emoji-pick">🏋️</button>
-          <button onclick="selectEmoji(this,'💼')" class="emoji-pick">💼</button>
-          <button onclick="selectEmoji(this,'🍽️')" class="emoji-pick">🍽️</button>
-          <button onclick="selectEmoji(this,'📵')" class="emoji-pick">📵</button>
-          <button onclick="selectEmoji(this,'🌙')" class="emoji-pick">🌙</button>
-          <button onclick="selectEmoji(this,'💧')" class="emoji-pick">💧</button>
-          <button onclick="selectEmoji(this,'🎯')" class="emoji-pick">🎯</button>
+        <div style="display:flex;gap:6px;flex-wrap:wrap" id="bloco-emoji-btns">
+          <button onclick="selectEmoji(this,'☀️')" class="emoji-pick selected" style="flex-direction:column;gap:2px;padding:7px 9px"><span>☀️</span><span style="font-size:9px;color:#94A3B8;line-height:1">Manhã</span><span style="font-size:9px;color:#8B5CF6;line-height:1;font-weight:700">5xp</span></button>
+          <button onclick="selectEmoji(this,'🧘')" class="emoji-pick" style="flex-direction:column;gap:2px;padding:7px 9px"><span>🧘</span><span style="font-size:9px;color:#94A3B8;line-height:1">Meditar</span><span style="font-size:9px;color:#8B5CF6;line-height:1;font-weight:700">8xp</span></button>
+          <button onclick="selectEmoji(this,'📚')" class="emoji-pick" style="flex-direction:column;gap:2px;padding:7px 9px"><span>📚</span><span style="font-size:9px;color:#94A3B8;line-height:1">Estudar</span><span style="font-size:9px;color:#8B5CF6;line-height:1;font-weight:700">10xp</span></button>
+          <button onclick="selectEmoji(this,'🏋️')" class="emoji-pick" style="flex-direction:column;gap:2px;padding:7px 9px"><span>🏋️</span><span style="font-size:9px;color:#94A3B8;line-height:1">Treinar</span><span style="font-size:9px;color:#8B5CF6;line-height:1;font-weight:700">10xp</span></button>
+          <button onclick="selectEmoji(this,'💼')" class="emoji-pick" style="flex-direction:column;gap:2px;padding:7px 9px"><span>💼</span><span style="font-size:9px;color:#94A3B8;line-height:1">Trabalho</span><span style="font-size:9px;color:#8B5CF6;line-height:1;font-weight:700">8xp</span></button>
+          <button onclick="selectEmoji(this,'🍽️')" class="emoji-pick" style="flex-direction:column;gap:2px;padding:7px 9px"><span>🍽️</span><span style="font-size:9px;color:#94A3B8;line-height:1">Refeição</span><span style="font-size:9px;color:#8B5CF6;line-height:1;font-weight:700">3xp</span></button>
+          <button onclick="selectEmoji(this,'📵')" class="emoji-pick" style="flex-direction:column;gap:2px;padding:7px 9px"><span>📵</span><span style="font-size:9px;color:#94A3B8;line-height:1">Sem cel.</span><span style="font-size:9px;color:#8B5CF6;line-height:1;font-weight:700">10xp</span></button>
+          <button onclick="selectEmoji(this,'🌙')" class="emoji-pick" style="flex-direction:column;gap:2px;padding:7px 9px"><span>🌙</span><span style="font-size:9px;color:#94A3B8;line-height:1">Descanso</span><span style="font-size:9px;color:#8B5CF6;line-height:1;font-weight:700">2xp</span></button>
+          <button onclick="selectEmoji(this,'💧')" class="emoji-pick" style="flex-direction:column;gap:2px;padding:7px 9px"><span>💧</span><span style="font-size:9px;color:#94A3B8;line-height:1">Hidrat.</span><span style="font-size:9px;color:#8B5CF6;line-height:1;font-weight:700">5xp</span></button>
+          <button onclick="selectEmoji(this,'🎯')" class="emoji-pick" style="flex-direction:column;gap:2px;padding:7px 9px"><span>🎯</span><span style="font-size:9px;color:#94A3B8;line-height:1">Foco</span><span style="font-size:9px;color:#8B5CF6;line-height:1;font-weight:700">10xp</span></button>
         </div>
       </div>
       <div>
@@ -1847,7 +1847,8 @@
         <label style="font-size:11px;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px">Descrição <span style="font-weight:400;text-transform:none">(opcional)</span></label>
         <input id="bloco-desc" type="text" placeholder="Ex: 45 min · Academia" maxlength="60" style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:11px 14px;color:#F1F5F9;font-size:14px;font-family:inherit;outline:none" onfocus="this.style.borderColor='rgba(139,92,246,.5)'" onblur="this.style.borderColor='rgba(255,255,255,0.1)'">
       </div>
-      <button onclick="salvarBloco()" style="background:linear-gradient(135deg,#8B5CF6,#7C3AED);color:#fff;border:none;border-radius:11px;padding:13px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;box-shadow:0 0 24px rgba(139,92,246,.35);margin-top:4px">Adicionar bloco</button>
+      <div id="bloco-error" style="display:none;color:#f87171;font-size:13px;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.25);border-radius:8px;padding:8px 12px">Preencha o horário e o nome do bloco.</div>
+      <button type="button" onclick="salvarBloco()" style="background:linear-gradient(135deg,#8B5CF6,#7C3AED);color:#fff;border:none;border-radius:11px;padding:13px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;box-shadow:0 0 24px rgba(139,92,246,.35);margin-top:4px">Adicionar bloco</button>
     </div>
   </div>
 </div>
@@ -2010,7 +2011,7 @@
 
 <style>
 @keyframes slideup { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
-.emoji-pick { background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:6px 10px;font-size:18px;cursor:pointer;transition:all 0.15s }
+.emoji-pick { display:inline-flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:6px 10px;font-size:18px;cursor:pointer;transition:all 0.15s;font-family:inherit }
 .emoji-pick.selected { background:rgba(139,92,246,0.2);border-color:rgba(139,92,246,0.5) }
 .emoji-pick:hover { background:rgba(255,255,255,0.1) }
 .bloco-delete { opacity:0;font-size:14px;cursor:pointer;transition:opacity 0.2s;background:none;border:none;color:#f87171;padding:4px 6px }
@@ -3044,6 +3045,30 @@ try {
   console.warn('Firebase init failed — modo demo ativo');
 }
 
+// ── XP POR EMOJI DE ROTINA ──
+const BLOCO_XP = {
+  '☀️': 5,   // Manhã
+  '🧘': 8,   // Meditar
+  '📚': 10,  // Estudar
+  '🏋️': 10, // Treinar
+  '💼': 8,   // Trabalho
+  '🍽️': 3,  // Refeição
+  '📵': 10,  // Sem celular
+  '🌙': 2,   // Descanso
+  '💧': 5,   // Hidratação
+  '🎯': 10,  // Foco
+};
+
+function xpDoBloco(emoji, label) {
+  if (emoji && BLOCO_XP[emoji] !== undefined) return BLOCO_XP[emoji];
+  if (label) {
+    for (const [e, xp] of Object.entries(BLOCO_XP)) {
+      if (label.startsWith(e)) return xp;
+    }
+  }
+  return 5;
+}
+
 // ── MODAL NOVO BLOCO ──
 let _selectedEmoji = '☀️';
 
@@ -3053,15 +3078,18 @@ function openBlocoModal() {
   document.getElementById('bloco-label').value = '';
   document.getElementById('bloco-desc').value = '';
   document.getElementById('bloco-time').value = '';
+  const errEl = document.getElementById('bloco-error');
+  if (errEl) errEl.style.display = 'none';
   _selectedEmoji = '☀️';
-  document.querySelectorAll('.emoji-pick').forEach(b => b.classList.remove('selected'));
-  document.querySelector('.emoji-pick').classList.add('selected');
+  document.querySelectorAll('#bloco-emoji-btns .emoji-pick').forEach(b => b.classList.remove('selected'));
+  const first = document.querySelector('#bloco-emoji-btns .emoji-pick');
+  if (first) first.classList.add('selected');
 }
 function closeBlocoModal() {
   document.getElementById('bloco-overlay').style.display = 'none';
 }
 function selectEmoji(btn, emoji) {
-  document.querySelectorAll('.emoji-pick').forEach(b => b.classList.remove('selected'));
+  document.querySelectorAll('#bloco-emoji-btns .emoji-pick').forEach(b => b.classList.remove('selected'));
   btn.classList.add('selected');
   _selectedEmoji = emoji;
 }
@@ -3070,9 +3098,14 @@ async function salvarBloco() {
   const time  = document.getElementById('bloco-time').value;
   const label = document.getElementById('bloco-label').value.trim();
   const desc  = document.getElementById('bloco-desc').value.trim();
-  if (!time || !label) { alert('Preencha o horário e o nome do bloco.'); return; }
+  const errEl = document.getElementById('bloco-error');
+  if (!time || !label) {
+    if (errEl) { errEl.textContent = 'Preencha o horário e o nome do bloco.'; errEl.style.display = 'block'; }
+    return;
+  }
+  if (errEl) errEl.style.display = 'none';
 
-  const bloco = { time, label: `${_selectedEmoji} ${label}`, desc, done: false, id: Date.now().toString() };
+  const bloco = { time, label: `${_selectedEmoji} ${label}`, emoji: _selectedEmoji, desc, done: false, id: Date.now().toString() };
 
   if (_uid && _db) {
     try {
@@ -3087,6 +3120,7 @@ async function salvarBloco() {
 function adicionarBlocoNaTimeline(bloco) {
   const timeline = document.getElementById('routine-timeline');
   if (!timeline) return;
+  const xp = xpDoBloco(bloco.emoji, bloco.label);
   const el = document.createElement('div');
   el.className = 'timeline-item';
   el.dataset.blocoId = bloco.id;
@@ -3097,12 +3131,16 @@ function adicionarBlocoNaTimeline(bloco) {
         <div class="timeline-label">${bloco.label}</div>
         ${bloco.desc ? `<div class="timeline-desc">${bloco.desc}</div>` : ''}
       </div>
-      <button class="bloco-delete" onclick="deletarBloco(this,'${bloco.id}')" title="Remover">✕</button>
+      <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
+        <span style="font-size:11px;color:#8B5CF6;font-weight:700;background:rgba(139,92,246,0.12);padding:2px 7px;border-radius:20px;white-space:nowrap">+${xp}xp</span>
+        <button class="bloco-delete" onclick="deletarBloco(this,'${bloco.id}')" title="Remover">✕</button>
+      </div>
     </div>`;
   el.querySelector('.timeline-block').addEventListener('click', (e) => {
     if (e.target.classList.contains('bloco-delete')) return;
+    const wasDone = el.classList.contains('done');
     el.classList.toggle('done');
-    marcarBlocoFeito(bloco.id, el.classList.contains('done'));
+    marcarBlocoFeito(bloco.id, !wasDone, bloco.emoji, bloco.label);
   });
   // Inserir na ordem correta por horário
   const items = [...timeline.querySelectorAll('.timeline-item[data-bloco-id]')];
@@ -3111,7 +3149,12 @@ function adicionarBlocoNaTimeline(bloco) {
   else timeline.appendChild(el);
 }
 
-async function marcarBlocoFeito(id, done) {
+async function marcarBlocoFeito(id, done, emoji, label) {
+  if (done) {
+    const xp = xpDoBloco(emoji, label);
+    addXP(xp);
+    showToast(`+${xp} XP — bloco concluído! 🎯`);
+  }
   if (!_uid || !_db) return;
   try {
     await _db.collection('users').doc(_uid).collection('routine').doc(id).update({ done });
