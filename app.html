@@ -4278,32 +4278,51 @@ async function salvarRefeicao() {
     return;
   }
   if (errEl) errEl.style.display = 'none';
-  const getVal = (id, fn) => { const el = document.getElementById(id); return el ? (fn(el.value) || 0) : 0; };
-  const getStr = (id) => { const el = document.getElementById(id); return el ? el.value : ''; };
-  const qtd    = parseFloat(getStr('ref-qtd')) || null;
-  const unid   = getStr('ref-unidade') || 'g';
+
+  const gv  = (id, fn) => { const el = document.getElementById(id); return el ? (fn(el.value) || 0) : 0; };
+  const gs  = (id)     => { const el = document.getElementById(id); return el ? el.value : ''; };
+  const qtd = parseFloat(gs('ref-qtd')) || null;
+  const unid = gs('ref-unidade') || 'g';
+
   const ref = {
     id:     Date.now().toString(),
     tipo:   _refTipo || 'cafe',
-    desc,
-    qtd,
-    unid,
-    cal:    getVal('ref-calorias',   parseInt),
-    prot:   getVal('ref-prot-inp',   parseFloat),
-    carb:   getVal('ref-carb-inp',   parseFloat),
-    gord:   getVal('ref-gord-inp',   parseFloat),
-    fibras: getVal('ref-fibras-inp', parseFloat),
-    qual:   3,
-    date:   todayKey(),
-    ts:     Date.now()
+    desc,  qtd,  unid,
+    cal:    gv('ref-calorias',   parseInt),
+    prot:   gv('ref-prot-inp',   parseFloat),
+    carb:   gv('ref-carb-inp',   parseFloat),
+    gord:   gv('ref-gord-inp',   parseFloat),
+    fibras: gv('ref-fibras-inp', parseFloat),
+    qual: 3,  date: todayKey(),  ts: Date.now()
   };
+
+  // Salva no Firestore
   if (_uid && _db) {
-    try { await _db.collection('users').doc(_uid).collection('meals').doc(ref.id).set(ref); } catch(e) {}
+    try {
+      await _db.collection('users').doc(_uid).collection('meals').doc(ref.id).set(ref);
+    } catch(e) { console.warn('salvarRefeicao Firestore:', e); }
   }
+
+  // Adiciona localmente e fecha o modal
   _refData.push(ref);
   closeRefeicaoModal();
-  showToast('✓ Alimento registrado!');
-  try { renderRefeicoes(); } catch(e) { console.warn('renderRefeicoes:', e); }
+
+  // Força abertura do accordion da refeição correta
+  const body    = document.getElementById('ref-body-' + ref.tipo);
+  const chevron = document.getElementById('chevron-' + ref.tipo);
+  if (body) {
+    body.classList.add('open');
+    if (chevron) chevron.classList.add('open');
+  }
+
+  // Atualiza a tela
+  renderRefeicoes();
+
+  // Confirmação visível com detalhes do que foi registrado
+  const tipoInfo = REF_TIPOS[ref.tipo] || { emoji:'🍽️', label:'Refeição' };
+  const porcao   = qtd ? ` ${qtd}${unid}` : '';
+  const cals     = ref.cal > 0 ? ` · ${ref.cal} kcal` : '';
+  showToast(`${tipoInfo.emoji} ${desc}${porcao}${cals} ✓`);
 }
 
 async function carregarRefeicoes(prefetchedUserData) {
