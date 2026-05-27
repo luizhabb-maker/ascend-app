@@ -606,6 +606,121 @@
     .grid-4 { grid-template-columns: 1fr 1fr; }
     .workout-card { flex-direction: column; gap: 14px; }
   }
+
+  /* ── ÁGUA FUTURISTA ────────────────────────────────── */
+  #agua-reservoir-wrap { padding: 24px 24px 0; }
+  #agua-reservoir {
+    position: relative; width: 180px; height: 240px; margin: 0 auto;
+    border-radius: 24px 24px 36px 36px;
+    border: 2px solid rgba(6,182,212,0.4); overflow: hidden;
+    background: rgba(6,182,212,0.03);
+    box-shadow: 0 0 30px rgba(6,182,212,0.12), inset 0 0 30px rgba(6,182,212,0.04);
+    transition: box-shadow 0.6s ease, border-color 0.6s ease;
+  }
+  #agua-reservoir.goal-glow {
+    box-shadow: 0 0 60px rgba(6,182,212,0.55), 0 0 120px rgba(6,182,212,0.25), inset 0 0 40px rgba(6,182,212,0.18);
+    border-color: rgba(6,182,212,0.85);
+  }
+  #agua-wave-fill {
+    position: absolute; bottom: 0; left: 0; right: 0; height: 0%;
+    background: linear-gradient(180deg, rgba(6,182,212,0.55) 0%, rgba(6,182,212,0.82) 100%);
+    transition: height 0.9s cubic-bezier(.4,0,.2,1); overflow: hidden;
+  }
+  .agua-wave {
+    position: absolute; top: -22px; left: -50%; width: 200%; height: 44px;
+    background: rgba(6,182,212,0.28); border-radius: 50%;
+    animation: agua-wave-anim 3.2s linear infinite;
+  }
+  .agua-wave-2 { top: -14px; opacity: 0.5; animation: agua-wave-anim 4.5s linear infinite reverse; }
+  @keyframes agua-wave-anim { from { transform:translateX(0) } to { transform:translateX(50%) } }
+  #agua-reservoir-inner {
+    position: absolute; inset: 0; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; z-index: 2;
+    color: #fff; text-shadow: 0 2px 10px rgba(0,0,0,0.55);
+    pointer-events: none;
+  }
+  #agua-total-display { font-size:48px; font-weight:900; line-height:1; }
+  #agua-pct-label     { font-size:26px; font-weight:900; margin-top:6px; opacity:0.9; }
+  #agua-meta-display  { font-size:12px; font-weight:600; opacity:0.65; margin-top:3px; }
+  #agua-meta-line     { font-size:12px; color:var(--text-muted); text-align:center; padding:12px 0 16px; }
+  .agua-quick-grid    { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-bottom:12px; }
+  .agua-quick-btn {
+    display:flex; flex-direction:column; align-items:center; gap:4px;
+    padding:14px 6px; border-radius:16px;
+    border:1px solid rgba(6,182,212,0.25); background:rgba(6,182,212,0.06);
+    color:var(--cyan); cursor:pointer; transition:all .2s;
+  }
+  .agua-quick-btn:hover, .agua-quick-btn:active {
+    background:rgba(6,182,212,0.2); transform:translateY(-2px);
+    box-shadow:0 4px 16px rgba(6,182,212,0.25);
+  }
+  .agua-quick-featured { border-color:rgba(6,182,212,0.5); background:rgba(6,182,212,0.12); box-shadow:0 0 14px rgba(6,182,212,0.15); }
+  .agua-quick-icon  { font-size:22px; }
+  .agua-quick-ml    { font-size:12px; font-weight:700; }
+  .agua-quick-label { font-size:10px; opacity:0.65; }
+  .agua-custom-row  { display:flex; gap:10px; align-items:center; }
+  .agua-custom-input {
+    flex:1; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.1);
+    border-radius:12px; padding:10px 14px; color:#fff; font-size:14px; outline:none;
+    transition:border-color .2s, box-shadow .2s;
+  }
+  .agua-custom-input:focus { border-color:rgba(6,182,212,0.5); box-shadow:0 0 0 2px rgba(6,182,212,0.15); }
+  .agua-custom-btn {
+    padding:10px 18px; border-radius:12px; border:1px solid rgba(6,182,212,0.4);
+    background:rgba(6,182,212,0.15); color:var(--cyan); font-size:13px; font-weight:700;
+    cursor:pointer; transition:all .2s; white-space:nowrap;
+  }
+  .agua-custom-btn:hover { background:rgba(6,182,212,0.28); }
+  .agua-ind-bar-wrap { margin-top:6px; height:4px; background:rgba(255,255,255,0.07); border-radius:99px; overflow:hidden; width:100%; }
+  .agua-ind-bar { height:100%; border-radius:99px; transition:width 0.8s ease; }
+  .agua-ind-val { font-size:18px!important; font-weight:800!important; }
+  .agua-ai-card { background:linear-gradient(135deg,rgba(6,182,212,0.08),rgba(59,130,246,0.08)); border-color:rgba(6,182,212,0.2)!important; }
+
+  /* ── REFEIÇÃO / NUTRIÇÃO ────────────────────────────────── */
+  .ref-cal-label { font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text-muted) }
+  .ref-cal-num   { font-size:36px;font-weight:900;line-height:1.15;background:linear-gradient(135deg,var(--amber),#F97316);-webkit-background-clip:text;-webkit-text-fill-color:transparent }
+  .ref-cal-slash { font-size:24px;opacity:.4;-webkit-text-fill-color:var(--text-muted) }
+  .ref-macro-card { text-align:center;padding:14px 10px!important }
+  .ref-macro-val  { font-size:20px;font-weight:900;color:var(--text);line-height:1 }
+  .ref-meal-section { background:var(--glass);border:1px solid var(--glass-border);border-radius:16px;margin-bottom:10px;overflow:hidden }
+  .ref-meal-header  { display:flex;align-items:center;gap:12px;padding:14px 16px;cursor:pointer;user-select:none;transition:background .15s }
+  .ref-meal-header:hover { background:rgba(255,255,255,0.03) }
+  .ref-meal-icon  { font-size:24px;flex-shrink:0 }
+  .ref-meal-info  { flex:1;min-width:0 }
+  .ref-meal-name  { font-size:13px;font-weight:700;color:var(--text) }
+  .ref-meal-cal   { font-size:11px;color:var(--text-muted);margin-top:2px }
+  .ref-meal-add   { width:30px;height:30px;border-radius:50%;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.05);color:var(--text);font-size:18px;line-height:1;cursor:pointer;flex-shrink:0;transition:all .2s }
+  .ref-meal-add:hover { background:rgba(139,92,246,0.2);border-color:rgba(139,92,246,0.4);color:var(--purple) }
+  .ref-meal-chevron { font-size:14px;color:var(--text-muted);flex-shrink:0;transition:transform .25s }
+  .ref-meal-chevron.open { transform:rotate(180deg) }
+  .ref-meal-body { max-height:0;overflow:hidden;transition:max-height .35s ease }
+  .ref-meal-body.open { max-height:800px }
+  .ref-meal-item  { display:flex;align-items:center;gap:10px;padding:10px 16px;border-top:1px solid rgba(255,255,255,0.05) }
+  .ref-meal-item-name { flex:1;font-size:13px;font-weight:500 }
+  .ref-meal-item-cal  { font-size:12px;font-weight:700;color:var(--amber) }
+  .ref-meal-empty { padding:12px 16px;font-size:12px;color:var(--text-muted);text-align:center;border-top:1px solid rgba(255,255,255,0.05) }
+  .ref-modal-tabs { display:flex;gap:6px;margin-bottom:18px;background:rgba(255,255,255,0.03);border-radius:12px;padding:4px }
+  .ref-tab  { flex:1;padding:8px 4px;border:1px solid transparent;border-radius:9px;background:transparent;color:var(--text-muted);font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;font-family:inherit }
+  .ref-tab.active { background:rgba(139,92,246,0.18);color:var(--purple);border-color:rgba(139,92,246,0.3) }
+  .ref-macros-row { display:grid;grid-template-columns:repeat(5,1fr);gap:8px }
+  .ref-macro-inp  { display:flex;flex-direction:column;gap:4px }
+  .ref-macro-inp label { font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;text-align:center;display:block }
+  .ref-macro-inp input { width:100%;text-align:center;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:7px 4px;color:#fff;font-size:12px;outline:none;transition:border-color .2s }
+  .ref-macro-inp input:focus { border-color:rgba(139,92,246,0.4) }
+  .ref-search-row { display:flex;gap:8px;margin-bottom:10px }
+  .ref-search-inp { flex:1;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:10px 12px;color:#fff;font-size:13px;outline:none;font-family:inherit;transition:border-color .2s }
+  .ref-search-inp:focus { border-color:rgba(139,92,246,0.4) }
+  .ref-search-btn { padding:10px 13px;border-radius:10px;border:1px solid rgba(139,92,246,0.3);background:rgba(139,92,246,0.1);color:var(--purple);cursor:pointer;font-size:16px;transition:all .2s }
+  .ref-search-btn:hover { background:rgba(139,92,246,0.22) }
+  .ref-food-result { display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);margin-bottom:8px;cursor:pointer;transition:all .2s }
+  .ref-food-result:hover { background:rgba(139,92,246,0.08);border-color:rgba(139,92,246,0.3) }
+  .ref-food-result-name { flex:1;font-size:13px;font-weight:600 }
+  .ref-food-result-kcal { font-size:12px;font-weight:700;color:var(--amber);flex-shrink:0 }
+  .ref-tipo-grid { display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:12px }
+  .ref-tipo-btn { padding:8px 6px;border-radius:10px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.04);color:var(--text-muted);font-size:11px;font-weight:700;cursor:pointer;transition:all .2s;font-family:inherit }
+  .ref-tipo-btn.selected { border-color:rgba(139,92,246,0.5);background:rgba(139,92,246,0.15);color:#C4B5FD }
+  .ref-fav-item { display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);margin-bottom:8px }
+  .ref-fav-item:hover { background:rgba(245,158,11,0.07);border-color:rgba(245,158,11,0.25) }
 </style>
 </head>
 <body>
@@ -998,42 +1113,93 @@
     <!-- ════ ÁGUA ════ -->
     <div class="section" id="section-agua">
       <div class="page-header">
-        <h1>Hidratação</h1>
-        <p>Acompanhe sua ingestão de água ao longo do dia</p>
+        <h1>💧 Hidratação</h1>
+        <p id="agua-ai-msg">Carregando...</p>
       </div>
 
-      <!-- Hero progress -->
-      <div class="card mb-16" style="text-align:center;padding:32px">
-        <div style="font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text-muted);margin-bottom:8px">Total de hoje</div>
-        <div style="font-size:64px;font-weight:900;background:linear-gradient(135deg,var(--cyan),var(--blue));-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1" id="agua-total-display">0L</div>
-        <div style="font-size:14px;color:var(--text-soft);margin-top:6px" id="agua-meta-display">Meta: — L</div>
-        <div class="progress-bar" style="max-width:400px;margin:16px auto 0;height:10px;border-radius:99px">
-          <div class="progress-fill" id="agua-progress-bar" style="width:0%;background:linear-gradient(90deg,var(--cyan),var(--blue));border-radius:99px"></div>
+      <!-- Reservatório futurista -->
+      <div class="card mb-16 agua-ai-card">
+        <div id="agua-reservoir-wrap">
+          <div id="agua-reservoir">
+            <div id="agua-wave-fill">
+              <div class="agua-wave agua-wave-1"></div>
+              <div class="agua-wave agua-wave-2"></div>
+            </div>
+            <div id="agua-reservoir-inner">
+              <div id="agua-total-display">0ml</div>
+              <div id="agua-pct-label">0%</div>
+              <div id="agua-meta-display">Meta: —</div>
+            </div>
+          </div>
+          <div id="agua-meta-line">
+            <span id="agua-faltam">—</span> para completar a meta
+          </div>
         </div>
-        <div style="font-size:12px;color:var(--text-muted);margin-top:8px" id="agua-pct-label">0% da meta</div>
       </div>
 
-      <!-- Seletor de tamanho -->
+      <!-- Indicadores corporais -->
+      <div class="grid-4 mb-16">
+        <div class="metric-card" style="text-align:center">
+          <div style="font-size:24px">💧</div>
+          <div class="metric-label">Hidratação</div>
+          <div class="metric-value agua-ind-val" id="ind-hidratacao" style="color:var(--cyan)">0%</div>
+          <div class="agua-ind-bar-wrap"><div class="agua-ind-bar" id="bar-hidratacao" style="width:0%;background:var(--cyan)"></div></div>
+        </div>
+        <div class="metric-card" style="text-align:center">
+          <div style="font-size:24px">⚡</div>
+          <div class="metric-label">Energia</div>
+          <div class="metric-value agua-ind-val" id="ind-energia" style="color:var(--amber)">—</div>
+          <div class="agua-ind-bar-wrap"><div class="agua-ind-bar" id="bar-energia" style="width:0%;background:var(--amber)"></div></div>
+        </div>
+        <div class="metric-card" style="text-align:center">
+          <div style="font-size:24px">🧠</div>
+          <div class="metric-label">Foco</div>
+          <div class="metric-value agua-ind-val" id="ind-foco" style="color:var(--purple)">—</div>
+          <div class="agua-ind-bar-wrap"><div class="agua-ind-bar" id="bar-foco" style="width:0%;background:var(--purple)"></div></div>
+        </div>
+        <div class="metric-card" style="text-align:center">
+          <div style="font-size:24px">💪</div>
+          <div class="metric-label">Recuperação</div>
+          <div class="metric-value agua-ind-val" id="ind-recuperacao" style="color:var(--green)">—</div>
+          <div class="agua-ind-bar-wrap"><div class="agua-ind-bar" id="bar-recuperacao" style="width:0%;background:var(--green)"></div></div>
+        </div>
+      </div>
+
+      <!-- Botões rápidos + personalizado -->
       <div class="card mb-16">
         <div class="card-title">Adicionar água</div>
-        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:4px">
-          <button onclick="aguaAdd(100)"  class="agua-size-btn" style="padding:14px 8px;border-radius:12px;border:1px solid rgba(6,182,212,0.3);background:rgba(6,182,212,0.07);color:var(--cyan);font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;display:flex;flex-direction:column;align-items:center;gap:4px"><span style="font-size:20px">🥛</span>100ml</button>
-          <button onclick="aguaAdd(200)"  class="agua-size-btn" style="padding:14px 8px;border-radius:12px;border:1px solid rgba(6,182,212,0.3);background:rgba(6,182,212,0.07);color:var(--cyan);font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;display:flex;flex-direction:column;align-items:center;gap:4px"><span style="font-size:20px">🥛</span>200ml</button>
-          <button onclick="aguaAdd(250)"  class="agua-size-btn" style="padding:14px 8px;border-radius:12px;border:1px solid rgba(6,182,212,0.3);background:rgba(6,182,212,0.07);color:var(--cyan);font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;display:flex;flex-direction:column;align-items:center;gap:4px"><span style="font-size:20px">🥤</span>250ml</button>
-          <button onclick="aguaAdd(350)"  class="agua-size-btn" style="padding:14px 8px;border-radius:12px;border:1px solid rgba(6,182,212,0.4);background:rgba(6,182,212,0.12);color:var(--cyan);font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;display:flex;flex-direction:column;align-items:center;gap:4px;box-shadow:0 0 10px rgba(6,182,212,0.15)"><span style="font-size:20px">🥤</span>350ml</button>
-          <button onclick="aguaAdd(500)"  class="agua-size-btn" style="padding:14px 8px;border-radius:12px;border:1px solid rgba(6,182,212,0.3);background:rgba(6,182,212,0.07);color:var(--cyan);font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;display:flex;flex-direction:column;align-items:center;gap:4px"><span style="font-size:20px">🍶</span>500ml</button>
-          <button onclick="aguaAdd(1000)" class="agua-size-btn" style="padding:14px 8px;border-radius:12px;border:1px solid rgba(6,182,212,0.3);background:rgba(6,182,212,0.07);color:var(--cyan);font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;display:flex;flex-direction:column;align-items:center;gap:4px"><span style="font-size:20px">🍺</span>1 litro</button>
+        <div class="agua-quick-grid">
+          <button class="agua-quick-btn" onclick="aguaAdd(200)" type="button">
+            <span class="agua-quick-icon">💧</span>
+            <span class="agua-quick-ml">+200ml</span>
+          </button>
+          <button class="agua-quick-btn agua-quick-featured" onclick="aguaAdd(350)" type="button">
+            <span class="agua-quick-icon">🥤</span>
+            <span class="agua-quick-ml">+350ml</span>
+            <span class="agua-quick-label">Copo</span>
+          </button>
+          <button class="agua-quick-btn" onclick="aguaAdd(500)" type="button">
+            <span class="agua-quick-icon">🍶</span>
+            <span class="agua-quick-ml">+500ml</span>
+          </button>
+          <button class="agua-quick-btn" onclick="aguaAdd(1000)" type="button">
+            <span class="agua-quick-icon">🫙</span>
+            <span class="agua-quick-ml">+1L</span>
+          </button>
         </div>
-        <style>.agua-size-btn:hover{background:rgba(6,182,212,0.2)!important;transform:translateY(-2px);box-shadow:0 4px 16px rgba(6,182,212,0.2)!important}</style>
+        <div class="agua-custom-row">
+          <input type="number" id="agua-custom-input" placeholder="ml personalizado" min="1" max="3000" class="agua-custom-input">
+          <button class="agua-custom-btn" onclick="aguaAddCustom()" type="button">Adicionar</button>
+        </div>
       </div>
 
       <!-- Métricas rápidas -->
       <div class="grid-3 mb-16">
         <div class="metric-card" style="text-align:center">
-          <div class="metric-icon" style="font-size:26px">💧</div>
+          <div class="metric-icon" style="font-size:26px">📋</div>
           <div class="metric-label">Registros hoje</div>
           <div class="metric-value" style="color:var(--cyan)" id="agua-copos-num">0</div>
-          <div class="metric-sub" id="agua-copos-meta">entradas</div>
+          <div class="metric-sub">entradas</div>
         </div>
         <div class="metric-card" style="text-align:center">
           <div class="metric-icon" style="font-size:26px">⏱️</div>
@@ -1044,19 +1210,19 @@
         <div class="metric-card" style="text-align:center">
           <div class="metric-icon" style="font-size:26px">🎯</div>
           <div class="metric-label">Faltam</div>
-          <div class="metric-value" style="color:var(--green);font-size:20px" id="agua-faltam">—</div>
+          <div class="metric-value" style="color:var(--green);font-size:20px" id="agua-faltam-card">—</div>
           <div class="metric-sub">para a meta</div>
         </div>
       </div>
 
-      <!-- Histórico do dia com horários -->
+      <!-- Registros de hoje -->
       <div class="card mb-16">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
           <div class="card-title" style="margin:0">Registros de hoje</div>
-          <button class="btn btn-ghost" style="font-size:11px;padding:6px 10px" onclick="aguaLimparDia()">Limpar</button>
+          <button class="btn btn-ghost" style="font-size:11px;padding:6px 10px" onclick="aguaLimparDia()" type="button">Limpar</button>
         </div>
         <div id="agua-registros-list">
-          <div style="text-align:center;padding:20px;color:var(--text-muted);font-size:13px">Nenhum registro ainda. Toque nos copos acima.</div>
+          <div style="text-align:center;padding:20px;color:var(--text-muted);font-size:13px">Nenhum registro ainda. Toque nos botões acima.</div>
         </div>
       </div>
 
@@ -1070,63 +1236,109 @@
     <!-- ════ REFEIÇÃO ════ -->
     <div class="section" id="section-refeicao">
       <div class="page-header">
-        <h1>Refeições</h1>
-        <p>Alimentação consciente, nutrição real</p>
+        <h1>🍽️ Nutrição</h1>
+        <p id="ref-ai-msg">Registre suas refeições para acompanhar a nutrição do dia.</p>
       </div>
 
-      <!-- Métricas do dia -->
-      <div class="grid-4 mb-16">
-        <div class="metric-card" style="text-align:center">
-          <div class="metric-icon">🍳</div>
-          <div class="metric-label">Café da manhã</div>
-          <div class="metric-value" style="font-size:20px" id="ref-cafe-status">—</div>
-          <div class="metric-sub" id="ref-cafe-sub">não registrado</div>
-        </div>
-        <div class="metric-card" style="text-align:center">
-          <div class="metric-icon">🥗</div>
-          <div class="metric-label">Almoço</div>
-          <div class="metric-value" style="font-size:20px" id="ref-almoco-status">—</div>
-          <div class="metric-sub" id="ref-almoco-sub">não registrado</div>
-        </div>
-        <div class="metric-card" style="text-align:center">
-          <div class="metric-icon">🍽️</div>
-          <div class="metric-label">Jantar</div>
-          <div class="metric-value" style="font-size:20px" id="ref-jantar-status">—</div>
-          <div class="metric-sub" id="ref-jantar-sub">não registrado</div>
-        </div>
-        <div class="metric-card" style="text-align:center">
-          <div class="metric-icon">🔥</div>
-          <div class="metric-label">Calorias est.</div>
-          <div class="metric-value" style="color:var(--amber)" id="ref-cal-total">0</div>
-          <div class="metric-sub">kcal hoje</div>
-        </div>
-      </div>
-
-      <!-- Score nutricional -->
-      <div class="card mb-16" style="display:flex;align-items:center;gap:24px;flex-wrap:wrap">
-        <div style="flex:1;min-width:180px">
-          <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text-muted);margin-bottom:4px">Qualidade nutricional hoje</div>
-          <div style="font-size:38px;font-weight:900;background:linear-gradient(90deg,var(--green),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1" id="ref-score">0</div>
-          <div style="font-size:12px;color:var(--text-soft);margin-top:4px" id="ref-score-label">Registre suas refeições</div>
-          <div class="progress-bar" style="margin-top:10px;height:6px"><div class="progress-fill" id="ref-score-bar" style="width:0%;background:linear-gradient(90deg,var(--green),var(--cyan))"></div></div>
-        </div>
-        <button class="btn btn-primary" onclick="openRefeicaoModal()" style="flex-shrink:0">🍽️ + Registrar refeição</button>
-      </div>
-
-      <!-- Lista de refeições do dia -->
+      <!-- Calorias hero -->
       <div class="card mb-16">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
-          <div class="card-title" style="margin:0">Refeições de hoje</div>
-          <button class="btn btn-ghost" style="font-size:12px;padding:7px 12px" onclick="openRefeicaoModal()">+ Adicionar</button>
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px">
+          <div>
+            <div class="ref-cal-label">Calorias hoje</div>
+            <div class="ref-cal-num"><span id="ref-cal-total">0</span><span class="ref-cal-slash"> / </span><span id="ref-cal-meta-disp">—</span> kcal</div>
+            <div style="font-size:11px;color:var(--text-muted);margin-top:4px" id="ref-cal-pct">0% da meta calórica</div>
+          </div>
+          <button class="btn btn-primary" onclick="openRefeicaoModal()" type="button">+ Adicionar</button>
         </div>
-        <div id="refeicoes-list">
-          <div style="text-align:center;padding:32px;color:var(--text-muted);font-size:13px">Nenhuma refeição registrada. Clique em "+ Adicionar" para começar.</div>
+        <div class="progress-bar" style="margin-top:14px;height:8px;border-radius:99px">
+          <div class="progress-fill" id="ref-cal-bar" style="width:0%;background:linear-gradient(90deg,var(--amber),#F97316);border-radius:99px"></div>
         </div>
       </div>
 
-      <!-- Histórico semanal -->
+      <!-- Macros -->
+      <div class="grid-4 mb-16">
+        <div class="metric-card ref-macro-card">
+          <div style="font-size:20px">🥩</div>
+          <div class="metric-label">Proteína</div>
+          <div class="ref-macro-val"><span id="ref-prot-val">0</span>g</div>
+          <div style="font-size:10px;color:var(--text-muted)" id="ref-prot-meta">/ 0g</div>
+          <div class="agua-ind-bar-wrap" style="margin-top:6px"><div class="agua-ind-bar" id="bar-prot" style="width:0%;background:#EF4444"></div></div>
+        </div>
+        <div class="metric-card ref-macro-card">
+          <div style="font-size:20px">🌾</div>
+          <div class="metric-label">Carboidrato</div>
+          <div class="ref-macro-val"><span id="ref-carb-val">0</span>g</div>
+          <div style="font-size:10px;color:var(--text-muted)" id="ref-carb-meta">/ 0g</div>
+          <div class="agua-ind-bar-wrap" style="margin-top:6px"><div class="agua-ind-bar" id="bar-carb" style="width:0%;background:var(--amber)"></div></div>
+        </div>
+        <div class="metric-card ref-macro-card">
+          <div style="font-size:20px">🥑</div>
+          <div class="metric-label">Gordura</div>
+          <div class="ref-macro-val"><span id="ref-gord-val">0</span>g</div>
+          <div style="font-size:10px;color:var(--text-muted)" id="ref-gord-meta">/ 0g</div>
+          <div class="agua-ind-bar-wrap" style="margin-top:6px"><div class="agua-ind-bar" id="bar-gord" style="width:0%;background:var(--green)"></div></div>
+        </div>
+        <div class="metric-card ref-macro-card">
+          <div style="font-size:20px">🥦</div>
+          <div class="metric-label">Fibras</div>
+          <div class="ref-macro-val"><span id="ref-fibras-val">0</span>g</div>
+          <div style="font-size:10px;color:var(--text-muted)" id="ref-fibras-meta">/ 30g</div>
+          <div class="agua-ind-bar-wrap" style="margin-top:6px"><div class="agua-ind-bar" id="bar-fibras" style="width:0%;background:var(--cyan)"></div></div>
+        </div>
+      </div>
+
+      <!-- 5 Refeições do dia (accordion) -->
+      <div class="mb-16">
+        <div class="ref-meal-section">
+          <div class="ref-meal-header" onclick="toggleRefSection('cafe')">
+            <span class="ref-meal-icon">🍳</span>
+            <div class="ref-meal-info"><div class="ref-meal-name">Café da manhã</div><div class="ref-meal-cal" id="ref-cafe-cal">0 kcal</div></div>
+            <button class="ref-meal-add" onclick="openRefModal('cafe',event)" type="button">+</button>
+            <div class="ref-meal-chevron" id="chevron-cafe">▾</div>
+          </div>
+          <div class="ref-meal-body" id="ref-body-cafe"></div>
+        </div>
+        <div class="ref-meal-section">
+          <div class="ref-meal-header" onclick="toggleRefSection('almoco')">
+            <span class="ref-meal-icon">🥗</span>
+            <div class="ref-meal-info"><div class="ref-meal-name">Almoço</div><div class="ref-meal-cal" id="ref-almoco-cal">0 kcal</div></div>
+            <button class="ref-meal-add" onclick="openRefModal('almoco',event)" type="button">+</button>
+            <div class="ref-meal-chevron" id="chevron-almoco">▾</div>
+          </div>
+          <div class="ref-meal-body" id="ref-body-almoco"></div>
+        </div>
+        <div class="ref-meal-section">
+          <div class="ref-meal-header" onclick="toggleRefSection('lanche')">
+            <span class="ref-meal-icon">🍎</span>
+            <div class="ref-meal-info"><div class="ref-meal-name">Café da tarde</div><div class="ref-meal-cal" id="ref-lanche-cal">0 kcal</div></div>
+            <button class="ref-meal-add" onclick="openRefModal('lanche',event)" type="button">+</button>
+            <div class="ref-meal-chevron" id="chevron-lanche">▾</div>
+          </div>
+          <div class="ref-meal-body" id="ref-body-lanche"></div>
+        </div>
+        <div class="ref-meal-section">
+          <div class="ref-meal-header" onclick="toggleRefSection('jantar')">
+            <span class="ref-meal-icon">🍽️</span>
+            <div class="ref-meal-info"><div class="ref-meal-name">Jantar</div><div class="ref-meal-cal" id="ref-jantar-cal">0 kcal</div></div>
+            <button class="ref-meal-add" onclick="openRefModal('jantar',event)" type="button">+</button>
+            <div class="ref-meal-chevron" id="chevron-jantar">▾</div>
+          </div>
+          <div class="ref-meal-body" id="ref-body-jantar"></div>
+        </div>
+        <div class="ref-meal-section">
+          <div class="ref-meal-header" onclick="toggleRefSection('ceia')">
+            <span class="ref-meal-icon">🌙</span>
+            <div class="ref-meal-info"><div class="ref-meal-name">Ceia</div><div class="ref-meal-cal" id="ref-ceia-cal">0 kcal</div></div>
+            <button class="ref-meal-add" onclick="openRefModal('ceia',event)" type="button">+</button>
+            <div class="ref-meal-chevron" id="chevron-ceia">▾</div>
+          </div>
+          <div class="ref-meal-body" id="ref-body-ceia"></div>
+        </div>
+      </div>
+
+      <!-- Gráfico semanal -->
       <div class="card">
-        <div class="card-title">Qualidade — últimos 7 dias</div>
+        <div class="card-title">Calorias — últimos 7 dias</div>
         <div class="chart-wrap"><canvas id="refeicaoChart"></canvas></div>
       </div>
     </div>
@@ -1873,41 +2085,71 @@
 </div>
 
 <!-- MODAL REFEIÇÃO -->
-<div id="refeicao-overlay" style="display:none;position:fixed;inset:0;z-index:3000;background:rgba(0,0,0,0.75);backdrop-filter:blur(8px);align-items:center;justify-content:center;padding:20px">
-  <div style="background:#0d1120;border:1px solid rgba(255,255,255,0.1);border-radius:20px;padding:32px;width:100%;max-width:440px;animation:slideup 0.25s ease;box-shadow:0 40px 80px rgba(0,0,0,0.6)">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px">
-      <div style="font-size:17px;font-weight:800">🍽️ Registrar refeição</div>
-      <button onclick="closeRefeicaoModal()" style="background:rgba(255,255,255,0.06);border:none;width:30px;height:30px;border-radius:50%;color:#94A3B8;cursor:pointer;font-size:16px">✕</button>
+<div id="refeicao-overlay" style="display:none;position:fixed;inset:0;z-index:3000;background:rgba(0,0,0,0.75);backdrop-filter:blur(8px);align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto">
+  <div style="background:#0d1120;border:1px solid rgba(255,255,255,0.1);border-radius:20px;padding:24px;width:100%;max-width:460px;animation:slideup 0.25s ease;box-shadow:0 40px 80px rgba(0,0,0,0.6);margin:auto">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">
+      <div style="font-size:17px;font-weight:800">🍽️ Adicionar alimento</div>
+      <button onclick="closeRefeicaoModal()" type="button" style="background:rgba(255,255,255,0.06);border:none;width:30px;height:30px;border-radius:50%;color:#94A3B8;cursor:pointer;font-size:16px">✕</button>
     </div>
-    <div style="display:flex;flex-direction:column;gap:14px">
-      <div>
-        <label style="font-size:11px;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:8px">Tipo de refeição</label>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px" id="ref-tipo-btns">
-          <button onclick="selectRefTipo(this,'cafe')" class="ref-tipo selected" data-t="cafe" style="padding:10px;border-radius:10px;border:1px solid rgba(245,158,11,0.4);background:rgba(245,158,11,0.1);color:#F59E0B;font-size:13px;font-weight:600;cursor:pointer">🍳 Café da manhã</button>
-          <button onclick="selectRefTipo(this,'almoco')" class="ref-tipo" data-t="almoco" style="padding:10px;border-radius:10px;border:1px solid rgba(34,197,94,0.3);background:rgba(34,197,94,0.06);color:#22C55E;font-size:13px;font-weight:600;cursor:pointer">🥗 Almoço</button>
-          <button onclick="selectRefTipo(this,'lanche')" class="ref-tipo" data-t="lanche" style="padding:10px;border-radius:10px;border:1px solid rgba(139,92,246,0.3);background:rgba(139,92,246,0.06);color:#8B5CF6;font-size:13px;font-weight:600;cursor:pointer">🍎 Lanche</button>
-          <button onclick="selectRefTipo(this,'jantar')" class="ref-tipo" data-t="jantar" style="padding:10px;border-radius:10px;border:1px solid rgba(59,130,246,0.3);background:rgba(59,130,246,0.06);color:#3B82F6;font-size:13px;font-weight:600;cursor:pointer">🍽️ Jantar</button>
-        </div>
+
+    <!-- Tabs -->
+    <div class="ref-modal-tabs">
+      <button class="ref-tab active" onclick="selectRefTab(this,'manual')" type="button">✏️ Manual</button>
+      <button class="ref-tab" onclick="selectRefTab(this,'busca')" type="button">🔍 Buscar</button>
+      <button class="ref-tab" onclick="selectRefTab(this,'favoritos')" type="button">⭐ Favoritos</button>
+    </div>
+
+    <!-- Tab: Manual -->
+    <div id="ref-tab-manual">
+      <label style="font-size:11px;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:8px">Refeição</label>
+      <div class="ref-tipo-grid" id="ref-tipo-btns">
+        <button class="ref-tipo-btn selected" onclick="selectRefTipo(this,'cafe')"   data-t="cafe"   type="button">🍳 Café manhã</button>
+        <button class="ref-tipo-btn"          onclick="selectRefTipo(this,'almoco')" data-t="almoco" type="button">🥗 Almoço</button>
+        <button class="ref-tipo-btn"          onclick="selectRefTipo(this,'lanche')" data-t="lanche" type="button">🍎 Café tarde</button>
+        <button class="ref-tipo-btn"          onclick="selectRefTipo(this,'jantar')" data-t="jantar" type="button">🍽️ Jantar</button>
+        <button class="ref-tipo-btn"          onclick="selectRefTipo(this,'ceia')"   data-t="ceia"   type="button">🌙 Ceia</button>
+        <div></div>
       </div>
-      <div>
-        <label style="font-size:11px;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px">O que você comeu?</label>
-        <input id="ref-descricao" type="text" placeholder="Ex: Frango grelhado com arroz e salada" maxlength="80" style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:11px 14px;color:#F1F5F9;font-size:14px;font-family:inherit;outline:none" onfocus="this.style.borderColor='rgba(34,197,94,.5)'" onblur="this.style.borderColor='rgba(255,255,255,0.1)'">
+
+      <label style="font-size:11px;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px;margin-top:4px">Alimento</label>
+      <input id="ref-descricao" type="text" placeholder="Ex: Frango grelhado, arroz integral..." maxlength="80"
+        style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:11px 14px;color:#F1F5F9;font-size:14px;font-family:inherit;outline:none;margin-bottom:12px;transition:border-color .2s"
+        onfocus="this.style.borderColor='rgba(139,92,246,.5)'" onblur="this.style.borderColor='rgba(255,255,255,0.1)'">
+
+      <label style="font-size:11px;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:8px">Macros (por porção)</label>
+      <div class="ref-macros-row">
+        <div class="ref-macro-inp"><label>Kcal</label><input id="ref-calorias"   type="number" min="0" max="9999" placeholder="0"></div>
+        <div class="ref-macro-inp"><label>Prot g</label><input id="ref-prot-inp" type="number" min="0" max="999"  placeholder="0"></div>
+        <div class="ref-macro-inp"><label>Carb g</label><input id="ref-carb-inp" type="number" min="0" max="999"  placeholder="0"></div>
+        <div class="ref-macro-inp"><label>Gord g</label><input id="ref-gord-inp" type="number" min="0" max="999"  placeholder="0"></div>
+        <div class="ref-macro-inp"><label>Fibras g</label><input id="ref-fibras-inp" type="number" min="0" max="999" placeholder="0"></div>
       </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-        <div>
-          <label style="font-size:11px;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px">Calorias <span style="font-weight:400;text-transform:none">(aprox.)</span></label>
-          <input id="ref-calorias" type="number" min="0" max="5000" placeholder="Ex: 450" style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:11px 14px;color:#F1F5F9;font-size:14px;font-family:inherit;outline:none" onfocus="this.style.borderColor='rgba(245,158,11,.5)'" onblur="this.style.borderColor='rgba(255,255,255,0.1)'">
-        </div>
-        <div>
-          <label style="font-size:11px;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px">Qualidade</label>
-          <div style="display:flex;gap:6px;margin-top:6px" id="ref-qual-btns">
-            <button onclick="selectRefQual(this,1)" class="ref-qual" title="Ruim" style="flex:1;padding:8px;border-radius:8px;border:1px solid rgba(239,68,68,0.3);background:rgba(239,68,68,0.06);font-size:16px;cursor:pointer">😬</button>
-            <button onclick="selectRefQual(this,2)" class="ref-qual selected" title="Ok" style="flex:1;padding:8px;border-radius:8px;border:1px solid rgba(245,158,11,0.4);background:rgba(245,158,11,0.1);font-size:16px;cursor:pointer">😐</button>
-            <button onclick="selectRefQual(this,3)" class="ref-qual" title="Saudável" style="flex:1;padding:8px;border-radius:8px;border:1px solid rgba(34,197,94,0.3);background:rgba(34,197,94,0.06);font-size:16px;cursor:pointer">😄</button>
-          </div>
-        </div>
+
+      <div style="display:flex;gap:8px;margin-top:14px;align-items:center">
+        <button onclick="toggleRefFavorite()" id="btn-ref-fav" type="button"
+          style="padding:9px 14px;border-radius:10px;border:1px solid rgba(245,158,11,0.3);background:rgba(245,158,11,0.07);color:#F59E0B;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;white-space:nowrap">⭐ Favoritar</button>
+        <button onclick="salvarRefeicao()" type="button"
+          style="flex:1;background:linear-gradient(135deg,#22C55E,#16A34A);color:#fff;border:none;border-radius:11px;padding:12px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;box-shadow:0 0 20px rgba(34,197,94,.25)">Registrar</button>
       </div>
-      <button onclick="salvarRefeicao()" style="background:linear-gradient(135deg,#22C55E,#16A34A);color:#fff;border:none;border-radius:11px;padding:13px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;box-shadow:0 0 24px rgba(34,197,94,.3);margin-top:4px">Registrar refeição</button>
+      <div id="ref-modal-error" style="color:#f87171;font-size:12px;margin-top:8px;display:none"></div>
+    </div>
+
+    <!-- Tab: Busca (Open Food Facts) -->
+    <div id="ref-tab-busca" style="display:none">
+      <div class="ref-search-row">
+        <input id="ref-busca-input" class="ref-search-inp" placeholder="Pesquisar alimento..." onkeydown="if(event.key==='Enter')buscarAlimento()">
+        <button class="ref-search-btn" onclick="buscarAlimento()" type="button" title="Buscar">🔍</button>
+        <button class="ref-search-btn" onclick="escaneiarCodigo()" type="button" title="Código de barras">📷</button>
+      </div>
+      <div id="ref-busca-loading" style="display:none;text-align:center;padding:20px;color:var(--text-muted);font-size:13px">Buscando...</div>
+      <div id="ref-busca-results"></div>
+    </div>
+
+    <!-- Tab: Favoritos -->
+    <div id="ref-tab-favoritos" style="display:none">
+      <div id="ref-favoritos-list">
+        <div style="text-align:center;padding:24px;color:var(--text-muted);font-size:13px">Nenhum favorito ainda. Use ⭐ ao registrar um alimento para salvá-lo aqui.</div>
+      </div>
     </div>
   </div>
 </div>
@@ -3172,7 +3414,7 @@ try {
     carregarTasks();
     carregarTreinos();
     carregarRotinaFull();
-    carregarRefeicoes();
+    carregarRefeicoes(d);
     carregarAguaRegistros();
 
     // Perfil counts
@@ -3504,45 +3746,78 @@ function pomoReset() {
 let _lastWeight = 0;
 let _aguaRegistros = [];  // [{ml, hora, ts, id}]
 let _aguaTotalMl   = 0;   // total ml hoje
+let _aguaGoalReachedToday = false;
 
-function aguaGoalMl() { return (_lastWeight || _goals.weight || 80) * 35; }
+function aguaGoalMl() {
+  const base = (_lastWeight || _goals.weight || 80) * 35;
+  const hasTreino = _treinosData && _treinosData.length > 0;
+  return base + (hasTreino ? 500 : 0);
+}
 
 function mlParaTexto(ml) {
   return ml >= 1000 ? (ml / 1000).toFixed(2).replace(/\.?0+$/, '').replace('.', ',') + 'L'
                     : ml + 'ml';
 }
 
-function aguaRenderAba() {
-  const goalMl = aguaGoalMl();
-  const totalMl = _aguaTotalMl;
-  const pct = Math.min(100, Math.round(totalMl / goalMl * 100));
-  const faltam = Math.max(0, goalMl - totalMl);
+function aguaGetAIMensagem(pct) {
+  const hour = new Date().getHours();
+  const hasTreino = _treinosData && _treinosData.length > 0;
+  if (pct >= 100) return '🏆 Meta batida! Corpo totalmente hidratado — performance máxima!';
+  if (pct >= 80)  return '💪 Quase lá! Mais um copo e você fecha a meta do dia!';
+  if (pct >= 60)  return hasTreino ? '🏋️ Bom progresso! Treino hoje exige mais reposição de líquidos.' : '👍 Boa hidratação. Continue bebendo regularmente!';
+  if (pct >= 40)  return hour < 12 ? '☀️ Manhã em andamento — hidrate-se bem antes do almoço!' : hour < 18 ? '🌤️ Metade do caminho! Beba água agora.' : '🌙 Noite chegando, ainda dá tempo de bater a meta!';
+  if (pct >= 20)  return hasTreino ? '⚡ Você treinou hoje — seu corpo precisa de mais água para recuperar!' : '💧 Abaixo do ideal. Beba um copo agora!';
+  return hour < 10 ? '🌅 Comece o dia com um copo de água. Seu corpo agradece.' : '⚠️ Hidratação crítica! Beba água agora para evitar fadiga.';
+}
 
-  const litros = totalMl >= 1000
-    ? (totalMl / 1000).toFixed(1).replace('.', ',') + 'L'
-    : totalMl + 'ml';
+function aguaGetIndicadores(pct) {
+  return {
+    hidratacao: Math.min(100, pct),
+    energia:    pct >= 75 ? 95 : pct >= 50 ? 70 : pct >= 25 ? 45 : 20,
+    foco:       pct >= 75 ? 95 : pct >= 50 ? 75 : pct >= 25 ? 50 : 25,
+    recuperacao:pct >= 75 ? 90 : pct >= 50 ? 65 : pct >= 25 ? 40 : 15,
+  };
+}
+
+function aguaRenderAba() {
+  const goalMl  = aguaGoalMl();
+  const totalMl = _aguaTotalMl;
+  const pct     = Math.min(100, Math.round(totalMl / goalMl * 100));
+  const faltam  = Math.max(0, goalMl - totalMl);
+  const litros  = totalMl >= 1000 ? (totalMl / 1000).toFixed(1).replace('.', ',') + 'L' : totalMl + 'ml';
 
   const set = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+
+  // Reservoir
+  const fill = document.getElementById('agua-wave-fill');
+  if (fill) fill.style.height = pct + '%';
+  const reservoir = document.getElementById('agua-reservoir');
+  if (reservoir) reservoir.classList.toggle('goal-glow', pct >= 100);
+
   set('agua-total-display', litros);
+  set('agua-pct-label', pct + '%');
   set('agua-meta-display', `Meta: ${mlParaTexto(goalMl)}`);
+  set('agua-faltam', faltam > 0 ? mlParaTexto(faltam) : '✓ Meta atingida!');
+  set('agua-faltam-card', faltam > 0 ? mlParaTexto(faltam) : '✓ Meta!');
   set('agua-copos-num', _aguaRegistros.length);
-  set('agua-pct-label', pct + '% da meta');
-  set('agua-faltam', faltam > 0 ? mlParaTexto(faltam) : '✓ Meta!');
+  set('agua-ultimo', _aguaRegistros.length > 0 ? _aguaRegistros[_aguaRegistros.length - 1].hora : '—');
 
-  const bar = document.getElementById('agua-progress-bar');
-  if (bar) bar.style.width = pct + '%';
+  // AI message
+  const aiEl = document.getElementById('agua-ai-msg');
+  if (aiEl) aiEl.textContent = aguaGetAIMensagem(pct);
 
-  if (_aguaRegistros.length > 0) {
-    set('agua-ultimo', _aguaRegistros[_aguaRegistros.length - 1].hora);
-  } else {
-    set('agua-ultimo', '—');
+  // Body indicators
+  const ind = aguaGetIndicadores(pct);
+  for (const [key, val] of Object.entries(ind)) {
+    set('ind-' + key, val + '%');
+    const bar = document.getElementById('bar-' + key);
+    if (bar) bar.style.width = val + '%';
   }
 
   aguaRenderRegistros();
 
-  // Sync waterCount (copos de 350ml equivalente) para o widget lateral e score
   waterCount = Math.round(totalMl / 350);
-  buildWater();          // reconstrói dots do painel lateral
+  buildWater();
   updateWaterDisplay();
   atualizarDashWater();
   recalcScore();
@@ -3552,7 +3827,7 @@ function aguaRenderRegistros() {
   const list = document.getElementById('agua-registros-list');
   if (!list) return;
   if (_aguaRegistros.length === 0) {
-    list.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text-muted);font-size:13px">Nenhum registro ainda. Selecione um tamanho acima.</div>';
+    list.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text-muted);font-size:13px">Nenhum registro ainda. Toque nos botões acima.</div>';
     return;
   }
   list.innerHTML = '';
@@ -3563,7 +3838,7 @@ function aguaRenderRegistros() {
     const idx = _aguaRegistros.length - 1 - ri;
     const el = document.createElement('div');
     el.style.cssText = 'display:flex;align-items:center;gap:14px;padding:12px 14px;border-radius:12px;background:var(--glass);border:1px solid var(--glass-border);margin-bottom:8px;transition:all .2s';
-    const icon = r.ml <= 150 ? '🥛' : r.ml <= 300 ? '🥤' : r.ml < 800 ? '🍶' : '🍺';
+    const icon = r.ml <= 150 ? '🥛' : r.ml <= 300 ? '💧' : r.ml < 800 ? '🥤' : '🫙';
     el.innerHTML = `
       <div style="font-size:22px">${icon}</div>
       <div style="flex:1">
@@ -3583,9 +3858,31 @@ function aguaAdd(ml) {
   const reg  = { ml, hora, ts: now.getTime(), id: Date.now().toString() };
   _aguaRegistros.push(reg);
   _aguaTotalMl += ml;
+
+  const pct = Math.min(100, _aguaTotalMl / aguaGoalMl() * 100);
+  if (!_aguaGoalReachedToday && pct >= 100) {
+    _aguaGoalReachedToday = true;
+    addXP(50);
+    showToast('🏆 Meta de hidratação batida! +50 XP 💧');
+  } else {
+    showToast(`+${mlParaTexto(ml)} registrado! 💧`);
+  }
+
   aguaRenderAba();
-  showToast(`+${mlParaTexto(ml)} registrado! 💧`);
   salvarAguaFirestore();
+}
+
+function aguaAddCustom() {
+  const inp = document.getElementById('agua-custom-input');
+  if (!inp) return;
+  const ml = parseInt(inp.value, 10);
+  if (!ml || ml < 1 || ml > 3000) {
+    inp.style.borderColor = 'rgba(239,68,68,0.6)';
+    setTimeout(() => { inp.style.borderColor = ''; }, 1200);
+    return;
+  }
+  inp.value = '';
+  aguaAdd(ml);
 }
 
 async function aguaRemoverRegistro(id, e) {
@@ -3602,6 +3899,7 @@ async function aguaLimparDia() {
   if (!confirm('Limpar todos os registros de água de hoje?')) return;
   _aguaTotalMl = 0;
   _aguaRegistros = [];
+  _aguaGoalReachedToday = false;
   waterCount = 0;
   await salvarAguaFirestore();
   aguaRenderAba();
@@ -3630,7 +3928,6 @@ async function carregarAguaRegistros() {
         _aguaRegistros = d.aguaRegistros;
         _aguaTotalMl   = d.aguaTotalMl || _aguaRegistros.reduce((s, r) => s + r.ml, 0);
       } else if (typeof d.water === 'number') {
-        // Migração: converte copos antigos para ml
         _aguaTotalMl = d.water * 350;
         waterCount   = d.water;
       }
@@ -3675,25 +3972,72 @@ initCharts = function(section) {
 };
 
 // ══════════════════════════════════════
-//  REFEIÇÃO
+//  REFEIÇÃO / NUTRIÇÃO
 // ══════════════════════════════════════
 let _refData = [];       // refeições do dia
 let _refTipo = 'cafe';   // tipo selecionado no modal
-let _refQual = 2;        // qualidade 1=ruim 2=ok 3=saudável
+let _refFavs = [];       // alimentos favoritos
 
-const REF_TIPO_LABELS = { cafe: '🍳 Café da manhã', almoco: '🥗 Almoço', lanche: '🍎 Lanche', jantar: '🍽️ Jantar' };
-const REF_QUAL_LABELS = { 1: 'Ruim', 2: 'Ok', 3: 'Saudável' };
-const REF_QUAL_COLORS = { 1: 'var(--red)', 2: 'var(--amber)', 3: 'var(--green)' };
-const REF_TIPO_COLORS  = { cafe: '#F59E0B', almoco: '#22C55E', lanche: '#8B5CF6', jantar: '#3B82F6' };
+const REF_TIPOS = {
+  cafe:   { label:'Café da manhã', emoji:'🍳' },
+  almoco: { label:'Almoço',        emoji:'🥗' },
+  lanche: { label:'Café da tarde', emoji:'🍎' },
+  jantar: { label:'Jantar',        emoji:'🍽️' },
+  ceia:   { label:'Ceia',          emoji:'🌙' },
+};
 
-function openRefeicaoModal() {
+function refGoals() {
+  const peso  = _lastWeight || _goals.weight || 75;
+  const cal   = Math.round(peso * 33);
+  const prot  = Math.round(peso * 2);
+  const carb  = Math.round(cal * 0.45 / 4);
+  const gord  = Math.round(cal * 0.25 / 9);
+  return { cal, prot, carb, gord, fibras: 30 };
+}
+
+function refGetTotals() {
+  return _refData.reduce((acc, r) => {
+    acc.cal    += r.cal    || 0;
+    acc.prot   += r.prot   || 0;
+    acc.carb   += r.carb   || 0;
+    acc.gord   += r.gord   || 0;
+    acc.fibras += r.fibras || 0;
+    return acc;
+  }, { cal:0, prot:0, carb:0, gord:0, fibras:0 });
+}
+
+function refGetAIMensagem() {
+  const goals  = refGoals();
+  const totals = refGetTotals();
+  if (_refData.length === 0) return 'Registre suas refeições para acompanhar a nutrição do dia.';
+  const pctProt = goals.prot > 0 ? totals.prot / goals.prot : 0;
+  const pctCal  = goals.cal  > 0 ? totals.cal  / goals.cal  : 0;
+  const pctCarb = goals.carb > 0 ? totals.carb / goals.carb : 0;
+  if (pctProt < 0.5)             return '🥩 Proteína baixa hoje. Adicione frango, ovos ou peixe.';
+  if (pctCarb > 1.2)             return '🌾 Carboidrato acima da meta. Prefira fontes integrais.';
+  if (pctCal > 1.1)              return '⚠️ Calorias acima da meta. Atenção nas próximas refeições.';
+  if (pctProt >= 0.9 && pctCal <= 1.0) return '💪 Perfeito! Proteína e calorias no ponto para sua meta!';
+  if (pctCal < 0.5)              return '⚡ Você ainda tem espaço para mais calorias. Continue registrando!';
+  return '👍 Alimentação equilibrada. Continue assim!';
+}
+
+function openRefeicaoModal(tipo) {
+  _refTipo = tipo || 'cafe';
   document.getElementById('refeicao-overlay').style.display = 'flex';
-  document.getElementById('ref-descricao').value = '';
-  document.getElementById('ref-calorias').value = '';
-  _refTipo = 'cafe';
-  _refQual = 2;
-  document.querySelectorAll('.ref-tipo').forEach(b => b.style.opacity = b.dataset.t === 'cafe' ? '1' : '0.45');
-  document.querySelectorAll('#ref-qual-btns .ref-qual').forEach((b, i) => b.style.opacity = (i + 1) === 2 ? '1' : '0.45');
+  ['ref-descricao','ref-calorias','ref-prot-inp','ref-carb-inp','ref-gord-inp','ref-fibras-inp'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.value = '';
+  });
+  const errEl = document.getElementById('ref-modal-error');
+  if (errEl) errEl.style.display = 'none';
+  document.querySelectorAll('#ref-tipo-btns .ref-tipo-btn').forEach(b => b.classList.toggle('selected', b.dataset.t === _refTipo));
+  selectRefTab(document.querySelector('.ref-tab'), 'manual');
+  const favBtn = document.getElementById('btn-ref-fav');
+  if (favBtn) { favBtn.textContent = '⭐ Favoritar'; favBtn.style.background = ''; }
+}
+
+function openRefModal(tipo, e) {
+  if (e) e.stopPropagation();
+  openRefeicaoModal(tipo);
 }
 
 function closeRefeicaoModal() {
@@ -3702,26 +4046,187 @@ function closeRefeicaoModal() {
 
 function selectRefTipo(btn, tipo) {
   _refTipo = tipo;
-  document.querySelectorAll('.ref-tipo').forEach(b => b.style.opacity = b.dataset.t === tipo ? '1' : '0.45');
+  document.querySelectorAll('#ref-tipo-btns .ref-tipo-btn').forEach(b => b.classList.toggle('selected', b.dataset.t === tipo));
 }
 
-function selectRefQual(btn, q) {
-  _refQual = q;
-  document.querySelectorAll('#ref-qual-btns .ref-qual').forEach((b, i) => b.style.opacity = (i + 1) === q ? '1' : '0.45');
+function selectRefTab(btn, tab) {
+  document.querySelectorAll('.ref-tab').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  ['manual','busca','favoritos'].forEach(t => {
+    const el = document.getElementById('ref-tab-' + t);
+    if (el) el.style.display = t === tab ? '' : 'none';
+  });
+  if (tab === 'favoritos') renderRefFavoritos();
+}
+
+function toggleRefFavorite() {
+  const btn    = document.getElementById('btn-ref-fav');
+  const desc   = document.getElementById('ref-descricao').value.trim();
+  if (!desc) { btn.style.color = '#f87171'; setTimeout(() => btn.style.color = '', 1000); return; }
+  const fav = {
+    id:     Date.now().toString(),
+    desc,
+    cal:    parseInt(document.getElementById('ref-calorias').value)   || 0,
+    prot:   parseFloat(document.getElementById('ref-prot-inp').value)  || 0,
+    carb:   parseFloat(document.getElementById('ref-carb-inp').value)  || 0,
+    gord:   parseFloat(document.getElementById('ref-gord-inp').value)  || 0,
+    fibras: parseFloat(document.getElementById('ref-fibras-inp').value)|| 0,
+  };
+  _refFavs.push(fav);
+  salvarFavoritosFirestore();
+  btn.textContent = '✓ Favoritado';
+  btn.style.background = 'rgba(245,158,11,0.18)';
+  showToast('⭐ Alimento salvo nos favoritos!');
+}
+
+function renderRefFavoritos() {
+  const list = document.getElementById('ref-favoritos-list');
+  if (!list) return;
+  if (_refFavs.length === 0) {
+    list.innerHTML = '<div style="text-align:center;padding:24px;color:var(--text-muted);font-size:13px">Nenhum favorito ainda. Use ⭐ ao registrar um alimento.</div>';
+    return;
+  }
+  list.innerHTML = '';
+  _refFavs.forEach(f => {
+    const el = document.createElement('div');
+    el.className = 'ref-fav-item';
+    el.innerHTML = `
+      <div style="flex:1;min-width:0">
+        <div style="font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${f.desc}</div>
+        <div style="font-size:11px;color:var(--text-muted)">${f.cal} kcal · P:${f.prot}g C:${f.carb}g G:${f.gord}g</div>
+      </div>
+      <button onclick="usarFavorito('${f.id}')" type="button" style="font-size:11px;padding:5px 10px;border-radius:8px;border:1px solid rgba(139,92,246,0.3);background:rgba(139,92,246,0.1);color:var(--purple);cursor:pointer;white-space:nowrap">Usar</button>
+      <button onclick="removerFavorito('${f.id}',event)" type="button" style="background:none;border:none;color:#f87171;cursor:pointer;font-size:14px;padding:4px">✕</button>`;
+    list.appendChild(el);
+  });
+}
+
+function usarFavorito(id) {
+  const f = _refFavs.find(x => x.id === id);
+  if (!f) return;
+  document.getElementById('ref-descricao').value    = f.desc;
+  document.getElementById('ref-calorias').value     = f.cal   || '';
+  document.getElementById('ref-prot-inp').value     = f.prot  || '';
+  document.getElementById('ref-carb-inp').value     = f.carb  || '';
+  document.getElementById('ref-gord-inp').value     = f.gord  || '';
+  document.getElementById('ref-fibras-inp').value   = f.fibras|| '';
+  selectRefTab(document.querySelector('.ref-tab'), 'manual');
+}
+
+function removerFavorito(id, e) {
+  e.stopPropagation();
+  _refFavs = _refFavs.filter(f => f.id !== id);
+  salvarFavoritosFirestore();
+  renderRefFavoritos();
+}
+
+async function salvarFavoritosFirestore() {
+  if (!_uid || !_db) return;
+  try { await _db.collection('users').doc(_uid).set({ foodFavs: _refFavs }, { merge: true }); } catch(e) {}
+}
+
+async function buscarAlimento() {
+  const q = (document.getElementById('ref-busca-input').value || '').trim();
+  if (!q) return;
+  const loading = document.getElementById('ref-busca-loading');
+  const results = document.getElementById('ref-busca-results');
+  if (loading) loading.style.display = '';
+  if (results) results.innerHTML = '';
+  try {
+    const res  = await fetch(`https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(q)}&search_simple=1&action=process&json=1&page_size=8&cc=br&lc=pt`);
+    const data = await res.json();
+    if (loading) loading.style.display = 'none';
+    if (!results) return;
+    const prods = (data.products || []).filter(p => p.product_name && p.nutriments);
+    if (prods.length === 0) {
+      results.innerHTML = '<div style="text-align:center;padding:16px;color:var(--text-muted);font-size:13px">Nenhum resultado encontrado.</div>';
+      return;
+    }
+    results.innerHTML = '';
+    prods.forEach(p => {
+      const n    = p.nutriments;
+      const kcal = Math.round(n['energy-kcal_100g'] || n['energy-kcal'] || 0);
+      const prot = Math.round((n.proteins_100g      || n.proteins       || 0) * 10) / 10;
+      const carb = Math.round((n.carbohydrates_100g || n.carbohydrates  || 0) * 10) / 10;
+      const gord = Math.round((n.fat_100g           || n.fat            || 0) * 10) / 10;
+      const fibr = Math.round((n.fiber_100g         || n.fiber          || 0) * 10) / 10;
+      const el = document.createElement('div');
+      el.className = 'ref-food-result';
+      el.innerHTML = `
+        <div style="flex:1;min-width:0">
+          <div class="ref-food-result-name" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${p.product_name}</div>
+          <div style="font-size:11px;color:var(--text-muted)">P:${prot}g C:${carb}g G:${gord}g · por 100g</div>
+        </div>
+        <div class="ref-food-result-kcal">${kcal} kcal</div>`;
+      el.onclick = () => preencherAlimentoBusca(p.product_name, kcal, prot, carb, gord, fibr);
+      results.appendChild(el);
+    });
+  } catch(err) {
+    if (loading) loading.style.display = 'none';
+    if (results) results.innerHTML = '<div style="text-align:center;padding:16px;color:#f87171;font-size:13px">Erro na busca. Verifique sua conexão.</div>';
+  }
+}
+
+function preencherAlimentoBusca(nome, kcal, prot, carb, gord, fibras) {
+  document.getElementById('ref-descricao').value    = nome;
+  document.getElementById('ref-calorias').value     = kcal   || '';
+  document.getElementById('ref-prot-inp').value     = prot   || '';
+  document.getElementById('ref-carb-inp').value     = carb   || '';
+  document.getElementById('ref-gord-inp').value     = gord   || '';
+  document.getElementById('ref-fibras-inp').value   = fibras || '';
+  selectRefTab(document.querySelector('.ref-tab'), 'manual');
+  showToast('Alimento selecionado! Ajuste a porção se necessário.');
+}
+
+async function escaneiarCodigo() {
+  if (!('BarcodeDetector' in window)) {
+    showToast('Scanner não disponível neste dispositivo/navegador.');
+    return;
+  }
+  try {
+    const stream   = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+    const detector = new BarcodeDetector({ formats: ['ean_13','ean_8','code_128'] });
+    const vid      = document.createElement('video');
+    vid.srcObject  = stream; vid.play();
+    showToast('Aponte para o código de barras…');
+    const scan = async () => {
+      const barcodes = await detector.detect(vid);
+      if (barcodes.length > 0) {
+        stream.getTracks().forEach(t => t.stop());
+        const code = barcodes[0].rawValue;
+        const r    = await fetch(`https://world.openfoodfacts.org/api/v0/product/${code}.json`);
+        const data = await r.json();
+        if (data.status === 1) {
+          const p = data.product; const n = p.nutriments || {};
+          preencherAlimentoBusca(p.product_name, Math.round(n['energy-kcal_100g']||0), Math.round((n.proteins_100g||0)*10)/10, Math.round((n.carbohydrates_100g||0)*10)/10, Math.round((n.fat_100g||0)*10)/10, Math.round((n.fiber_100g||0)*10)/10);
+        } else { showToast('Produto não encontrado.'); }
+        return;
+      }
+      setTimeout(scan, 200);
+    };
+    setTimeout(scan, 600);
+  } catch(err) { showToast('Erro ao acessar câmera.'); }
 }
 
 async function salvarRefeicao() {
-  const desc = document.getElementById('ref-descricao').value.trim();
-  if (!desc) { alert('Descreva o que você comeu.'); return; }
-  const cal = parseInt(document.getElementById('ref-calorias').value) || 0;
+  const desc  = document.getElementById('ref-descricao').value.trim();
+  const errEl = document.getElementById('ref-modal-error');
+  if (!desc) {
+    if (errEl) { errEl.textContent = 'Descreva o alimento.'; errEl.style.display = ''; }
+    return;
+  }
   const ref = {
-    id: Date.now().toString(),
-    tipo: _refTipo,
+    id:     Date.now().toString(),
+    tipo:   _refTipo,
     desc,
-    cal,
-    qual: _refQual,
-    date: todayKey(),
-    ts: Date.now()
+    cal:    parseInt(document.getElementById('ref-calorias').value)    || 0,
+    prot:   parseFloat(document.getElementById('ref-prot-inp').value)  || 0,
+    carb:   parseFloat(document.getElementById('ref-carb-inp').value)  || 0,
+    gord:   parseFloat(document.getElementById('ref-gord-inp').value)  || 0,
+    fibras: parseFloat(document.getElementById('ref-fibras-inp').value)|| 0,
+    qual:   3,
+    date:   todayKey(),
+    ts:     Date.now()
   };
   if (_uid && _db) {
     try { await _db.collection('users').doc(_uid).collection('meals').doc(ref.id).set(ref); } catch(e) {}
@@ -3729,53 +4234,62 @@ async function salvarRefeicao() {
   _refData.push(ref);
   renderRefeicoes();
   closeRefeicaoModal();
-  showToast('Refeição registrada! ✓');
+  showToast('✓ Alimento registrado!');
 }
 
-async function carregarRefeicoes() {
+async function carregarRefeicoes(prefetchedUserData) {
   if (!_uid || !_db) return;
   try {
-    const snap = await _db.collection('users').doc(_uid).collection('meals').where('date', '==', todayKey()).get();
+    const snap = await _db.collection('users').doc(_uid).collection('meals').where('date','==',todayKey()).get();
     _refData = [];
     snap.forEach(doc => _refData.push(doc.data()));
-    _refData.sort((a, b) => (a.ts || 0) - (b.ts || 0));
+    _refData.sort((a,b) => (a.ts||0)-(b.ts||0));
+    if (prefetchedUserData && prefetchedUserData.foodFavs) _refFavs = prefetchedUserData.foodFavs;
     renderRefeicoes();
   } catch(e) { console.warn('carregarRefeicoes:', e); }
 }
 
+function toggleRefSection(tipo) {
+  const body    = document.getElementById('ref-body-' + tipo);
+  const chevron = document.getElementById('chevron-' + tipo);
+  if (!body) return;
+  const isOpen = body.classList.toggle('open');
+  if (chevron) chevron.classList.toggle('open', isOpen);
+}
+
 function renderRefeicoes() {
-  const list = document.getElementById('refeicoes-list');
-  if (!list) return;
+  const tipos = ['cafe','almoco','lanche','jantar','ceia'];
+  tipos.forEach(tipo => {
+    const items    = _refData.filter(r => r.tipo === tipo);
+    const totalCal = items.reduce((s,r) => s + (r.cal||0), 0);
+    const calEl    = document.getElementById(`ref-${tipo}-cal`);
+    if (calEl) calEl.textContent = totalCal > 0 ? totalCal + ' kcal' : '0 kcal';
 
-  if (_refData.length === 0) {
-    list.innerHTML = '<div style="text-align:center;padding:32px;color:var(--text-muted);font-size:13px">Nenhuma refeição registrada. Clique em "+ Adicionar" para começar.</div>';
-    atualizarMetricasRefeicao();
-    return;
-  }
-
-  list.innerHTML = '';
-  _refData.forEach(r => {
-    const qualColor = REF_QUAL_COLORS[r.qual] || 'var(--text-muted)';
-    const qualLabel = REF_QUAL_LABELS[r.qual] || '—';
-    const tipoColor = REF_TIPO_COLORS[r.tipo] || 'var(--text-muted)';
-    const el = document.createElement('div');
-    el.style.cssText = 'display:flex;align-items:center;gap:14px;padding:14px;border-radius:12px;background:var(--glass);border:1px solid var(--glass-border);margin-bottom:10px;transition:all .2s';
-    el.innerHTML = `
-      <div style="width:44px;height:44px;border-radius:12px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0">${REF_TIPO_LABELS[r.tipo]?.split(' ')[0] || '🍽️'}</div>
-      <div style="flex:1;min-width:0">
-        <div style="font-size:12px;font-weight:700;color:${tipoColor};text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px">${REF_TIPO_LABELS[r.tipo]?.split(' ').slice(1).join(' ') || r.tipo}</div>
-        <div style="font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${r.desc}</div>
-        ${r.cal ? `<div style="font-size:11px;color:var(--text-muted);margin-top:2px">~${r.cal} kcal</div>` : ''}
-      </div>
-      <div style="text-align:right;flex-shrink:0">
-        <div style="font-size:11px;font-weight:700;padding:3px 10px;border-radius:99px;background:${qualColor}18;color:${qualColor};border:1px solid ${qualColor}33">${qualLabel}</div>
-      </div>
-      <button onclick="deletarRefeicao('${r.id}',event)" style="background:none;border:none;color:#f87171;cursor:pointer;font-size:13px;padding:4px 6px;opacity:0;transition:opacity .2s;flex-shrink:0" class="ref-del">✕</button>`;
-    el.addEventListener('mouseenter', () => el.querySelector('.ref-del').style.opacity = '1');
-    el.addEventListener('mouseleave', () => el.querySelector('.ref-del').style.opacity = '0');
-    list.appendChild(el);
+    const body = document.getElementById('ref-body-' + tipo);
+    if (!body) return;
+    if (items.length === 0) {
+      body.innerHTML = '<div class="ref-meal-empty">Nenhum item registrado</div>';
+    } else {
+      body.innerHTML = '';
+      items.forEach(r => {
+        const el = document.createElement('div');
+        el.className = 'ref-meal-item';
+        el.innerHTML = `
+          <div class="ref-meal-item-name">${r.desc}</div>
+          ${r.prot ? `<div style="font-size:11px;color:#94A3B8;white-space:nowrap">P:${r.prot}g</div>` : ''}
+          <div class="ref-meal-item-cal">${r.cal||0} kcal</div>
+          <button onclick="deletarRefeicao('${r.id}',event)" type="button" style="background:none;border:none;color:#f87171;cursor:pointer;font-size:12px;padding:2px 6px;opacity:0;transition:opacity .2s" class="ref-del">✕</button>`;
+        el.addEventListener('mouseenter', () => el.querySelector('.ref-del').style.opacity = '1');
+        el.addEventListener('mouseleave', () => el.querySelector('.ref-del').style.opacity = '0');
+        body.appendChild(el);
+      });
+      if (!body.classList.contains('open')) {
+        body.classList.add('open');
+        const chevron = document.getElementById('chevron-' + tipo);
+        if (chevron) chevron.classList.add('open');
+      }
+    }
   });
-
   atualizarMetricasRefeicao();
 }
 
@@ -3787,42 +4301,35 @@ async function deletarRefeicao(id, e) {
 }
 
 function atualizarMetricasRefeicao() {
-  // Cards de tipo
-  ['cafe', 'almoco', 'jantar'].forEach(tipo => {
-    const itens = _refData.filter(r => r.tipo === tipo);
-    const statusEl = document.getElementById(`ref-${tipo}-status`);
-    const subEl    = document.getElementById(`ref-${tipo}-sub`);
-    if (!statusEl) return;
-    if (itens.length > 0) {
-      const qualMed = Math.round(itens.reduce((s, r) => s + r.qual, 0) / itens.length);
-      statusEl.textContent = ['😬','😐','😄'][qualMed - 1] || '✓';
-      subEl.textContent = itens[0].desc.substring(0, 22) + (itens[0].desc.length > 22 ? '…' : '');
-    } else {
-      statusEl.textContent = '—';
-      subEl.textContent = 'não registrado';
-    }
-  });
+  const goals  = refGoals();
+  const totals = refGetTotals();
+  const set    = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+  const setW   = (id, w) => { const el = document.getElementById(id); if (el) el.style.width = Math.min(100, Math.max(0, w)) + '%'; };
 
-  // Total calorias
-  const totalCal = _refData.reduce((s, r) => s + (r.cal || 0), 0);
-  const calEl = document.getElementById('ref-cal-total');
-  if (calEl) calEl.textContent = totalCal.toLocaleString('pt-BR');
+  set('ref-cal-total', totals.cal.toLocaleString('pt-BR'));
+  set('ref-cal-meta-disp', goals.cal.toLocaleString('pt-BR'));
+  const calPct = goals.cal > 0 ? Math.round(totals.cal / goals.cal * 100) : 0;
+  set('ref-cal-pct', calPct + '% da meta calórica');
+  setW('ref-cal-bar', calPct);
 
-  // Score nutricional (média de qualidade × 33)
-  const score = _refData.length > 0
-    ? Math.min(100, Math.round(_refData.reduce((s, r) => s + r.qual, 0) / _refData.length / 3 * 100))
-    : 0;
-  const scoreEl  = document.getElementById('ref-score');
-  const scoreLbl = document.getElementById('ref-score-label');
-  const scoreBar = document.getElementById('ref-score-bar');
-  if (scoreEl)  scoreEl.textContent = score;
-  if (scoreBar) scoreBar.style.width = score + '%';
-  if (scoreLbl) {
-    if (_refData.length === 0) scoreLbl.textContent = 'Registre suas refeições';
-    else if (score >= 80) scoreLbl.textContent = '🌿 Alimentação excelente!';
-    else if (score >= 50) scoreLbl.textContent = '⬆ Pode melhorar um pouco';
-    else scoreLbl.textContent = 'Tente incluir mais opções saudáveis';
-  }
+  set('ref-prot-val', Math.round(totals.prot));
+  set('ref-prot-meta', '/ ' + goals.prot + 'g');
+  setW('bar-prot', goals.prot > 0 ? totals.prot / goals.prot * 100 : 0);
+
+  set('ref-carb-val', Math.round(totals.carb));
+  set('ref-carb-meta', '/ ' + goals.carb + 'g');
+  setW('bar-carb', goals.carb > 0 ? totals.carb / goals.carb * 100 : 0);
+
+  set('ref-gord-val', Math.round(totals.gord));
+  set('ref-gord-meta', '/ ' + goals.gord + 'g');
+  setW('bar-gord', goals.gord > 0 ? totals.gord / goals.gord * 100 : 0);
+
+  set('ref-fibras-val', Math.round(totals.fibras));
+  set('ref-fibras-meta', '/ ' + goals.fibras + 'g');
+  setW('bar-fibras', goals.fibras > 0 ? totals.fibras / goals.fibras * 100 : 0);
+
+  const aiEl = document.getElementById('ref-ai-msg');
+  if (aiEl) aiEl.textContent = refGetAIMensagem();
 }
 
 // Hook chart init para refeição
@@ -3837,10 +4344,10 @@ initCharts = function(section) {
       data: {
         labels: ['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'],
         datasets: [{
-          label: 'Qualidade nutricional',
-          data: [0,0,0,0,0,0,0],
-          backgroundColor: 'rgba(34,197,94,0.6)',
-          borderColor: '#22C55E',
+          label: 'Calorias (kcal)',
+          data: [0,0,0,0,0,0,refGetTotals().cal],
+          backgroundColor: 'rgba(245,158,11,0.5)',
+          borderColor: '#F59E0B',
           borderWidth: 1,
           borderRadius: 8
         }]
