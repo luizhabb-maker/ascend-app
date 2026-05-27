@@ -880,9 +880,13 @@
       </div>
 
       <div class="card mb-16">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
-          <div class="card-title" style="margin:0">Hábitos de hoje</div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+          <div class="card-title" style="margin:0" id="hab-card-title">Hábitos de hoje</div>
           <button class="btn btn-ghost" style="font-size:12px;padding:7px 12px" onclick="openHabitoModal()">+ Novo hábito</button>
+        </div>
+        <!-- Date strip — 30 dias antes/depois -->
+        <div style="overflow-x:auto;margin-bottom:14px;scrollbar-width:none;-webkit-overflow-scrolling:touch">
+          <div id="hab-date-strip" style="display:flex;gap:5px;width:max-content;padding-bottom:2px"></div>
         </div>
         <div id="habits-full-list">
           <div style="text-align:center;padding:32px;color:var(--text-muted);font-size:13px">Nenhum hábito ainda. Clique em "+ Novo hábito" para começar.</div>
@@ -1918,17 +1922,17 @@
     <div style="display:flex;flex-direction:column;gap:14px">
       <div>
         <label style="font-size:11px;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px">Emoji</label>
-        <div style="display:flex;gap:8px;flex-wrap:wrap" id="habito-emoji-btns">
-          <button onclick="selectHabitoEmoji(this,'🧘')" class="emoji-pick selected">🧘</button>
-          <button onclick="selectHabitoEmoji(this,'📚')" class="emoji-pick">📚</button>
-          <button onclick="selectHabitoEmoji(this,'🏋️')" class="emoji-pick">🏋️</button>
-          <button onclick="selectHabitoEmoji(this,'💧')" class="emoji-pick">💧</button>
-          <button onclick="selectHabitoEmoji(this,'🚫')" class="emoji-pick">🚫</button>
-          <button onclick="selectHabitoEmoji(this,'❄️')" class="emoji-pick">❄️</button>
-          <button onclick="selectHabitoEmoji(this,'🌿')" class="emoji-pick">🌿</button>
-          <button onclick="selectHabitoEmoji(this,'✍️')" class="emoji-pick">✍️</button>
-          <button onclick="selectHabitoEmoji(this,'🎯')" class="emoji-pick">🎯</button>
-          <button onclick="selectHabitoEmoji(this,'🛌')" class="emoji-pick">🛌</button>
+        <div style="display:flex;gap:6px;flex-wrap:wrap" id="habito-emoji-btns">
+          <button onclick="selectHabitoEmoji(this,'☀️')" class="emoji-pick selected" style="flex-direction:column;gap:2px;padding:7px 9px"><span>☀️</span><span style="font-size:9px;color:#94A3B8;line-height:1">Manhã</span><span style="font-size:9px;color:#8B5CF6;line-height:1;font-weight:700">5xp</span></button>
+          <button onclick="selectHabitoEmoji(this,'🧘')" class="emoji-pick" style="flex-direction:column;gap:2px;padding:7px 9px"><span>🧘</span><span style="font-size:9px;color:#94A3B8;line-height:1">Meditar</span><span style="font-size:9px;color:#8B5CF6;line-height:1;font-weight:700">8xp</span></button>
+          <button onclick="selectHabitoEmoji(this,'📚')" class="emoji-pick" style="flex-direction:column;gap:2px;padding:7px 9px"><span>📚</span><span style="font-size:9px;color:#94A3B8;line-height:1">Estudar</span><span style="font-size:9px;color:#8B5CF6;line-height:1;font-weight:700">10xp</span></button>
+          <button onclick="selectHabitoEmoji(this,'🏋️')" class="emoji-pick" style="flex-direction:column;gap:2px;padding:7px 9px"><span>🏋️</span><span style="font-size:9px;color:#94A3B8;line-height:1">Treinar</span><span style="font-size:9px;color:#8B5CF6;line-height:1;font-weight:700">10xp</span></button>
+          <button onclick="selectHabitoEmoji(this,'💼')" class="emoji-pick" style="flex-direction:column;gap:2px;padding:7px 9px"><span>💼</span><span style="font-size:9px;color:#94A3B8;line-height:1">Trabalho</span><span style="font-size:9px;color:#8B5CF6;line-height:1;font-weight:700">8xp</span></button>
+          <button onclick="selectHabitoEmoji(this,'📵')" class="emoji-pick" style="flex-direction:column;gap:2px;padding:7px 9px"><span>📵</span><span style="font-size:9px;color:#94A3B8;line-height:1">Sem cel.</span><span style="font-size:9px;color:#8B5CF6;line-height:1;font-weight:700">10xp</span></button>
+          <button onclick="selectHabitoEmoji(this,'💧')" class="emoji-pick" style="flex-direction:column;gap:2px;padding:7px 9px"><span>💧</span><span style="font-size:9px;color:#94A3B8;line-height:1">Hidrat.</span><span style="font-size:9px;color:#8B5CF6;line-height:1;font-weight:700">5xp</span></button>
+          <button onclick="selectHabitoEmoji(this,'🌙')" class="emoji-pick" style="flex-direction:column;gap:2px;padding:7px 9px"><span>🌙</span><span style="font-size:9px;color:#94A3B8;line-height:1">Descanso</span><span style="font-size:9px;color:#8B5CF6;line-height:1;font-weight:700">2xp</span></button>
+          <button onclick="selectHabitoEmoji(this,'🎯')" class="emoji-pick" style="flex-direction:column;gap:2px;padding:7px 9px"><span>🎯</span><span style="font-size:9px;color:#94A3B8;line-height:1">Foco</span><span style="font-size:9px;color:#8B5CF6;line-height:1;font-weight:700">10xp</span></button>
+          <button onclick="selectHabitoEmoji(this,'🌿')" class="emoji-pick" style="flex-direction:column;gap:2px;padding:7px 9px"><span>🌿</span><span style="font-size:9px;color:#94A3B8;line-height:1">Nutrição</span><span style="font-size:9px;color:#8B5CF6;line-height:1;font-weight:700">5xp</span></button>
         </div>
       </div>
       <div>
@@ -2058,6 +2062,7 @@ function navigate(id, el) {
   document.getElementById('section-' + id).classList.add('active');
   if (el) el.classList.add('active');
   setTimeout(() => initCharts(id), 50);
+  if (id === 'habitos') setTimeout(() => buildHabDateStrip(), 60);
 }
 
 // ── NAVIGATION (mobile) ──
@@ -2317,7 +2322,9 @@ let _habitosData = []; // [{id,name,emoji,streak,createdAt}]
 let _dailyData = {};   // today's doc
 let _treinosData = []; // workouts this week
 let _selectedPriority = 'alta';
-let _selectedHabitoEmoji = '🧘';
+let _selectedHabitoEmoji = '☀️';
+let _habViewDate = '';       // data sendo visualizada nos hábitos
+let _habViewDayHabits = {};  // hábitos concluídos no dia sendo visualizado
 
 // ── DAILY SAVE HELPERS ──
 async function saveDaily(patch) {
@@ -2329,12 +2336,22 @@ async function saveDaily(patch) {
 }
 
 async function saveHabitById(id, done) {
-  await saveDaily({ habits: { [id]: done } });
-  // XP +10 when completing
-  if (done) await addXP(10);
-  atualizarDashHabitos();
-  atualizarMetricasHabitos();
-  recalcScore();
+  const viewKey = _habViewDate || todayKey();
+  const isToday = viewKey === todayKey();
+  if (_uid && _db) {
+    try {
+      await _db.collection('users').doc(_uid).collection('daily').doc(viewKey).set({ habits: { [id]: done } }, { merge: true });
+    } catch(e) { console.warn('saveHabitById:', e); }
+  }
+  _habViewDayHabits = { ..._habViewDayHabits, [id]: done };
+  if (isToday) {
+    if (!_dailyData.habits) _dailyData.habits = {};
+    _dailyData.habits[id] = done;
+    if (done) await addXP(10);
+    atualizarDashHabitos();
+    atualizarMetricasHabitos();
+    recalcScore();
+  }
 }
 
 async function saveMood(emoji) { await saveDaily({ mood: emoji }); }
@@ -2446,7 +2463,7 @@ function openHabitoModal() {
   document.getElementById('habito-name').value = '';
   const errEl = document.getElementById('habito-error');
   if (errEl) errEl.style.display = 'none';
-  _selectedHabitoEmoji = '🧘';
+  _selectedHabitoEmoji = '☀️';
   document.querySelectorAll('#habito-emoji-btns .emoji-pick').forEach(b => b.classList.remove('selected'));
   document.querySelector('#habito-emoji-btns .emoji-pick').classList.add('selected');
 }
@@ -2476,6 +2493,93 @@ async function salvarHabito() {
   showToast('Hábito criado! ✓');
 }
 
+// ── FILTRO DE DATA — HÁBITOS ──
+function dateKeyFrom(d) {
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+
+function buildHabDateStrip() {
+  const strip = document.getElementById('hab-date-strip');
+  if (!strip) return;
+  const today = new Date();
+  const todayStr = dateKeyFrom(today);
+  if (!_habViewDate) _habViewDate = todayStr;
+  _habViewDayHabits = (_dailyData && _dailyData.habits) ? { ..._dailyData.habits } : {};
+
+  strip.innerHTML = '';
+  const DIAS_PT = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+  let todayBtn = null;
+
+  for (let i = -30; i <= 30; i++) {
+    const d = new Date(today);
+    d.setDate(today.getDate() + i);
+    const key = dateKeyFrom(d);
+    const isTod = i === 0;
+    const isSel = key === _habViewDate;
+
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.dataset.dk = key;
+    btn.style.cssText = `flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 10px;border-radius:10px;border:1px solid ${isSel ? 'rgba(139,92,246,0.55)' : isTod ? 'rgba(255,255,255,0.18)' : 'rgba(255,255,255,0.07)'};background:${isSel ? 'rgba(139,92,246,0.2)' : 'rgba(255,255,255,0.03)'};cursor:pointer;font-family:inherit;transition:all 0.15s`;
+    btn.innerHTML = `<span style="font-size:10px;font-weight:600;color:${isSel ? '#C4B5FD' : '#64748B'}">${DIAS_PT[d.getDay()]}</span><span style="font-size:15px;font-weight:700;color:${isSel ? '#C4B5FD' : isTod ? '#F1F5F9' : '#94A3B8'}">${d.getDate()}</span><span style="font-size:9px;color:${isSel ? '#A78BFA' : '#475569'}">${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getFullYear()).slice(2)}</span>`;
+    btn.onclick = () => selectHabDate(key);
+    strip.appendChild(btn);
+    if (isTod) todayBtn = btn;
+  }
+
+  setTimeout(() => {
+    const selBtn = strip.querySelector(`[data-dk="${_habViewDate}"]`) || todayBtn;
+    if (selBtn) selBtn.scrollIntoView({ behavior: 'instant', block: 'nearest', inline: 'center' });
+  }, 30);
+}
+
+async function selectHabDate(key) {
+  _habViewDate = key;
+  const todayStr = dateKeyFrom(new Date());
+  const isToday = key === todayStr;
+
+  // Atualiza visual do strip
+  document.querySelectorAll('#hab-date-strip button').forEach(btn => {
+    const isSel = btn.dataset.dk === key;
+    const isTod = btn.dataset.dk === todayStr;
+    btn.style.background = isSel ? 'rgba(139,92,246,0.2)' : 'rgba(255,255,255,0.03)';
+    btn.style.borderColor = isSel ? 'rgba(139,92,246,0.55)' : isTod ? 'rgba(255,255,255,0.18)' : 'rgba(255,255,255,0.07)';
+    const spans = btn.querySelectorAll('span');
+    const color = isSel ? '#C4B5FD' : isTod ? '#F1F5F9' : '#94A3B8';
+    if (spans[0]) spans[0].style.color = isSel ? '#C4B5FD' : '#64748B';
+    if (spans[1]) spans[1].style.color = color;
+    if (spans[2]) spans[2].style.color = isSel ? '#A78BFA' : '#475569';
+  });
+
+  // Título do card
+  const titleEl = document.getElementById('hab-card-title');
+  const DIAS_PT = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+  if (titleEl) {
+    if (isToday) {
+      titleEl.textContent = 'Hábitos de hoje';
+    } else {
+      const d = new Date(key + 'T12:00:00');
+      titleEl.textContent = `Hábitos — ${DIAS_PT[d.getDay()]}, ${d.getDate()}/${d.getMonth()+1}/${d.getFullYear()}`;
+    }
+  }
+
+  // Carrega dados do dia
+  if (isToday) {
+    _habViewDayHabits = (_dailyData && _dailyData.habits) ? { ..._dailyData.habits } : {};
+    renderHabitos();
+    return;
+  }
+  if (_uid && _db) {
+    try {
+      const snap = await _db.collection('users').doc(_uid).collection('daily').doc(key).get();
+      _habViewDayHabits = (snap.exists && snap.data().habits) ? snap.data().habits : {};
+    } catch(e) { _habViewDayHabits = {}; }
+  } else {
+    _habViewDayHabits = {};
+  }
+  renderHabitos();
+}
+
 async function carregarHabitos() {
   if (!_uid || !_db) return;
   try {
@@ -2483,7 +2587,11 @@ async function carregarHabitos() {
     _habitosData = [];
     snap.forEach(doc => _habitosData.push(doc.data()));
     _habitosData.sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
+    // Inicializa view date como hoje
+    _habViewDate = todayKey();
+    _habViewDayHabits = (_dailyData && _dailyData.habits) ? { ..._dailyData.habits } : {};
     renderHabitos();
+    buildHabDateStrip();
   } catch(e) { console.warn('carregarHabitos:', e); }
 }
 
@@ -2499,13 +2607,14 @@ function renderHabitos() {
     return;
   }
 
-  const todayHabits = (_dailyData && _dailyData.habits) ? _dailyData.habits : {};
+  const viewHabits = _habViewDayHabits || (_dailyData && _dailyData.habits) || {};
+  const isViewingToday = (_habViewDate || todayKey()) === todayKey();
 
   list.innerHTML = '';
   if (dashList) dashList.innerHTML = '';
 
   _habitosData.forEach(h => {
-    const done = !!todayHabits[h.id];
+    const done = !!viewHabits[h.id];
     const streakTxt = h.streak > 0 ? `🔥 ${h.streak} dias` : '— pendente';
     const streakColor = h.streak > 0 ? 'var(--amber)' : 'var(--text-muted)';
 
@@ -2518,10 +2627,12 @@ function renderHabitos() {
         <div class="habit-name">${h.emoji} ${h.name}</div>
       </div>
       <div class="habit-streak" style="color:${streakColor}">${streakTxt}</div>
-      <button onclick="deletarHabito('${h.id}',event)" style="background:none;border:none;color:#f87171;cursor:pointer;font-size:13px;padding:4px 6px;opacity:0;transition:opacity .2s" class="hab-del">✕</button>`;
+      ${isViewingToday ? `<button onclick="deletarHabito('${h.id}',event)" style="background:none;border:none;color:#f87171;cursor:pointer;font-size:13px;padding:4px 6px;opacity:0;transition:opacity .2s" class="hab-del">✕</button>` : ''}`;
     el.querySelector('.habit-check').addEventListener('click', () => toggleHabitEl(el, h.id));
-    el.addEventListener('mouseenter', () => el.querySelector('.hab-del').style.opacity = '1');
-    el.addEventListener('mouseleave', () => el.querySelector('.hab-del').style.opacity = '0');
+    if (isViewingToday) {
+      el.addEventListener('mouseenter', () => el.querySelector('.hab-del').style.opacity = '1');
+      el.addEventListener('mouseleave', () => el.querySelector('.hab-del').style.opacity = '0');
+    }
     list.appendChild(el);
 
     // Dashboard mini version
