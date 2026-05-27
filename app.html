@@ -1847,6 +1847,21 @@
         <label style="font-size:11px;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px">Descrição <span style="font-weight:400;text-transform:none">(opcional)</span></label>
         <input id="bloco-desc" type="text" placeholder="Ex: 45 min · Academia" maxlength="60" style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:11px 14px;color:#F1F5F9;font-size:14px;font-family:inherit;outline:none" onfocus="this.style.borderColor='rgba(139,92,246,.5)'" onblur="this.style.borderColor='rgba(255,255,255,0.1)'">
       </div>
+      <div>
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;font-weight:600;color:#94A3B8;margin-bottom:10px">
+          <input type="checkbox" id="bloco-repete" onchange="toggleRepeteDias()" style="accent-color:#8B5CF6;width:16px;height:16px;cursor:pointer">
+          Repete nos dias da semana
+        </label>
+        <div id="bloco-dias-wrap" style="display:none;flex-wrap:wrap;gap:6px">
+          <label class="dia-check"><input type="checkbox" value="0"><span>Dom</span></label>
+          <label class="dia-check"><input type="checkbox" value="1"><span>Seg</span></label>
+          <label class="dia-check"><input type="checkbox" value="2"><span>Ter</span></label>
+          <label class="dia-check"><input type="checkbox" value="3"><span>Qua</span></label>
+          <label class="dia-check"><input type="checkbox" value="4"><span>Qui</span></label>
+          <label class="dia-check"><input type="checkbox" value="5"><span>Sex</span></label>
+          <label class="dia-check"><input type="checkbox" value="6"><span>Sáb</span></label>
+        </div>
+      </div>
       <div id="bloco-error" style="display:none;color:#f87171;font-size:13px;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.25);border-radius:8px;padding:8px 12px">Preencha o horário e o nome do bloco.</div>
       <button type="button" onclick="salvarBloco()" style="background:linear-gradient(135deg,#8B5CF6,#7C3AED);color:#fff;border:none;border-radius:11px;padding:13px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;box-shadow:0 0 24px rgba(139,92,246,.35);margin-top:4px">Adicionar bloco</button>
     </div>
@@ -2014,6 +2029,10 @@
 .emoji-pick { display:inline-flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:6px 10px;font-size:18px;cursor:pointer;transition:all 0.15s;font-family:inherit }
 .emoji-pick.selected { background:rgba(139,92,246,0.2);border-color:rgba(139,92,246,0.5) }
 .emoji-pick:hover { background:rgba(255,255,255,0.1) }
+.dia-check { display:inline-flex;align-items:center;cursor:pointer }
+.dia-check input { position:absolute;opacity:0;width:0;height:0 }
+.dia-check span { background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);border-radius:8px;padding:5px 10px;font-size:12px;font-weight:600;color:#64748B;transition:all 0.15s;user-select:none }
+.dia-check input:checked + span { background:rgba(139,92,246,0.2);border-color:rgba(139,92,246,0.5);color:#C4B5FD }
 .bloco-delete { opacity:0;font-size:14px;cursor:pointer;transition:opacity 0.2s;background:none;border:none;color:#f87171;padding:4px 6px }
 .timeline-item:hover .bloco-delete { opacity:1 }
 </style>
@@ -2540,9 +2559,10 @@ function atualizarMetricasHabitos() {
   set('hab-rate', rate + '%');
   set('hab-count', total);
 
-  // Nav badge
+  // Nav badge — mostra hábitos pendentes hoje
   const badge = document.querySelector('.nav-item[onclick*="habitos"] .nav-badge');
-  if (badge) badge.textContent = total;
+  const pending = total - done;
+  if (badge) badge.textContent = pending > 0 ? pending : '';
 }
 
 function atualizarDashHabitos() {
@@ -3072,6 +3092,12 @@ function xpDoBloco(emoji, label) {
 // ── MODAL NOVO BLOCO ──
 let _selectedEmoji = '☀️';
 
+function toggleRepeteDias() {
+  const wrap = document.getElementById('bloco-dias-wrap');
+  const checked = document.getElementById('bloco-repete').checked;
+  wrap.style.display = checked ? 'flex' : 'none';
+}
+
 function openBlocoModal() {
   const ov = document.getElementById('bloco-overlay');
   ov.style.display = 'flex';
@@ -3080,6 +3106,10 @@ function openBlocoModal() {
   document.getElementById('bloco-time').value = '';
   const errEl = document.getElementById('bloco-error');
   if (errEl) errEl.style.display = 'none';
+  const repCb = document.getElementById('bloco-repete');
+  if (repCb) repCb.checked = false;
+  const wrap = document.getElementById('bloco-dias-wrap');
+  if (wrap) { wrap.style.display = 'none'; wrap.querySelectorAll('input[type=checkbox]').forEach(cb => cb.checked = false); }
   _selectedEmoji = '☀️';
   document.querySelectorAll('#bloco-emoji-btns .emoji-pick').forEach(b => b.classList.remove('selected'));
   const first = document.querySelector('#bloco-emoji-btns .emoji-pick');
@@ -3105,7 +3135,12 @@ async function salvarBloco() {
   }
   if (errEl) errEl.style.display = 'none';
 
-  const bloco = { time, label: `${_selectedEmoji} ${label}`, emoji: _selectedEmoji, desc, done: false, id: Date.now().toString() };
+  const repete = document.getElementById('bloco-repete')?.checked || false;
+  const repeatDays = repete
+    ? [...document.querySelectorAll('#bloco-dias-wrap input[type=checkbox]:checked')].map(cb => parseInt(cb.value))
+    : [];
+
+  const bloco = { time, label: `${_selectedEmoji} ${label}`, emoji: _selectedEmoji, desc, repeatDays, done: false, id: Date.now().toString() };
 
   if (_uid && _db) {
     try {
@@ -3115,21 +3150,36 @@ async function salvarBloco() {
 
   adicionarBlocoNaTimeline(bloco);
   closeBlocoModal();
+  // Navega para a aba Rotina e confirma visualmente
+  navigate('rotina', document.querySelector('.nav-item[onclick*="rotina"]'));
+  showToast('Bloco adicionado! ✓');
 }
+
+const _DIAS_SEMANA = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
 
 function adicionarBlocoNaTimeline(bloco) {
   const timeline = document.getElementById('routine-timeline');
   if (!timeline) return;
   const xp = xpDoBloco(bloco.emoji, bloco.label);
+  const today = new Date().getDay();
+  const hasRepeat = bloco.repeatDays && bloco.repeatDays.length > 0;
+  const isToday = !hasRepeat || bloco.repeatDays.includes(today);
+  const repeatHtml = hasRepeat
+    ? `<div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:5px">${bloco.repeatDays.map(d =>
+        `<span style="font-size:10px;padding:2px 7px;border-radius:10px;font-weight:600;${d === today ? 'background:rgba(139,92,246,0.2);color:#C4B5FD;border:1px solid rgba(139,92,246,0.4)' : 'background:rgba(255,255,255,0.05);color:#64748B;border:1px solid rgba(255,255,255,0.1)'}">${_DIAS_SEMANA[d]}</span>`
+      ).join('')}</div>`
+    : '';
   const el = document.createElement('div');
   el.className = 'timeline-item';
   el.dataset.blocoId = bloco.id;
+  if (!isToday) el.style.opacity = '0.45';
   el.innerHTML = `
     <div class="timeline-block" style="display:flex;align-items:center;gap:10px">
       <div style="flex:1">
         <div class="timeline-time">${bloco.time}</div>
         <div class="timeline-label">${bloco.label}</div>
         ${bloco.desc ? `<div class="timeline-desc">${bloco.desc}</div>` : ''}
+        ${repeatHtml}
       </div>
       <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
         <span style="font-size:11px;color:#8B5CF6;font-weight:700;background:rgba(139,92,246,0.12);padding:2px 7px;border-radius:20px;white-space:nowrap">+${xp}xp</span>
