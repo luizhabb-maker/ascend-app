@@ -2324,11 +2324,16 @@ async function saveWater() {
 }
 
 // ── LOAD GOALS ──
-async function carregarGoals() {
+async function carregarGoals(prefetchedData) {
   if (!_uid || !_db) return;
   try {
-    const snap = await _db.collection('users').doc(_uid).get();
-    const d = snap.exists ? snap.data() : {};
+    let d;
+    if (prefetchedData !== undefined) {
+      d = prefetchedData;
+    } else {
+      const snap = await _db.collection('users').doc(_uid).get();
+      d = snap.exists ? snap.data() : {};
+    }
     const g = d.goals || {};
     // Fallback para dados salvos pelo onboarding no nível raiz
     _goals.sleep    = g.sleep    || 8;
@@ -2992,10 +2997,15 @@ try {
     if (!user) { window.location.href = '/login'; return; }
     _uid = user.uid;
 
+    // Perfil + dados do dia em paralelo (uma única rodada de rede)
+    const [snap, daySnap] = await Promise.all([
+      _db.collection('users').doc(_uid).get().catch(() => null),
+      _db.collection('users').doc(_uid).collection('daily').doc(todayKey()).get().catch(() => null),
+    ]);
+
     // Perfil
+    const d = (snap && snap.exists) ? snap.data() : {};
     try {
-      const snap = await _db.collection('users').doc(_uid).get();
-      const d = snap.exists ? snap.data() : {};
       applyUserProfile(user, d);
       const xp = d.xp || 0;
       const lv = d.level || 1;
@@ -3008,13 +3018,12 @@ try {
       else if (d.weight) aplicarPeso(parseFloat(d.weight));
     } catch(e) { applyUserProfile(user, null); }
 
-    // Goals
-    await carregarGoals();
+    // Goals — reutiliza dados já buscados, sem nova leitura
+    await carregarGoals(d);
 
     // Dados do dia
     try {
-      const daySnap = await _db.collection('users').doc(_uid).collection('daily').doc(todayKey()).get();
-      if (daySnap.exists) applyDailyData(daySnap.data());
+      if (daySnap && daySnap.exists) applyDailyData(daySnap.data());
     } catch(e) { console.warn('loadDaily:', e); }
 
     // Hábitos, Tarefas, Treinos, Rotina, Refeições em paralelo
