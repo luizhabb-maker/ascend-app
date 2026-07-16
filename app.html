@@ -995,10 +995,13 @@
       <div class="card mb-16">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
           <div class="card-title" style="margin:0">Timeline do dia</div>
-          <button class="btn btn-ghost" style="font-size:12px;padding:7px 12px" onclick="openBlocoModal()">+ Novo bloco</button>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-ghost" style="font-size:12px;padding:7px 12px" onclick="openHistoricoRotinaModal()">🕓 Histórico</button>
+            <button class="btn btn-ghost" style="font-size:12px;padding:7px 12px" onclick="openBlocoModal()">+ Nova rotina</button>
+          </div>
         </div>
         <div class="timeline" id="routine-timeline">
-          <div id="routine-empty" style="text-align:center;padding:32px;color:var(--text-muted);font-size:13px">Nenhum bloco ainda. Clique em "+ Novo bloco" para começar.</div>
+          <div id="routine-empty" style="text-align:center;padding:32px;color:var(--text-muted);font-size:13px">Nenhum bloco ainda. Clique em "+ Nova rotina" para começar.</div>
         </div>
       </div>
     </div>
@@ -2082,7 +2085,7 @@
 <div id="bloco-overlay" style="display:none;position:fixed;inset:0;z-index:3000;background:rgba(0,0,0,0.75);backdrop-filter:blur(8px);align-items:center;justify-content:center;padding:20px">
   <div style="background:#0d1120;border:1px solid rgba(255,255,255,0.1);border-radius:20px;padding:32px;width:100%;max-width:420px;animation:slideup 0.25s ease;box-shadow:0 40px 80px rgba(0,0,0,0.6)">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px">
-      <div style="font-size:17px;font-weight:800">+ Novo bloco de rotina</div>
+      <div style="font-size:17px;font-weight:800">+ Nova rotina</div>
       <button onclick="closeBlocoModal()" style="background:rgba(255,255,255,0.06);border:none;width:30px;height:30px;border-radius:50%;color:#94A3B8;cursor:pointer;font-size:16px">✕</button>
     </div>
     <div style="display:flex;flex-direction:column;gap:14px">
@@ -2311,6 +2314,24 @@
   </div>
 </div>
 
+<!-- MODAL HISTÓRICO DE ROTINA -->
+<div id="historico-rotina-overlay" style="display:none;position:fixed;inset:0;z-index:3000;background:rgba(0,0,0,0.75);backdrop-filter:blur(8px);align-items:center;justify-content:center;padding:20px" onclick="if(event.target===this) closeHistoricoRotinaModal()">
+  <div style="background:#0d1120;border:1px solid rgba(255,255,255,0.1);border-radius:20px;padding:28px;width:100%;max-width:440px;max-height:80vh;display:flex;flex-direction:column;animation:slideup 0.25s ease;box-shadow:0 40px 80px rgba(0,0,0,0.6)">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+      <div style="font-size:17px;font-weight:800">🕓 Histórico da rotina</div>
+      <button onclick="closeHistoricoRotinaModal()" style="background:rgba(255,255,255,0.06);border:none;width:30px;height:30px;border-radius:50%;color:#94A3B8;cursor:pointer;font-size:16px">✕</button>
+    </div>
+    <div style="display:flex;gap:6px;margin-bottom:16px">
+      <button type="button" onclick="openHistoricoRotinaModal(7)" data-range="7" class="hist-rotina-range-btn" style="flex:1;padding:7px;border-radius:8px;border:1px solid rgba(139,92,246,0.3);background:rgba(139,92,246,0.08);color:#C4B5FD;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">7 dias</button>
+      <button type="button" onclick="openHistoricoRotinaModal(30)" data-range="30" class="hist-rotina-range-btn" style="flex:1;padding:7px;border-radius:8px;border:1px solid rgba(139,92,246,0.3);background:rgba(139,92,246,0.08);color:#C4B5FD;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">30 dias</button>
+      <button type="button" onclick="openHistoricoRotinaModal(90)" data-range="90" class="hist-rotina-range-btn" style="flex:1;padding:7px;border-radius:8px;border:1px solid rgba(139,92,246,0.3);background:rgba(139,92,246,0.08);color:#C4B5FD;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">90 dias</button>
+    </div>
+    <div id="historico-rotina-list" style="overflow-y:auto;display:flex;flex-direction:column;gap:8px">
+      <div style="text-align:center;padding:32px;color:var(--text-muted);font-size:13px">Carregando...</div>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL TAREFA -->
 <div id="tarefa-overlay" style="display:none;position:fixed;inset:0;z-index:3000;background:rgba(0,0,0,0.75);backdrop-filter:blur(8px);align-items:center;justify-content:center;padding:20px">
   <div style="background:#0d1120;border:1px solid rgba(255,255,255,0.1);border-radius:20px;padding:32px;width:100%;max-width:420px;animation:slideup 0.25s ease;box-shadow:0 40px 80px rgba(0,0,0,0.6)">
@@ -2451,6 +2472,9 @@ function updateQuickAddButton(id) {
   if (id === 'habitos') {
     btn.textContent = '+ Novo hábito';
     btn.onclick = openHabitoModal;
+  } else if (id === 'rotina') {
+    btn.textContent = '+ Nova rotina';
+    btn.onclick = openBlocoModal;
   } else {
     btn.textContent = '+ Novo bloco';
     btn.onclick = openBlocoModal;
@@ -2701,6 +2725,8 @@ function applyUserProfile(user, profileData) {
 // ── GLOBAL STATE ──
 let _goals = { sleep: 8, weight: 80, height: 170, workouts: 5 };
 let _habitosData = []; // [{id,name,emoji,streak,createdAt}]
+let _rotinaData = [];  // [{id,time,label,emoji,desc,repeatDays}]
+let _historicoRotinaRange = 30;
 let _dailyData = {};   // today's doc
 let _treinosData = []; // workouts this week
 let _selectedPriority = 'alta';
@@ -3893,7 +3919,7 @@ function selectEmoji(btn, emoji) {
   _selectedEmoji = emoji;
 }
 
-async function salvarBloco() {
+function salvarBloco() {
   const time  = document.getElementById('bloco-time').value;
   const label = document.getElementById('bloco-label').value.trim();
   const desc  = document.getElementById('bloco-desc').value.trim();
@@ -3909,14 +3935,14 @@ async function salvarBloco() {
     ? [...document.querySelectorAll('#bloco-dias-wrap input[type=checkbox]:checked')].map(cb => parseInt(cb.value))
     : [];
 
-  const bloco = { time, label: `${_selectedEmoji} ${label}`, emoji: _selectedEmoji, desc, repeatDays, done: false, id: Date.now().toString() };
+  const bloco = { time, label: `${_selectedEmoji} ${label}`, emoji: _selectedEmoji, desc, repeatDays, id: Date.now().toString() };
 
   if (_uid && _db) {
-    try {
-      await _db.collection('users').doc(_uid).collection('routine').doc(bloco.id).set(bloco);
-    } catch(e) { console.warn('salvarBloco:', e); }
+    _db.collection('users').doc(_uid).collection('routine').doc(bloco.id).set(bloco)
+      .catch(e => { console.warn('salvarBloco:', e); showToast('⚠️ Rotina não foi salva na nuvem. Verifique sua conexão.'); });
   }
 
+  _rotinaData.push(bloco);
   adicionarBlocoNaTimeline(bloco);
   closeBlocoModal();
   // Navega para a aba Rotina e confirma visualmente
@@ -3926,20 +3952,30 @@ async function salvarBloco() {
 
 const _DIAS_SEMANA = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
 
+// Um bloco sem repeatDays é considerado diário (acontece todo dia); com
+// repeatDays, só nos dias da semana marcados.
+function blocoAgendadoEm(bloco, dayKey) {
+  const hasRepeat = bloco.repeatDays && bloco.repeatDays.length > 0;
+  if (!hasRepeat) return true;
+  const dow = new Date(dayKey + 'T12:00:00').getDay();
+  return bloco.repeatDays.includes(dow);
+}
+
 function adicionarBlocoNaTimeline(bloco) {
   const timeline = document.getElementById('routine-timeline');
   if (!timeline) return;
   const xp = xpDoBloco(bloco.emoji, bloco.label);
   const today = new Date().getDay();
   const hasRepeat = bloco.repeatDays && bloco.repeatDays.length > 0;
-  const isToday = !hasRepeat || bloco.repeatDays.includes(today);
+  const isToday = blocoAgendadoEm(bloco, todayKey());
+  const done = !!(_dailyData.rotina && _dailyData.rotina[bloco.id]);
   const repeatHtml = hasRepeat
     ? `<div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:5px">${bloco.repeatDays.map(d =>
         `<span style="font-size:10px;padding:2px 7px;border-radius:10px;font-weight:600;${d === today ? 'background:rgba(139,92,246,0.2);color:#C4B5FD;border:1px solid rgba(139,92,246,0.4)' : 'background:rgba(255,255,255,0.05);color:#64748B;border:1px solid rgba(255,255,255,0.1)'}">${_DIAS_SEMANA[d]}</span>`
       ).join('')}</div>`
     : '';
   const el = document.createElement('div');
-  el.className = 'timeline-item';
+  el.className = 'timeline-item' + (done ? ' done' : '');
   el.dataset.blocoId = bloco.id;
   if (!isToday) el.style.opacity = '0.45';
   el.innerHTML = `
@@ -3968,41 +4004,34 @@ function adicionarBlocoNaTimeline(bloco) {
   else timeline.appendChild(el);
 }
 
-async function marcarBlocoFeito(id, done, emoji, label) {
+// Otimista, igual ao padrão dos hábitos: atualiza a tela na hora e grava a
+// conclusão do dia em daily/{hoje}.rotina (não mais um campo fixo no bloco),
+// pra suportar histórico e resetar diariamente nos blocos recorrentes.
+function marcarBlocoFeito(id, done, emoji, label) {
+  if (!_dailyData.rotina) _dailyData.rotina = {};
+  _dailyData.rotina[id] = done;
+
   if (done) {
     const xp = xpDoBloco(emoji, label);
     addXP(xp);
     showToast(`+${xp} XP — bloco concluído! 🎯`);
   }
-  if (!_uid || !_db) return;
-  try {
-    await _db.collection('users').doc(_uid).collection('routine').doc(id).update({ done });
-  } catch(e) { console.warn('marcarBlocoFeito:', e); }
-}
-
-async function deletarBloco(btn, id) {
-  btn.closest('.timeline-item').remove();
   if (_uid && _db) {
-    try { await _db.collection('users').doc(_uid).collection('routine').doc(id).delete(); } catch(e) {}
+    _db.collection('users').doc(_uid).collection('daily').doc(todayKey())
+      .set({ rotina: { [id]: done } }, { merge: true })
+      .catch(e => { console.warn('marcarBlocoFeito:', e); showToast('⚠️ Não foi possível salvar na nuvem. Verifique sua conexão.'); });
   }
 }
 
-async function carregarRotina() {
-  if (!_uid || !_db) return;
-  try {
-    const snap = await _db.collection('users').doc(_uid).collection('routine').get();
-    if (snap.empty) return;
-    const blocos = [];
-    snap.forEach(doc => blocos.push(doc.data()));
-    blocos.sort((a, b) => a.time.localeCompare(b.time));
-    // Limpa os blocos demo e insere os do usuário
-    const timeline = document.getElementById('routine-timeline');
-    if (timeline) {
-      // Remove só blocos sem data-bloco-id (os hardcoded demo)
-      timeline.querySelectorAll('.timeline-item:not([data-bloco-id])').forEach(el => el.remove());
-      blocos.forEach(b => adicionarBlocoNaTimeline(b));
-    }
-  } catch(e) { console.warn('carregarRotina:', e); }
+function deletarBloco(btn, id) {
+  if (!confirm('Excluir este bloco da rotina?')) return;
+  btn.closest('.timeline-item').remove();
+  _rotinaData = _rotinaData.filter(b => b.id !== id);
+  showToast('Bloco excluído.');
+  if (_uid && _db) {
+    _db.collection('users').doc(_uid).collection('routine').doc(id).delete()
+      .catch(e => { console.warn('deletarBloco:', e); showToast('⚠️ Não foi possível excluir na nuvem. Verifique sua conexão.'); });
+  }
 }
 
 // ── WATER SAVE PATCH ──
@@ -4015,24 +4044,93 @@ buildWater = function() {
   });
 };
 
-// Fix carregarRotina to handle empty state
 async function carregarRotinaFull() {
   if (!_uid || !_db) return;
   try {
     const snap = await _db.collection('users').doc(_uid).collection('routine').get();
     const empty = document.getElementById('routine-empty');
-    if (snap.empty) { if (empty) empty.style.display = 'block'; return; }
+    _rotinaData = [];
+    snap.forEach(doc => _rotinaData.push(doc.data()));
+    _rotinaData.sort((a, b) => a.time.localeCompare(b.time));
+    if (_rotinaData.length === 0) { if (empty) empty.style.display = 'block'; return; }
     if (empty) empty.style.display = 'none';
-    const blocos = [];
-    snap.forEach(doc => blocos.push(doc.data()));
-    blocos.sort((a, b) => a.time.localeCompare(b.time));
     const timeline = document.getElementById('routine-timeline');
     if (timeline) {
       timeline.querySelectorAll('.timeline-item[data-bloco-id]').forEach(el => el.remove());
-      blocos.forEach(b => adicionarBlocoNaTimeline(b));
+      _rotinaData.forEach(b => adicionarBlocoNaTimeline(b));
     }
   } catch(e) { console.warn('carregarRotinaFull:', e); }
 }
+
+// ── HISTÓRICO DA ROTINA (popup) ──
+async function openHistoricoRotinaModal(rangeDays) {
+  rangeDays = rangeDays || _historicoRotinaRange || 30;
+  _historicoRotinaRange = rangeDays;
+  document.getElementById('historico-rotina-overlay').style.display = 'flex';
+  document.querySelectorAll('.hist-rotina-range-btn').forEach(b => {
+    const active = Number(b.dataset.range) === rangeDays;
+    b.style.background = active ? 'rgba(139,92,246,0.35)' : 'rgba(139,92,246,0.08)';
+    b.style.borderColor = active ? 'rgba(139,92,246,0.7)' : 'rgba(139,92,246,0.3)';
+  });
+  const list = document.getElementById('historico-rotina-list');
+  list.innerHTML = '<div style="text-align:center;padding:32px;color:var(--text-muted);font-size:13px">Carregando...</div>';
+
+  if (!_uid || !_db) { list.innerHTML = '<div style="text-align:center;padding:32px;color:var(--text-muted);font-size:13px">Faça login para ver o histórico.</div>'; return; }
+  if (_rotinaData.length === 0) { list.innerHTML = '<div style="text-align:center;padding:32px;color:var(--text-muted);font-size:13px">Adicione blocos à rotina para começar a ver seu histórico.</div>'; return; }
+
+  const DIAS_PT = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+  const todayStr = todayKey();
+
+  try {
+    const snap = await withTimeout(_db.collection('users').doc(_uid).collection('daily')
+      .orderBy(firebase.firestore.FieldPath.documentId(), 'desc')
+      .where(firebase.firestore.FieldPath.documentId(), '<', todayStr)
+      .limit(rangeDays).get(), 10000);
+
+    const rotinaPorDia = {};
+    snap.forEach(doc => { rotinaPorDia[doc.id] = doc.data().rotina || {}; });
+
+    const dias = [];
+    for (let i = 1; i <= rangeDays; i++) {
+      const key = dateKeyOffset(-i);
+      const blocosDoDia = _rotinaData.filter(b => blocoAgendadoEm(b, key));
+      if (blocosDoDia.length === 0) continue;
+      const rotina = rotinaPorDia[key] || {};
+      const done = blocosDoDia.filter(b => rotina[b.id]).length;
+      dias.push({ key, done, total: blocosDoDia.length });
+    }
+
+    if (dias.length === 0) {
+      list.innerHTML = '<div style="text-align:center;padding:32px;color:var(--text-muted);font-size:13px">Ainda não há dias anteriores registrados.</div>';
+      return;
+    }
+
+    list.innerHTML = '';
+    dias.forEach(({ key, done, total }) => {
+      const d = new Date(key + 'T12:00:00');
+      const rate = total > 0 ? Math.round(done / total * 100) : 0;
+      const row = document.createElement('div');
+      row.style.cssText = 'display:flex;align-items:center;gap:12px;width:100%;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:10px 14px';
+      row.innerHTML = `
+        <div style="min-width:64px">
+          <div style="font-size:11px;font-weight:700;color:#64748B">${DIAS_PT[d.getDay()]}</div>
+          <div style="font-size:14px;font-weight:800;color:#F1F5F9">${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}</div>
+        </div>
+        <div style="flex:1">
+          <div style="height:6px;border-radius:3px;background:rgba(255,255,255,0.08);overflow:hidden">
+            <div style="height:100%;width:${rate}%;background:linear-gradient(90deg,#8B5CF6,#06B6D4);border-radius:3px"></div>
+          </div>
+        </div>
+        <div style="font-size:12px;font-weight:700;color:${rate===100&&total>0?'var(--green)':'#94A3B8'};min-width:56px;text-align:right">${done}/${total}</div>`;
+      list.appendChild(row);
+    });
+  } catch(e) {
+    console.warn('openHistoricoRotinaModal:', e);
+    const msg = e && e.message === 'timeout' ? 'Demorou demais para carregar. Verifique sua conexão e tente novamente.' : 'Não foi possível carregar o histórico.';
+    list.innerHTML = `<div style="text-align:center;padding:32px;color:var(--text-muted);font-size:13px">${msg}</div>`;
+  }
+}
+function closeHistoricoRotinaModal() { document.getElementById('historico-rotina-overlay').style.display = 'none'; }
 
 // Patch adicionarBlocoNaTimeline to also hide empty state
 const _origAdd = adicionarBlocoNaTimeline;
