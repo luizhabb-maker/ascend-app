@@ -565,15 +565,16 @@
     border-top: 1px solid var(--glass-border);
     padding: 10px 0 env(safe-area-inset-bottom);
   }
-  .mobile-nav-inner { display: flex; justify-content: space-around; align-items: center; }
+  .mobile-nav-inner { display: flex; justify-content: space-around; align-items: center; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+  .mobile-nav-inner::-webkit-scrollbar { display: none; }
   .mob-nav-btn {
-    display: flex; flex-direction: column; align-items: center; gap: 3px;
-    padding: 6px 12px; border-radius: 12px; cursor: pointer; transition: all 0.2s;
-    color: var(--text-muted); min-width: 52px;
+    display: flex; flex-direction: column; align-items: center; gap: 3px; flex-shrink: 0;
+    padding: 6px 8px; border-radius: 12px; cursor: pointer; transition: all 0.2s;
+    color: var(--text-muted); min-width: 44px;
   }
   .mob-nav-btn.active { color: var(--purple); background: var(--purple-dim); }
-  .mob-nav-btn .mob-icon { font-size: 20px; }
-  .mob-nav-btn .mob-label { font-size: 9px; font-weight: 600; }
+  .mob-nav-btn .mob-icon { font-size: 18px; }
+  .mob-nav-btn .mob-label { font-size: 8px; font-weight: 600; }
 
   @media (max-width: 768px) {
     :root { --sidebar-w: 0px; --right-w: 0px; }
@@ -997,15 +998,14 @@
 
       <div class="card mb-16">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-          <div class="card-title" style="margin:0" id="hab-card-title">Hábitos de hoje</div>
+          <div style="display:flex;align-items:center;gap:10px">
+            <div class="card-title" style="margin:0" id="hab-card-title">Hábitos de hoje</div>
+            <button id="hab-back-today-btn" onclick="voltarParaHoje()" style="display:none;font-size:11px;font-weight:700;color:#A78BFA;background:rgba(139,92,246,0.12);border:1px solid rgba(139,92,246,0.3);border-radius:8px;padding:4px 9px;cursor:pointer;font-family:inherit">← Hoje</button>
+          </div>
           <div style="display:flex;gap:8px">
             <button class="btn btn-ghost" style="font-size:12px;padding:7px 12px" onclick="openHistoricoModal()">🕓 Histórico</button>
             <button class="btn btn-ghost" style="font-size:12px;padding:7px 12px" onclick="openHabitoModal()">+ Novo hábito</button>
           </div>
-        </div>
-        <!-- Date strip — 30 dias antes/depois -->
-        <div style="overflow-x:auto;margin-bottom:14px;scrollbar-width:none;-webkit-overflow-scrolling:touch">
-          <div id="hab-date-strip" style="display:flex;gap:5px;width:max-content;padding-bottom:2px"></div>
         </div>
         <div id="habits-full-list">
           <div style="text-align:center;padding:32px;color:var(--text-muted);font-size:13px">Nenhum hábito ainda. Clique em "+ Novo hábito" para começar.</div>
@@ -2025,6 +2025,7 @@
   <div class="mobile-nav-inner">
     <div class="mob-nav-btn active" onclick="mobileNav('dashboard', this)"><span class="mob-icon">⊞</span><span class="mob-label">Home</span></div>
     <div class="mob-nav-btn" onclick="mobileNav('rotina', this)"><span class="mob-icon">◷</span><span class="mob-label">Rotina</span></div>
+    <div class="mob-nav-btn" onclick="mobileNav('habitos', this)"><span class="mob-icon">◈</span><span class="mob-label">Hábitos</span></div>
     <div class="mob-nav-btn" onclick="mobileNav('refeicao', this)"><span class="mob-icon">🍽️</span><span class="mob-label">Refeição</span></div>
     <div class="mob-nav-btn" onclick="mobileNav('agua', this)"><span class="mob-icon">💧</span><span class="mob-label">Água</span></div>
     <div class="mob-nav-btn" onclick="mobileNav('fitness', this)"><span class="mob-icon">◉</span><span class="mob-label">Fitness</span></div>
@@ -2227,9 +2228,18 @@
 <!-- MODAL HISTÓRICO DE HÁBITOS -->
 <div id="historico-overlay" style="display:none;position:fixed;inset:0;z-index:3000;background:rgba(0,0,0,0.75);backdrop-filter:blur(8px);align-items:center;justify-content:center;padding:20px" onclick="if(event.target===this) closeHistoricoModal()">
   <div style="background:#0d1120;border:1px solid rgba(255,255,255,0.1);border-radius:20px;padding:28px;width:100%;max-width:440px;max-height:80vh;display:flex;flex-direction:column;animation:slideup 0.25s ease;box-shadow:0 40px 80px rgba(0,0,0,0.6)">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
       <div style="font-size:17px;font-weight:800">🕓 Histórico de hábitos</div>
       <button onclick="closeHistoricoModal()" style="background:rgba(255,255,255,0.06);border:none;width:30px;height:30px;border-radius:50%;color:#94A3B8;cursor:pointer;font-size:16px">✕</button>
+    </div>
+    <div style="display:flex;gap:6px;margin-bottom:10px" id="historico-range-btns">
+      <button type="button" onclick="openHistoricoModal(7)" data-range="7" class="hist-range-btn" style="flex:1;padding:7px;border-radius:8px;border:1px solid rgba(139,92,246,0.3);background:rgba(139,92,246,0.08);color:#C4B5FD;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">7 dias</button>
+      <button type="button" onclick="openHistoricoModal(30)" data-range="30" class="hist-range-btn" style="flex:1;padding:7px;border-radius:8px;border:1px solid rgba(139,92,246,0.3);background:rgba(139,92,246,0.08);color:#C4B5FD;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">30 dias</button>
+      <button type="button" onclick="openHistoricoModal(90)" data-range="90" class="hist-range-btn" style="flex:1;padding:7px;border-radius:8px;border:1px solid rgba(139,92,246,0.3);background:rgba(139,92,246,0.08);color:#C4B5FD;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">90 dias</button>
+    </div>
+    <div style="display:flex;gap:6px;align-items:center;margin-bottom:16px">
+      <input id="historico-data-especifica" type="date" style="flex:1;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:8px 10px;color:#F1F5F9;font-size:13px;font-family:inherit;outline:none;color-scheme:dark">
+      <button type="button" onclick="irParaDataEspecifica()" style="padding:8px 12px;border-radius:8px;border:none;background:linear-gradient(135deg,#8B5CF6,#7C3AED);color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap">Ir para data</button>
     </div>
     <div id="historico-list" style="overflow-y:auto;display:flex;flex-direction:column;gap:8px">
       <div style="text-align:center;padding:32px;color:var(--text-muted);font-size:13px">Carregando...</div>
@@ -2354,7 +2364,7 @@ function navigate(id, el) {
   document.getElementById('section-' + id).classList.add('active');
   if (el) el.classList.add('active');
   setTimeout(() => initCharts(id), 50);
-  if (id === 'habitos') setTimeout(() => buildHabDateStrip(), 60);
+  if (id === 'habitos') setTimeout(() => initHabViewDate(), 60);
   updateQuickAddButton(id);
 }
 
@@ -2365,7 +2375,7 @@ function mobileNav(id, el) {
   document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
   document.getElementById('section-' + id).classList.add('active');
   setTimeout(() => initCharts(id), 50);
-  if (id === 'habitos') setTimeout(() => buildHabDateStrip(), 60);
+  if (id === 'habitos') setTimeout(() => initHabViewDate(), 60);
   updateQuickAddButton(id);
   document.querySelector('.main').scrollTop = 0;
 }
@@ -2632,6 +2642,7 @@ let _selectedPriority = 'alta';
 let _selectedHabitoEmoji = '☀️';
 let _habViewDate = '';       // data sendo visualizada nos hábitos
 let _habViewDayHabits = {};  // hábitos concluídos no dia sendo visualizado
+let _historicoRange = 30;    // período (em dias) selecionado no popup de histórico
 
 // ── DAILY SAVE HELPERS ──
 async function saveDaily(patch) {
@@ -2868,66 +2879,21 @@ function salvarHabito() {
 }
 
 // ── FILTRO DE DATA — HÁBITOS ──
-function dateKeyFrom(d) {
-  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-}
-
-function buildHabDateStrip() {
-  const strip = document.getElementById('hab-date-strip');
-  if (!strip) return;
-  const today = new Date();
-  const todayStr = dateKeyFrom(today);
-  if (!_habViewDate) _habViewDate = todayStr;
+function initHabViewDate() {
+  if (!_habViewDate) _habViewDate = todayKey();
   _habViewDayHabits = (_dailyData && _dailyData.habits) ? { ..._dailyData.habits } : {};
-
-  strip.innerHTML = '';
-  const DIAS_PT = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
-  let todayBtn = null;
-
-  for (let i = -30; i <= 30; i++) {
-    const d = new Date(today);
-    d.setDate(today.getDate() + i);
-    const key = dateKeyFrom(d);
-    const isTod = i === 0;
-    const isSel = key === _habViewDate;
-
-    const btn = document.createElement('button');
-    btn.type = 'button';
-    btn.dataset.dk = key;
-    btn.style.cssText = `flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 10px;border-radius:10px;border:1px solid ${isSel ? 'rgba(139,92,246,0.55)' : isTod ? 'rgba(255,255,255,0.18)' : 'rgba(255,255,255,0.07)'};background:${isSel ? 'rgba(139,92,246,0.2)' : 'rgba(255,255,255,0.03)'};cursor:pointer;font-family:inherit;transition:all 0.15s`;
-    btn.innerHTML = `<span style="font-size:10px;font-weight:600;color:${isSel ? '#C4B5FD' : '#64748B'}">${DIAS_PT[d.getDay()]}</span><span style="font-size:15px;font-weight:700;color:${isSel ? '#C4B5FD' : isTod ? '#F1F5F9' : '#94A3B8'}">${d.getDate()}</span><span style="font-size:9px;color:${isSel ? '#A78BFA' : '#475569'}">${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getFullYear()).slice(2)}</span>`;
-    btn.onclick = () => selectHabDate(key);
-    strip.appendChild(btn);
-    if (isTod) todayBtn = btn;
-  }
-
-  setTimeout(() => {
-    const selBtn = strip.querySelector(`[data-dk="${_habViewDate}"]`) || todayBtn;
-    if (selBtn) selBtn.scrollIntoView({ behavior: 'instant', block: 'nearest', inline: 'center' });
-  }, 30);
 }
+
+function voltarParaHoje() { selectHabDate(todayKey()); }
 
 async function selectHabDate(key) {
   _habViewDate = key;
-  const todayStr = dateKeyFrom(new Date());
+  const todayStr = todayKey();
   const isToday = key === todayStr;
 
-  // Atualiza visual do strip
-  document.querySelectorAll('#hab-date-strip button').forEach(btn => {
-    const isSel = btn.dataset.dk === key;
-    const isTod = btn.dataset.dk === todayStr;
-    btn.style.background = isSel ? 'rgba(139,92,246,0.2)' : 'rgba(255,255,255,0.03)';
-    btn.style.borderColor = isSel ? 'rgba(139,92,246,0.55)' : isTod ? 'rgba(255,255,255,0.18)' : 'rgba(255,255,255,0.07)';
-    const spans = btn.querySelectorAll('span');
-    const color = isSel ? '#C4B5FD' : isTod ? '#F1F5F9' : '#94A3B8';
-    if (spans[0]) spans[0].style.color = isSel ? '#C4B5FD' : '#64748B';
-    if (spans[1]) spans[1].style.color = color;
-    if (spans[2]) spans[2].style.color = isSel ? '#A78BFA' : '#475569';
-    if (isSel) btn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
-  });
-
-  // Título do card
+  // Título do card + botão de voltar para hoje
   const titleEl = document.getElementById('hab-card-title');
+  const backBtn = document.getElementById('hab-back-today-btn');
   const DIAS_PT = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
   if (titleEl) {
     if (isToday) {
@@ -2937,6 +2903,7 @@ async function selectHabDate(key) {
       titleEl.textContent = `Hábitos — ${DIAS_PT[d.getDay()]}, ${d.getDate()}/${d.getMonth()+1}/${d.getFullYear()}`;
     }
   }
+  if (backBtn) backBtn.style.display = isToday ? 'none' : '';
 
   // Carrega dados do dia
   if (isToday) {
@@ -2966,7 +2933,7 @@ async function carregarHabitos() {
     _habViewDate = todayKey();
     _habViewDayHabits = (_dailyData && _dailyData.habits) ? { ..._dailyData.habits } : {};
     renderHabitos();
-    buildHabDateStrip();
+    initHabViewDate();
   } catch(e) { console.warn('carregarHabitos:', e); }
 }
 
@@ -3044,8 +3011,22 @@ function renderHabitos() {
 }
 
 // ── HISTÓRICO DE HÁBITOS (popup) ──
-async function openHistoricoModal() {
+function withTimeout(promise, ms) {
+  return Promise.race([
+    promise,
+    new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), ms)),
+  ]);
+}
+
+async function openHistoricoModal(rangeDays) {
+  rangeDays = rangeDays || _historicoRange || 30;
+  _historicoRange = rangeDays;
   document.getElementById('historico-overlay').style.display = 'flex';
+  document.querySelectorAll('.hist-range-btn').forEach(b => {
+    const active = Number(b.dataset.range) === rangeDays;
+    b.style.background = active ? 'rgba(139,92,246,0.35)' : 'rgba(139,92,246,0.08)';
+    b.style.borderColor = active ? 'rgba(139,92,246,0.7)' : 'rgba(139,92,246,0.3)';
+  });
   const list = document.getElementById('historico-list');
   list.innerHTML = '<div style="text-align:center;padding:32px;color:var(--text-muted);font-size:13px">Carregando...</div>';
 
@@ -3056,10 +3037,10 @@ async function openHistoricoModal() {
   const total = _habitosData.length;
 
   try {
-    const snap = await _db.collection('users').doc(_uid).collection('daily')
+    const snap = await withTimeout(_db.collection('users').doc(_uid).collection('daily')
       .orderBy(firebase.firestore.FieldPath.documentId(), 'desc')
       .where(firebase.firestore.FieldPath.documentId(), '<', todayStr)
-      .limit(30).get();
+      .limit(rangeDays).get(), 10000);
 
     const dias = [];
     snap.forEach(doc => {
@@ -3099,10 +3080,19 @@ async function openHistoricoModal() {
     });
   } catch(e) {
     console.warn('openHistoricoModal:', e);
-    list.innerHTML = '<div style="text-align:center;padding:32px;color:var(--text-muted);font-size:13px">Não foi possível carregar o histórico.</div>';
+    const msg = e && e.message === 'timeout' ? 'Demorou demais para carregar. Verifique sua conexão e tente novamente.' : 'Não foi possível carregar o histórico.';
+    list.innerHTML = `<div style="text-align:center;padding:32px;color:var(--text-muted);font-size:13px">${msg}</div>`;
   }
 }
 function closeHistoricoModal() { document.getElementById('historico-overlay').style.display = 'none'; }
+
+function irParaDataEspecifica() {
+  const val = document.getElementById('historico-data-especifica').value;
+  if (!val) return;
+  closeHistoricoModal();
+  navigate('habitos', document.querySelector('.nav-item[onclick*="habitos"]'));
+  setTimeout(() => selectHabDate(val), 70);
+}
 
 function deletarHabito(id) {
   const habito = _habitosData.find(h => h.id === id);
