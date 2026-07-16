@@ -972,15 +972,15 @@
     <div class="section" id="section-rotina">
       <div class="page-header">
         <h1>Minha Rotina</h1>
-        <p>Quinta-feira, 22 de Maio · <span style="color:var(--purple)">8 blocos programados</span></p>
+        <p id="rotina-subtitle">Carregando...</p>
       </div>
 
       <div class="grid-2 mb-16">
         <div class="card">
           <div class="card-title">Progresso do dia</div>
-          <div style="font-size:32px;font-weight:800;margin-bottom:4px">3<span style="font-size:16px;font-weight:400;color:var(--text-muted)">/8 blocos</span></div>
-          <div class="progress-bar" style="margin-bottom:8px"><div class="progress-fill" style="width:37%"></div></div>
-          <div style="font-size:12px;color:var(--text-soft)">Você está no caminho certo 🔥</div>
+          <div id="rotina-progress-num" style="font-size:32px;font-weight:800;margin-bottom:4px">0<span style="font-size:16px;font-weight:400;color:var(--text-muted)">/0 blocos</span></div>
+          <div class="progress-bar" style="margin-bottom:8px"><div class="progress-fill" id="rotina-progress-bar" style="width:0%"></div></div>
+          <div id="rotina-progress-msg" style="font-size:12px;color:var(--text-soft)">Adicione blocos à sua rotina.</div>
         </div>
         <div class="card">
           <div class="card-title">Energia estimada</div>
@@ -3944,6 +3944,7 @@ function salvarBloco() {
 
   _rotinaData.push(bloco);
   adicionarBlocoNaTimeline(bloco);
+  atualizarProgressoRotina();
   closeBlocoModal();
   // Navega para a aba Rotina e confirma visualmente
   navigate('rotina', document.querySelector('.nav-item[onclick*="rotina"]'));
@@ -3959,6 +3960,36 @@ function blocoAgendadoEm(bloco, dayKey) {
   if (!hasRepeat) return true;
   const dow = new Date(dayKey + 'T12:00:00').getDay();
   return bloco.repeatDays.includes(dow);
+}
+
+const _DIAS_SEMANA_FULL = ['Domingo','Segunda-feira','Terça-feira','Quarta-feira','Quinta-feira','Sexta-feira','Sábado'];
+const _MESES_PT = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+
+function atualizarProgressoRotina() {
+  const todayStr = todayKey();
+  const blocosHoje = _rotinaData.filter(b => blocoAgendadoEm(b, todayStr));
+  const total = blocosHoje.length;
+  const rotinaHoje = (_dailyData && _dailyData.rotina) ? _dailyData.rotina : {};
+  const done = blocosHoje.filter(b => rotinaHoje[b.id]).length;
+  const rate = total > 0 ? Math.round(done / total * 100) : 0;
+
+  const d = new Date();
+  const subEl = document.getElementById('rotina-subtitle');
+  if (subEl) subEl.innerHTML = `${_DIAS_SEMANA_FULL[d.getDay()]}, ${d.getDate()} de ${_MESES_PT[d.getMonth()]} · <span style="color:var(--purple)">${total} bloco${total === 1 ? '' : 's'} programado${total === 1 ? '' : 's'}</span>`;
+
+  const numEl = document.getElementById('rotina-progress-num');
+  if (numEl) numEl.innerHTML = `${done}<span style="font-size:16px;font-weight:400;color:var(--text-muted)">/${total} blocos</span>`;
+
+  const barEl = document.getElementById('rotina-progress-bar');
+  if (barEl) barEl.style.width = rate + '%';
+
+  const msgEl = document.getElementById('rotina-progress-msg');
+  if (msgEl) {
+    if (total === 0) msgEl.textContent = 'Adicione blocos à sua rotina.';
+    else if (done === total) msgEl.textContent = 'Rotina completa! 🎉';
+    else if (done === 0) msgEl.textContent = 'Vamos começar? 💪';
+    else msgEl.textContent = 'Você está no caminho certo 🔥';
+  }
 }
 
 function adicionarBlocoNaTimeline(bloco) {
@@ -4021,6 +4052,7 @@ function marcarBlocoFeito(id, done, emoji, label) {
       .set({ rotina: { [id]: done } }, { merge: true })
       .catch(e => { console.warn('marcarBlocoFeito:', e); showToast('⚠️ Não foi possível salvar na nuvem. Verifique sua conexão.'); });
   }
+  atualizarProgressoRotina();
 }
 
 function deletarBloco(btn, id) {
@@ -4028,6 +4060,7 @@ function deletarBloco(btn, id) {
   btn.closest('.timeline-item').remove();
   _rotinaData = _rotinaData.filter(b => b.id !== id);
   showToast('Bloco excluído.');
+  atualizarProgressoRotina();
   if (_uid && _db) {
     _db.collection('users').doc(_uid).collection('routine').doc(id).delete()
       .catch(e => { console.warn('deletarBloco:', e); showToast('⚠️ Não foi possível excluir na nuvem. Verifique sua conexão.'); });
@@ -4052,13 +4085,14 @@ async function carregarRotinaFull() {
     _rotinaData = [];
     snap.forEach(doc => _rotinaData.push(doc.data()));
     _rotinaData.sort((a, b) => a.time.localeCompare(b.time));
-    if (_rotinaData.length === 0) { if (empty) empty.style.display = 'block'; return; }
+    if (_rotinaData.length === 0) { if (empty) empty.style.display = 'block'; atualizarProgressoRotina(); return; }
     if (empty) empty.style.display = 'none';
     const timeline = document.getElementById('routine-timeline');
     if (timeline) {
       timeline.querySelectorAll('.timeline-item[data-bloco-id]').forEach(el => el.remove());
       _rotinaData.forEach(b => adicionarBlocoNaTimeline(b));
     }
+    atualizarProgressoRotina();
   } catch(e) { console.warn('carregarRotinaFull:', e); }
 }
 
