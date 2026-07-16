@@ -2842,13 +2842,18 @@ async function salvarHabito() {
   renderHabitos();
   navigate('habitos', document.querySelector('.nav-item[onclick*="habitos"]'));
 
+  // Limpa nome e horário para permitir cadastrar outro hábito em seguida,
+  // mas mantém a modal aberta com a confirmação visível (usuário fecha quando quiser).
+  document.getElementById('habito-name').value = '';
+  const timeEl = document.getElementById('habito-time');
+  if (timeEl) timeEl.value = '';
+
   const succEl = document.getElementById('habito-success');
   if (succEl) {
     succEl.textContent = `✓ ${habito.emoji} ${habito.name} às ${time} adicionado!`;
     succEl.style.display = '';
   }
   showToast('Hábito criado! ✓');
-  setTimeout(closeHabitoModal, 1100);
 }
 
 // ── FILTRO DE DATA — HÁBITOS ──
@@ -2994,8 +2999,14 @@ function renderHabitos() {
         ${meta ? `<div style="font-size:11px;color:#64748B;margin-top:2px">${meta}</div>` : ''}
       </div>
       <div class="habit-streak" style="color:${streakColor}">${streakTxt}</div>
-      ${isViewingToday ? `<button onclick="deletarHabito('${h.id}',event)" style="background:none;border:none;color:#f87171;cursor:pointer;font-size:15px;padding:4px 8px;opacity:0.55;transition:opacity .2s" class="hab-del" onmouseenter="this.style.opacity=1" onmouseleave="this.style.opacity=0.55" title="Excluir hábito">✕</button>` : ''}`;
+      ${isViewingToday ? `<button type="button" class="hab-del" title="Excluir hábito" style="background:none;border:none;color:#f87171;cursor:pointer;font-size:15px;padding:4px 8px;opacity:0.55;transition:opacity .2s">✕</button>` : ''}`;
     el.querySelector('.habit-check').addEventListener('click', () => toggleHabitEl(el, h.id));
+    if (isViewingToday) {
+      const delBtn = el.querySelector('.hab-del');
+      delBtn.addEventListener('mouseenter', () => delBtn.style.opacity = '1');
+      delBtn.addEventListener('mouseleave', () => delBtn.style.opacity = '0.55');
+      delBtn.addEventListener('click', (ev) => { ev.stopPropagation(); deletarHabito(h.id); });
+    }
     list.appendChild(el);
 
     // Dashboard mini version
@@ -3082,13 +3093,15 @@ async function openHistoricoModal() {
 }
 function closeHistoricoModal() { document.getElementById('historico-overlay').style.display = 'none'; }
 
-async function deletarHabito(id, e) {
-  e.stopPropagation();
+async function deletarHabito(id) {
+  const habito = _habitosData.find(h => h.id === id);
+  if (habito && !confirm(`Excluir o hábito "${habito.emoji} ${habito.name}"?`)) return;
   _habitosData = _habitosData.filter(h => h.id !== id);
   if (_uid && _db) {
-    try { await _db.collection('users').doc(_uid).collection('habits').doc(id).delete(); } catch(err) {}
+    try { await _db.collection('users').doc(_uid).collection('habits').doc(id).delete(); } catch(err) { console.warn('deletarHabito:', err); }
   }
   renderHabitos();
+  showToast('Hábito excluído.');
 }
 
 function atualizarMetricasHabitos() {
