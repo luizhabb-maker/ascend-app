@@ -2741,13 +2741,15 @@ function saveHabitById(id, done) {
   if (_uid && _db) {
     _db.collection('users').doc(_uid).collection('daily').doc(viewKey)
       .set({ habits: { [id]: done } }, { merge: true })
-      .catch(e => console.warn('saveHabitById:', e));
+      .catch(e => { console.warn('saveHabitById:', e); showToast('⚠️ Não foi possível salvar. Verifique sua conexão.'); });
     if (isToday && habito) {
       _db.collection('users').doc(_uid).collection('habits').doc(id)
         .set({ streak: habito.streak, lastDoneDate: habito.lastDoneDate }, { merge: true })
         .catch(e => console.warn('saveHabitById streak:', e));
     }
     if (isToday && done) addXP(10);
+  } else {
+    showToast('⚠️ Sem conexão com sua conta — o hábito não foi salvo.');
   }
 }
 
@@ -2903,7 +2905,9 @@ function salvarHabito() {
   // Grava em segundo plano — a tela já é atualizada na hora, sem esperar a rede.
   if (_uid && _db) {
     _db.collection('users').doc(_uid).collection('habits').doc(habito.id).set(habito)
-      .catch(e => console.warn('salvarHabito:', e));
+      .catch(e => { console.warn('salvarHabito:', e); showToast('⚠️ Hábito não foi salvo na nuvem. Verifique sua conexão.'); });
+  } else {
+    showToast('⚠️ Sem conexão com sua conta — o hábito não será salvo.');
   }
   _habitosData.push(habito);
   _habitosData.sort((a, b) => (a.time || '').localeCompare(b.time || ''));
@@ -3189,7 +3193,7 @@ function deletarHabito(id) {
   showToast('Hábito excluído.');
   if (_uid && _db) {
     _db.collection('users').doc(_uid).collection('habits').doc(id).delete()
-      .catch(err => console.warn('deletarHabito:', err));
+      .catch(err => { console.warn('deletarHabito:', err); showToast('⚠️ Não foi possível excluir na nuvem. Verifique sua conexão.'); });
   }
 }
 
