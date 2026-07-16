@@ -802,7 +802,7 @@
       <div class="top-actions">
         <div class="icon-btn" title="Notificações">🔔</div>
         <div class="icon-btn" title="Buscar">⌕</div>
-        <button class="btn btn-primary" style="font-size:12px;padding:8px 14px" onclick="openBlocoModal()">+ Novo bloco</button>
+        <button id="top-quick-add-btn" class="btn btn-primary" style="font-size:12px;padding:8px 14px" onclick="openBlocoModal()">+ Novo bloco</button>
       </div>
     </div>
 
@@ -998,7 +998,10 @@
       <div class="card mb-16">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
           <div class="card-title" style="margin:0" id="hab-card-title">Hábitos de hoje</div>
-          <button class="btn btn-ghost" style="font-size:12px;padding:7px 12px" onclick="openHabitoModal()">+ Novo hábito</button>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-ghost" style="font-size:12px;padding:7px 12px" onclick="openHistoricoModal()">🕓 Histórico</button>
+            <button class="btn btn-ghost" style="font-size:12px;padding:7px 12px" onclick="openHabitoModal()">+ Novo hábito</button>
+          </div>
         </div>
         <!-- Date strip — 30 dias antes/depois -->
         <div style="overflow-x:auto;margin-bottom:14px;scrollbar-width:none;-webkit-overflow-scrolling:touch">
@@ -2212,6 +2215,19 @@
   </div>
 </div>
 
+<!-- MODAL HISTÓRICO DE HÁBITOS -->
+<div id="historico-overlay" style="display:none;position:fixed;inset:0;z-index:3000;background:rgba(0,0,0,0.75);backdrop-filter:blur(8px);align-items:center;justify-content:center;padding:20px" onclick="if(event.target===this) closeHistoricoModal()">
+  <div style="background:#0d1120;border:1px solid rgba(255,255,255,0.1);border-radius:20px;padding:28px;width:100%;max-width:440px;max-height:80vh;display:flex;flex-direction:column;animation:slideup 0.25s ease;box-shadow:0 40px 80px rgba(0,0,0,0.6)">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">
+      <div style="font-size:17px;font-weight:800">🕓 Histórico de hábitos</div>
+      <button onclick="closeHistoricoModal()" style="background:rgba(255,255,255,0.06);border:none;width:30px;height:30px;border-radius:50%;color:#94A3B8;cursor:pointer;font-size:16px">✕</button>
+    </div>
+    <div id="historico-list" style="overflow-y:auto;display:flex;flex-direction:column;gap:8px">
+      <div style="text-align:center;padding:32px;color:var(--text-muted);font-size:13px">Carregando...</div>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL TAREFA -->
 <div id="tarefa-overlay" style="display:none;position:fixed;inset:0;z-index:3000;background:rgba(0,0,0,0.75);backdrop-filter:blur(8px);align-items:center;justify-content:center;padding:20px">
   <div style="background:#0d1120;border:1px solid rgba(255,255,255,0.1);border-radius:20px;padding:32px;width:100%;max-width:420px;animation:slideup 0.25s ease;box-shadow:0 40px 80px rgba(0,0,0,0.6)">
@@ -2330,6 +2346,7 @@ function navigate(id, el) {
   if (el) el.classList.add('active');
   setTimeout(() => initCharts(id), 50);
   if (id === 'habitos') setTimeout(() => buildHabDateStrip(), 60);
+  updateQuickAddButton(id);
 }
 
 // ── NAVIGATION (mobile) ──
@@ -2339,7 +2356,22 @@ function mobileNav(id, el) {
   document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
   document.getElementById('section-' + id).classList.add('active');
   setTimeout(() => initCharts(id), 50);
+  if (id === 'habitos') setTimeout(() => buildHabDateStrip(), 60);
+  updateQuickAddButton(id);
   document.querySelector('.main').scrollTop = 0;
+}
+
+// ── TOP QUICK-ADD BUTTON (contextual por aba) ──
+function updateQuickAddButton(id) {
+  const btn = document.getElementById('top-quick-add-btn');
+  if (!btn) return;
+  if (id === 'habitos') {
+    btn.textContent = '+ Novo hábito';
+    btn.onclick = openHabitoModal;
+  } else {
+    btn.textContent = '+ Novo bloco';
+    btn.onclick = openBlocoModal;
+  }
 }
 
 // ── HABITS TOGGLE (dashboard inline) ──
@@ -2816,6 +2848,7 @@ async function selectHabDate(key) {
     if (spans[0]) spans[0].style.color = isSel ? '#C4B5FD' : '#64748B';
     if (spans[1]) spans[1].style.color = color;
     if (spans[2]) spans[2].style.color = isSel ? '#A78BFA' : '#475569';
+    if (isSel) btn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
   });
 
   // Título do card
@@ -2924,6 +2957,67 @@ function renderHabitos() {
   atualizarMetricasHabitos();
   atualizarDashHabitos();
 }
+
+// ── HISTÓRICO DE HÁBITOS (popup) ──
+async function openHistoricoModal() {
+  document.getElementById('historico-overlay').style.display = 'flex';
+  const list = document.getElementById('historico-list');
+  list.innerHTML = '<div style="text-align:center;padding:32px;color:var(--text-muted);font-size:13px">Carregando...</div>';
+
+  if (!_uid || !_db) { list.innerHTML = '<div style="text-align:center;padding:32px;color:var(--text-muted);font-size:13px">Faça login para ver o histórico.</div>'; return; }
+
+  const DIAS_PT = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+  const todayStr = todayKey();
+  const total = _habitosData.length;
+
+  try {
+    const snap = await _db.collection('users').doc(_uid).collection('daily')
+      .orderBy(firebase.firestore.FieldPath.documentId(), 'desc')
+      .where(firebase.firestore.FieldPath.documentId(), '<', todayStr)
+      .limit(30).get();
+
+    const dias = [];
+    snap.forEach(doc => {
+      const data = doc.data();
+      const habits = data.habits || {};
+      const done = _habitosData.filter(h => habits[h.id]).length;
+      dias.push({ key: doc.id, done });
+    });
+
+    if (dias.length === 0) {
+      list.innerHTML = '<div style="text-align:center;padding:32px;color:var(--text-muted);font-size:13px">Ainda não há dias anteriores registrados.</div>';
+      return;
+    }
+
+    list.innerHTML = '';
+    dias.forEach(({ key, done }) => {
+      const d = new Date(key + 'T12:00:00');
+      const rate = total > 0 ? Math.round(done / total * 100) : 0;
+      const row = document.createElement('button');
+      row.type = 'button';
+      row.style.cssText = 'display:flex;align-items:center;gap:12px;width:100%;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:10px 14px;cursor:pointer;font-family:inherit;text-align:left;transition:background .15s';
+      row.onmouseenter = () => row.style.background = 'rgba(255,255,255,0.08)';
+      row.onmouseleave = () => row.style.background = 'rgba(255,255,255,0.04)';
+      row.innerHTML = `
+        <div style="min-width:64px">
+          <div style="font-size:11px;font-weight:700;color:#64748B">${DIAS_PT[d.getDay()]}</div>
+          <div style="font-size:14px;font-weight:800;color:#F1F5F9">${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}</div>
+        </div>
+        <div style="flex:1">
+          <div style="height:6px;border-radius:3px;background:rgba(255,255,255,0.08);overflow:hidden">
+            <div style="height:100%;width:${rate}%;background:linear-gradient(90deg,#8B5CF6,#06B6D4);border-radius:3px"></div>
+          </div>
+        </div>
+        <div style="font-size:12px;font-weight:700;color:${rate===100&&total>0?'var(--green)':'#94A3B8'};min-width:56px;text-align:right">${done}/${total}</div>`;
+      row.onclick = () => { closeHistoricoModal(); navigate('habitos', document.querySelector('.nav-item[onclick*="habitos"]')); setTimeout(() => selectHabDate(key), 70); };
+      list.appendChild(row);
+    });
+  } catch(e) {
+    console.warn('openHistoricoModal:', e);
+    list.innerHTML = '<div style="text-align:center;padding:32px;color:var(--text-muted);font-size:13px">Não foi possível carregar o histórico.</div>';
+  }
+}
+function closeHistoricoModal() { document.getElementById('historico-overlay').style.display = 'none'; }
 
 async function deletarHabito(id, e) {
   e.stopPropagation();
