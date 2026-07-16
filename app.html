@@ -2292,6 +2292,25 @@
   </div>
 </div>
 
+<!-- MODAL EXCLUIR HÁBITO RECORRENTE -->
+<div id="delhabito-overlay" style="display:none;position:fixed;inset:0;z-index:3100;background:rgba(0,0,0,0.75);backdrop-filter:blur(8px);align-items:center;justify-content:center;padding:20px" onclick="if(event.target===this) closeDelHabitoModal()">
+  <div style="background:#0d1120;border:1px solid rgba(255,255,255,0.1);border-radius:20px;padding:28px;width:100%;max-width:380px;animation:slideup 0.25s ease;box-shadow:0 40px 80px rgba(0,0,0,0.6)">
+    <div style="font-size:17px;font-weight:800;margin-bottom:8px" id="delhabito-title">Excluir hábito</div>
+    <div style="font-size:13px;color:var(--text-soft);margin-bottom:20px">Esse hábito se repete todos os dias. O que você quer fazer?</div>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <button type="button" onclick="confirmarExclusaoHabito('hoje')" style="background:rgba(245,158,11,0.12);border:1px solid rgba(245,158,11,0.35);color:#F59E0B;border-radius:11px;padding:12px 14px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;text-align:left">
+        Parar a partir de hoje
+        <div style="font-weight:400;font-size:12px;opacity:.85;margin-top:2px">Mantém o histórico dos dias anteriores</div>
+      </button>
+      <button type="button" onclick="confirmarExclusaoHabito('tudo')" style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);color:#f87171;border-radius:11px;padding:12px 14px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;text-align:left">
+        Excluir de todos os dias
+        <div style="font-weight:400;font-size:12px;opacity:.85;margin-top:2px">Apaga o hábito e todo o histórico</div>
+      </button>
+      <button type="button" onclick="closeDelHabitoModal()" style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);color:var(--text-soft);border-radius:11px;padding:11px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">Cancelar</button>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL TAREFA -->
 <div id="tarefa-overlay" style="display:none;position:fixed;inset:0;z-index:3000;background:rgba(0,0,0,0.75);backdrop-filter:blur(8px);align-items:center;justify-content:center;padding:20px">
   <div style="background:#0d1120;border:1px solid rgba(255,255,255,0.1);border-radius:20px;padding:32px;width:100%;max-width:420px;animation:slideup 0.25s ease;box-shadow:0 40px 80px rgba(0,0,0,0.6)">
@@ -2705,24 +2724,19 @@ function dateKeyOffset(offsetDays) {
   return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 }
 
-// Quantos hábitos já existiam até o fim de um determinado dia (evita contar
-// hábitos criados depois como "pendentes" em dias anteriores à sua criação).
-function totalHabitosAteData(dayKey) {
-  const cutoff = new Date(dayKey + 'T23:59:59').getTime();
-  return _habitosData.filter(h => (h.createdAt || 0) <= cutoff).length;
-}
-
 function dateKeyFromTimestamp(ts) {
   const d = new Date(ts || Date.now());
   return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 }
 
-// Hábitos válidos para um dia específico: os "diários" a partir da criação,
-// e os que "não repetem" só no próprio dia em que foram criados.
+// Hábitos válidos para um dia específico: os "diários" a partir da criação
+// (e até o endDate, se o usuário tiver optado por parar de repetir a partir
+// de uma data), e os que "não repetem" só no próprio dia em que foram criados.
 function habitosAgendadosEm(dayKey) {
   return _habitosData.filter(h => {
     const createdKey = dateKeyFromTimestamp(h.createdAt);
     if (h.repeats === false) return createdKey === dayKey;
+    if (h.endDate && dayKey > h.endDate) return false;
     return createdKey <= dayKey;
   });
 }
@@ -2981,12 +2995,11 @@ async function carregarConsistenciaHabitos() {
     const taxaPorDia = {};
     for (let i = 0; i < 28; i++) {
       const key = dateKeyOffset(-i);
-      const totalNaData = totalHabitosAteData(key);
-      if (totalNaData === 0) { taxaPorDia[key] = 0; continue; }
+      const habitosDoDia = habitosAgendadosEm(key);
+      if (habitosDoDia.length === 0) { taxaPorDia[key] = 0; continue; }
       const habits = habitsPorDia[key] || {};
-      const cutoff = new Date(key + 'T23:59:59').getTime();
-      const done = _habitosData.filter(h => habits[h.id] && (h.createdAt || 0) <= cutoff).length;
-      taxaPorDia[key] = (done / totalNaData) * 100;
+      const done = habitosDoDia.filter(h => habits[h.id]).length;
+      taxaPorDia[key] = (done / habitosDoDia.length) * 100;
     }
 
     // Agrupa os últimos 28 dias em 4 blocos de 7 dias (dias sem registro contam como 0%).
@@ -3184,12 +3197,11 @@ async function openHistoricoModal(rangeDays) {
     const dias = [];
     for (let i = 1; i <= rangeDays; i++) {
       const key = dateKeyOffset(-i);
-      const totalNaData = totalHabitosAteData(key);
-      if (totalNaData === 0) continue;
+      const habitosDoDia = habitosAgendadosEm(key);
+      if (habitosDoDia.length === 0) continue;
       const habits = habitsPorDia[key] || {};
-      const cutoff = new Date(key + 'T23:59:59').getTime();
-      const done = _habitosData.filter(h => habits[h.id] && (h.createdAt || 0) <= cutoff).length;
-      dias.push({ key, done, total: totalNaData });
+      const done = habitosDoDia.filter(h => habits[h.id]).length;
+      dias.push({ key, done, total: habitosDoDia.length });
     }
 
     if (dias.length === 0) {
@@ -3236,15 +3248,58 @@ function irParaDataEspecifica() {
   setTimeout(() => selectHabDate(val), 70);
 }
 
+let _habitoParaExcluir = null;
+
 function deletarHabito(id) {
   const habito = _habitosData.find(h => h.id === id);
-  if (habito && !confirm(`Excluir o hábito "${habito.emoji} ${habito.name}"?`)) return;
+  if (!habito) return;
+
+  // Hábito de ocorrência única: não tem sentido "parar a partir de hoje",
+  // só existe naquele dia — confirmação simples.
+  if (habito.repeats === false) {
+    if (!confirm(`Excluir o hábito "${habito.emoji} ${habito.name}"?`)) return;
+    executarExclusaoHabito(id, 'tudo');
+    return;
+  }
+
+  // Hábito recorrente: pergunta se é pra parar só a partir de hoje ou apagar tudo.
+  _habitoParaExcluir = id;
+  document.getElementById('delhabito-title').textContent = `Excluir "${habito.emoji} ${habito.name}"`;
+  document.getElementById('delhabito-overlay').style.display = 'flex';
+}
+
+function closeDelHabitoModal() {
+  document.getElementById('delhabito-overlay').style.display = 'none';
+  _habitoParaExcluir = null;
+}
+
+function confirmarExclusaoHabito(modo) {
+  const id = _habitoParaExcluir;
+  closeDelHabitoModal();
+  if (id) executarExclusaoHabito(id, modo);
+}
+
+function executarExclusaoHabito(id, modo) {
+  if (modo === 'hoje') {
+    const habito = _habitosData.find(h => h.id === id);
+    if (!habito) return;
+    habito.endDate = dateKeyOffset(-1);
+    renderHabitos();
+    showToast('Hábito não vai mais repetir a partir de hoje.');
+    if (_uid && _db) {
+      _db.collection('users').doc(_uid).collection('habits').doc(id)
+        .set({ endDate: habito.endDate }, { merge: true })
+        .catch(err => { console.warn('executarExclusaoHabito (hoje):', err); showToast('⚠️ Não foi possível salvar na nuvem. Verifique sua conexão.'); });
+    }
+    return;
+  }
+
   _habitosData = _habitosData.filter(h => h.id !== id);
   renderHabitos();
-  showToast('Hábito excluído.');
+  showToast('Hábito excluído de todos os dias.');
   if (_uid && _db) {
     _db.collection('users').doc(_uid).collection('habits').doc(id).delete()
-      .catch(err => { console.warn('deletarHabito:', err); showToast('⚠️ Não foi possível excluir na nuvem. Verifique sua conexão.'); });
+      .catch(err => { console.warn('executarExclusaoHabito (tudo):', err); showToast('⚠️ Não foi possível excluir na nuvem. Verifique sua conexão.'); });
   }
 }
 
