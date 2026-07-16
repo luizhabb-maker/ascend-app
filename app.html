@@ -2384,10 +2384,10 @@ function updateQuickAddButton(id) {
 }
 
 // ── HABITS TOGGLE (dashboard inline) ──
-async function toggleHabitEl(el, habitId) {
+function toggleHabitEl(el, habitId) {
   const check = el.querySelector('.habit-check');
   const newDone = !check.classList.contains('done');
-  await saveHabitById(habitId, newDone);
+  saveHabitById(habitId, newDone);
   renderHabitos();
 }
 
@@ -2648,20 +2648,20 @@ function dateKeyOffset(offsetDays) {
   return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 }
 
-async function saveHabitById(id, done) {
+// Otimista: atualiza estado local e a tela na hora; a gravação no Firestore
+// acontece em segundo plano para não travar a interface esperando a rede.
+function saveHabitById(id, done) {
   const viewKey = _habViewDate || todayKey();
   const isToday = viewKey === todayKey();
-  if (_uid && _db) {
-    try {
-      await _db.collection('users').doc(_uid).collection('daily').doc(viewKey).set({ habits: { [id]: done } }, { merge: true });
-    } catch(e) { console.warn('saveHabitById:', e); }
-  }
+
   _habViewDayHabits = { ..._habViewDayHabits, [id]: done };
+
+  let habito = null;
   if (isToday) {
     if (!_dailyData.habits) _dailyData.habits = {};
     _dailyData.habits[id] = done;
 
-    const habito = _habitosData.find(h => h.id === id);
+    habito = _habitosData.find(h => h.id === id);
     if (habito) {
       const today = todayKey();
       const yesterday = dateKeyOffset(-1);
@@ -2674,15 +2674,23 @@ async function saveHabitById(id, done) {
         habito.streak = Math.max(0, (habito.streak || 1) - 1);
         habito.lastDoneDate = habito.streak > 0 ? yesterday : null;
       }
-      if (_uid && _db) {
-        try { await _db.collection('users').doc(_uid).collection('habits').doc(id).set({ streak: habito.streak, lastDoneDate: habito.lastDoneDate }, { merge: true }); } catch(e) { console.warn('saveHabitById streak:', e); }
-      }
     }
 
-    if (done) await addXP(10);
     atualizarDashHabitos();
     atualizarMetricasHabitos();
     recalcScore();
+  }
+
+  if (_uid && _db) {
+    _db.collection('users').doc(_uid).collection('daily').doc(viewKey)
+      .set({ habits: { [id]: done } }, { merge: true })
+      .catch(e => console.warn('saveHabitById:', e));
+    if (isToday && habito) {
+      _db.collection('users').doc(_uid).collection('habits').doc(id)
+        .set({ streak: habito.streak, lastDoneDate: habito.lastDoneDate }, { merge: true })
+        .catch(e => console.warn('saveHabitById streak:', e));
+    }
+    if (isToday && done) addXP(10);
   }
 }
 
@@ -2812,7 +2820,7 @@ function selectHabitoEmoji(btn, emoji) {
   _selectedHabitoEmoji = emoji;
 }
 
-async function salvarHabito() {
+function salvarHabito() {
   const name = document.getElementById('habito-name').value.trim();
   const errEl = document.getElementById('habito-error');
   const time = document.getElementById('habito-time').value;
@@ -2834,8 +2842,11 @@ async function salvarHabito() {
   if (errEl) errEl.style.display = 'none';
 
   const habito = { id: Date.now().toString(), name, emoji: _selectedHabitoEmoji, time, repeats, streak: 0, lastDoneDate: null, createdAt: Date.now() };
+
+  // Grava em segundo plano — a tela já é atualizada na hora, sem esperar a rede.
   if (_uid && _db) {
-    try { await _db.collection('users').doc(_uid).collection('habits').doc(habito.id).set(habito); } catch(e) { console.warn('salvarHabito:', e); }
+    _db.collection('users').doc(_uid).collection('habits').doc(habito.id).set(habito)
+      .catch(e => console.warn('salvarHabito:', e));
   }
   _habitosData.push(habito);
   _habitosData.sort((a, b) => (a.time || '').localeCompare(b.time || ''));
@@ -3018,10 +3029,10 @@ function renderHabitos() {
         <div class="habit-check${done?' done':''}">${done?'✓':''}</div>
         <div class="habit-name">${h.emoji} ${h.name}</div>
         <div class="habit-streak" style="color:${streakColor}">${streakTxt}</div>`;
-      del.querySelector('.habit-check').addEventListener('click', async () => {
+      del.querySelector('.habit-check').addEventListener('click', () => {
         const check = del.querySelector('.habit-check');
         const newDone = !check.classList.contains('done');
-        await saveHabitById(h.id, newDone);
+        saveHabitById(h.id, newDone);
         renderHabitos();
       });
       dashList.appendChild(del);
@@ -3093,15 +3104,16 @@ async function openHistoricoModal() {
 }
 function closeHistoricoModal() { document.getElementById('historico-overlay').style.display = 'none'; }
 
-async function deletarHabito(id) {
+function deletarHabito(id) {
   const habito = _habitosData.find(h => h.id === id);
   if (habito && !confirm(`Excluir o hábito "${habito.emoji} ${habito.name}"?`)) return;
   _habitosData = _habitosData.filter(h => h.id !== id);
-  if (_uid && _db) {
-    try { await _db.collection('users').doc(_uid).collection('habits').doc(id).delete(); } catch(err) { console.warn('deletarHabito:', err); }
-  }
   renderHabitos();
   showToast('Hábito excluído.');
+  if (_uid && _db) {
+    _db.collection('users').doc(_uid).collection('habits').doc(id).delete()
+      .catch(err => console.warn('deletarHabito:', err));
+  }
 }
 
 function atualizarMetricasHabitos() {
