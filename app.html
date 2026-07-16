@@ -2712,6 +2712,21 @@ function totalHabitosAteData(dayKey) {
   return _habitosData.filter(h => (h.createdAt || 0) <= cutoff).length;
 }
 
+function dateKeyFromTimestamp(ts) {
+  const d = new Date(ts || Date.now());
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+
+// Hábitos válidos para um dia específico: os "diários" a partir da criação,
+// e os que "não repetem" só no próprio dia em que foram criados.
+function habitosAgendadosEm(dayKey) {
+  return _habitosData.filter(h => {
+    const createdKey = dateKeyFromTimestamp(h.createdAt);
+    if (h.repeats === false) return createdKey === dayKey;
+    return createdKey <= dayKey;
+  });
+}
+
 // Otimista: atualiza estado local e a tela na hora; a gravação no Firestore
 // acontece em segundo plano para não travar a interface esperando a rede.
 function saveHabitById(id, done) {
@@ -3054,20 +3069,35 @@ function renderHabitos() {
   }
 
   const viewHabits = _habViewDayHabits || (_dailyData && _dailyData.habits) || {};
-  const isViewingToday = (_habViewDate || todayKey()) === todayKey();
+  const viewDateKey = _habViewDate || todayKey();
+  const isViewingToday = viewDateKey === todayKey();
+
+  const habitosDoDia = habitosAgendadosEm(viewDateKey);
 
   list.innerHTML = '';
   if (dashList) dashList.innerHTML = '';
 
-  _habitosData.forEach(h => {
+  if (habitosDoDia.length === 0) {
+    list.innerHTML = `<div style="text-align:center;padding:32px;color:var(--text-muted);font-size:13px">Nenhum hábito para ${isViewingToday ? 'hoje' : 'este dia'}.</div>`;
+    atualizarMetricasHabitos();
+    atualizarDashHabitos();
+    return;
+  }
+
+  habitosDoDia.forEach(h => {
     const done = !!viewHabits[h.id];
     let streakTxt, streakColor;
-    if (done) {
-      streakTxt = h.streak > 0 ? `🔥 ${h.streak} dias` : '✓ concluído';
-      streakColor = 'var(--green)';
+    if (isViewingToday) {
+      if (done) {
+        streakTxt = h.streak > 0 ? `🔥 ${h.streak} dias` : '✓ concluído';
+        streakColor = 'var(--green)';
+      } else {
+        streakTxt = h.streak > 0 ? `🔥 ${h.streak} dias (pendente hoje)` : '— pendente';
+        streakColor = 'var(--text-muted)';
+      }
     } else {
-      streakTxt = h.streak > 0 ? `🔥 ${h.streak} dias (pendente hoje)` : '— pendente';
-      streakColor = 'var(--text-muted)';
+      streakTxt = done ? '✓ concluído' : '— não concluído';
+      streakColor = done ? 'var(--green)' : 'var(--text-muted)';
     }
     const meta = [h.time || '', h.repeats === false ? 'não repete' : 'diário'].filter(Boolean).join(' · ');
 
@@ -3220,8 +3250,9 @@ function deletarHabito(id) {
 
 function atualizarMetricasHabitos() {
   const todayHabits = (_dailyData && _dailyData.habits) ? _dailyData.habits : {};
-  const total = _habitosData.length;
-  const done  = _habitosData.filter(h => todayHabits[h.id]).length;
+  const habitosHoje = habitosAgendadosEm(todayKey());
+  const total = habitosHoje.length;
+  const done  = habitosHoje.filter(h => todayHabits[h.id]).length;
   const best  = _habitosData.reduce((m, h) => Math.max(m, h.streak || 0), 0);
   const rate  = total > 0 ? Math.round(done / total * 100) : 0;
 
@@ -3241,8 +3272,9 @@ function atualizarMetricasHabitos() {
 
 function atualizarDashHabitos() {
   const todayHabits = (_dailyData && _dailyData.habits) ? _dailyData.habits : {};
-  const total = _habitosData.length;
-  const done  = _habitosData.filter(h => todayHabits[h.id]).length;
+  const habitosHoje = habitosAgendadosEm(todayKey());
+  const total = habitosHoje.length;
+  const done  = habitosHoje.filter(h => todayHabits[h.id]).length;
   const rate  = total > 0 ? Math.round(done / total * 100) : 0;
 
   const cnt = document.getElementById('dash-hab-count');
