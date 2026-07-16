@@ -2705,6 +2705,13 @@ function dateKeyOffset(offsetDays) {
   return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 }
 
+// Quantos hábitos já existiam até o fim de um determinado dia (evita contar
+// hábitos criados depois como "pendentes" em dias anteriores à sua criação).
+function totalHabitosAteData(dayKey) {
+  const cutoff = new Date(dayKey + 'T23:59:59').getTime();
+  return _habitosData.filter(h => (h.createdAt || 0) <= cutoff).length;
+}
+
 // Otimista: atualiza estado local e a tela na hora; a gravação no Firestore
 // acontece em segundo plano para não travar a interface esperando a rede.
 function saveHabitById(id, done) {
@@ -2939,8 +2946,7 @@ function voltarParaHoje() { selectHabDate(todayKey()); }
 // Preenche o gráfico "Consistência — Últimas 4 semanas" com dados reais do Firestore.
 async function carregarConsistenciaHabitos() {
   if (!_uid || !_db || !charts.habit) return;
-  const total = _habitosData.length;
-  if (total === 0) { charts.habit.data.datasets[0].data = [0, 0, 0, 0]; charts.habit.update(); return; }
+  if (_habitosData.length === 0) { charts.habit.data.datasets[0].data = [0, 0, 0, 0]; charts.habit.update(); return; }
 
   try {
     const todayStr = todayKey();
@@ -2949,16 +2955,23 @@ async function carregarConsistenciaHabitos() {
       .where(firebase.firestore.FieldPath.documentId(), '<=', todayStr)
       .limit(28).get(), 10000);
 
-    const taxaPorDia = {};
-    snap.forEach(doc => {
-      const habits = doc.data().habits || {};
-      const done = _habitosData.filter(h => habits[h.id]).length;
-      taxaPorDia[doc.id] = (done / total) * 100;
-    });
+    const habitsPorDia = {};
+    snap.forEach(doc => { habitsPorDia[doc.id] = doc.data().habits || {}; });
     // O dia de hoje pode ainda não ter documento salvo — usa o estado local.
-    if (!(todayStr in taxaPorDia)) {
-      const doneHoje = _habitosData.filter(h => (_dailyData.habits || {})[h.id]).length;
-      taxaPorDia[todayStr] = (doneHoje / total) * 100;
+    if (!(todayStr in habitsPorDia)) habitsPorDia[todayStr] = _dailyData.habits || {};
+
+    // Taxa de cada dia calculada com o total de hábitos que já existiam
+    // NAQUELE dia (não o total atual), pra não penalizar dias anteriores
+    // à criação de um hábito novo.
+    const taxaPorDia = {};
+    for (let i = 0; i < 28; i++) {
+      const key = dateKeyOffset(-i);
+      const totalNaData = totalHabitosAteData(key);
+      if (totalNaData === 0) { taxaPorDia[key] = 0; continue; }
+      const habits = habitsPorDia[key] || {};
+      const cutoff = new Date(key + 'T23:59:59').getTime();
+      const done = _habitosData.filter(h => habits[h.id] && (h.createdAt || 0) <= cutoff).length;
+      taxaPorDia[key] = (done / totalNaData) * 100;
     }
 
     // Agrupa os últimos 28 dias em 4 blocos de 7 dias (dias sem registro contam como 0%).
@@ -3125,7 +3138,6 @@ async function openHistoricoModal(rangeDays) {
 
   const DIAS_PT = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
   const todayStr = todayKey();
-  const total = _habitosData.length;
 
   try {
     const snap = await withTimeout(_db.collection('users').doc(_uid).collection('daily')
@@ -3133,13 +3145,22 @@ async function openHistoricoModal(rangeDays) {
       .where(firebase.firestore.FieldPath.documentId(), '<', todayStr)
       .limit(rangeDays).get(), 10000);
 
+    const habitsPorDia = {};
+    snap.forEach(doc => { habitsPorDia[doc.id] = doc.data().habits || {}; });
+
+    // Mostra TODOS os dias do período (não só os que têm documento salvo) —
+    // dias sem registro entram como 0 concluídos. Pula dias em que ainda
+    // não existia nenhum hábito criado.
     const dias = [];
-    snap.forEach(doc => {
-      const data = doc.data();
-      const habits = data.habits || {};
-      const done = _habitosData.filter(h => habits[h.id]).length;
-      dias.push({ key: doc.id, done });
-    });
+    for (let i = 1; i <= rangeDays; i++) {
+      const key = dateKeyOffset(-i);
+      const totalNaData = totalHabitosAteData(key);
+      if (totalNaData === 0) continue;
+      const habits = habitsPorDia[key] || {};
+      const cutoff = new Date(key + 'T23:59:59').getTime();
+      const done = _habitosData.filter(h => habits[h.id] && (h.createdAt || 0) <= cutoff).length;
+      dias.push({ key, done, total: totalNaData });
+    }
 
     if (dias.length === 0) {
       list.innerHTML = '<div style="text-align:center;padding:32px;color:var(--text-muted);font-size:13px">Ainda não há dias anteriores registrados.</div>';
@@ -3147,7 +3168,7 @@ async function openHistoricoModal(rangeDays) {
     }
 
     list.innerHTML = '';
-    dias.forEach(({ key, done }) => {
+    dias.forEach(({ key, done, total }) => {
       const d = new Date(key + 'T12:00:00');
       const rate = total > 0 ? Math.round(done / total * 100) : 0;
       const row = document.createElement('button');
@@ -3669,8 +3690,11 @@ try {
 
   // Cache local (IndexedDB) com fila de escrita offline: garante que uma
   // gravação (ex.: criar/marcar hábito) não se perca se a página recarregar
-  // ou a rede cair antes do envio ao servidor terminar.
-  _db.enablePersistence({ synchronizeTabs: true }).catch(e => console.warn('Firestore persistence:', e.code));
+  // ou a rede cair antes do envio ao servidor terminar. Isolado em seu
+  // próprio try/catch para nunca impedir o login se isso falhar.
+  try {
+    _db.enablePersistence({ synchronizeTabs: true }).catch(e => console.warn('Firestore persistence:', e.code));
+  } catch (e) { console.warn('Firestore persistence (sync):', e); }
 
   _auth.onAuthStateChanged(async (user) => {
     if (!user) { window.location.href = '/login'; return; }
