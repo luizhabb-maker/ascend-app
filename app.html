@@ -931,14 +931,8 @@
           </div>
           <div class="card">
             <div class="card-title">Próximo na rotina</div>
-            <div class="timeline-item active-now" style="margin:0">
-              <div class="timeline-time">20:00 — Agora</div>
-              <div class="timeline-label">🏋️ Treino de Costas</div>
-              <div class="timeline-desc">45 min · Academia · Prioridade alta</div>
-              <div style="margin-top:10px; display:flex; gap:8px;">
-                <button class="btn btn-primary" style="font-size:12px;padding:7px 14px">▶ Iniciar</button>
-                <button class="btn btn-ghost" style="font-size:12px;padding:7px 14px">Adiar 15min</button>
-              </div>
+            <div id="dash-proximo-rotina">
+              <div style="text-align:center;padding:20px;color:var(--text-muted);font-size:13px">Adicione blocos na aba Rotina.</div>
             </div>
           </div>
         </div>
@@ -3944,7 +3938,7 @@ function salvarBloco() {
 
   _rotinaData.push(bloco);
   adicionarBlocoNaTimeline(bloco);
-  atualizarProgressoRotina();
+  atualizarProgressoRotina(); atualizarProximoNaRotina();
   closeBlocoModal();
   // Navega para a aba Rotina e confirma visualmente
   navigate('rotina', document.querySelector('.nav-item[onclick*="rotina"]'));
@@ -3989,6 +3983,71 @@ function atualizarProgressoRotina() {
     else if (done === total) msgEl.textContent = 'Rotina completa! 🎉';
     else if (done === 0) msgEl.textContent = 'Vamos começar? 💪';
     else msgEl.textContent = 'Você está no caminho certo 🔥';
+  }
+}
+
+// Preenche o card "Próximo na rotina" do Dashboard com o próximo bloco
+// pendente de hoje (ou o mais atrasado, se todos já passaram do horário).
+function atualizarProximoNaRotina() {
+  const container = document.getElementById('dash-proximo-rotina');
+  if (!container) return;
+
+  const todayStr = todayKey();
+  const rotinaHoje = (_dailyData && _dailyData.rotina) ? _dailyData.rotina : {};
+  const nowHHMM = new Date().toTimeString().slice(0, 5);
+
+  const pendentes = _rotinaData
+    .filter(b => blocoAgendadoEm(b, todayStr) && !rotinaHoje[b.id])
+    .sort((a, b) => a.time.localeCompare(b.time));
+
+  if (pendentes.length === 0) {
+    container.innerHTML = _rotinaData.length === 0
+      ? '<div style="text-align:center;padding:20px;color:var(--text-muted);font-size:13px">Adicione blocos na aba Rotina.</div>'
+      : '<div style="text-align:center;padding:20px;color:var(--text-muted);font-size:13px">Nenhum bloco pendente hoje. 🎉</div>';
+    return;
+  }
+
+  const proximo = pendentes.find(b => b.time >= nowHHMM) || pendentes[0];
+  const statusTxt = proximo.time < nowHHMM ? 'Atrasado' : (proximo.time === nowHHMM ? 'Agora' : 'Em breve');
+
+  container.innerHTML = `
+    <div class="timeline-item active-now" style="margin:0">
+      <div class="timeline-time">${proximo.time} — ${statusTxt}</div>
+      <div class="timeline-label">${proximo.label}</div>
+      ${proximo.desc ? `<div class="timeline-desc">${proximo.desc}</div>` : ''}
+      <div style="margin-top:10px; display:flex; gap:8px;">
+        <button class="btn btn-primary" style="font-size:12px;padding:7px 14px" onclick="iniciarProximoBloco()">▶ Iniciar</button>
+        <button class="btn btn-ghost" style="font-size:12px;padding:7px 14px" onclick="adiarProximoBloco('${proximo.id}')">Adiar 15min</button>
+      </div>
+    </div>`;
+}
+
+function iniciarProximoBloco() {
+  navigate('rotina', document.querySelector('.nav-item[onclick*="rotina"]'));
+}
+
+function adiarProximoBloco(id) {
+  const bloco = _rotinaData.find(b => b.id === id);
+  if (!bloco) return;
+  const [h, m] = bloco.time.split(':').map(Number);
+  const d = new Date();
+  d.setHours(h, m + 15, 0, 0);
+  bloco.time = `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+
+  atualizarProximoNaRotina();
+  showToast(`Bloco adiado para ${bloco.time}.`);
+
+  const timeline = document.getElementById('routine-timeline');
+  if (timeline) {
+    const el = timeline.querySelector(`[data-bloco-id="${id}"]`);
+    if (el) el.remove();
+    adicionarBlocoNaTimeline(bloco);
+  }
+
+  if (_uid && _db) {
+    _db.collection('users').doc(_uid).collection('routine').doc(id)
+      .set({ time: bloco.time }, { merge: true })
+      .catch(e => { console.warn('adiarProximoBloco:', e); showToast('⚠️ Não foi possível salvar na nuvem. Verifique sua conexão.'); });
   }
 }
 
@@ -4052,7 +4111,7 @@ function marcarBlocoFeito(id, done, emoji, label) {
       .set({ rotina: { [id]: done } }, { merge: true })
       .catch(e => { console.warn('marcarBlocoFeito:', e); showToast('⚠️ Não foi possível salvar na nuvem. Verifique sua conexão.'); });
   }
-  atualizarProgressoRotina();
+  atualizarProgressoRotina(); atualizarProximoNaRotina();
 }
 
 function deletarBloco(btn, id) {
@@ -4060,7 +4119,7 @@ function deletarBloco(btn, id) {
   btn.closest('.timeline-item').remove();
   _rotinaData = _rotinaData.filter(b => b.id !== id);
   showToast('Bloco excluído.');
-  atualizarProgressoRotina();
+  atualizarProgressoRotina(); atualizarProximoNaRotina();
   if (_uid && _db) {
     _db.collection('users').doc(_uid).collection('routine').doc(id).delete()
       .catch(e => { console.warn('deletarBloco:', e); showToast('⚠️ Não foi possível excluir na nuvem. Verifique sua conexão.'); });
@@ -4085,14 +4144,14 @@ async function carregarRotinaFull() {
     _rotinaData = [];
     snap.forEach(doc => _rotinaData.push(doc.data()));
     _rotinaData.sort((a, b) => a.time.localeCompare(b.time));
-    if (_rotinaData.length === 0) { if (empty) empty.style.display = 'block'; atualizarProgressoRotina(); return; }
+    if (_rotinaData.length === 0) { if (empty) empty.style.display = 'block'; atualizarProgressoRotina(); atualizarProximoNaRotina(); return; }
     if (empty) empty.style.display = 'none';
     const timeline = document.getElementById('routine-timeline');
     if (timeline) {
       timeline.querySelectorAll('.timeline-item[data-bloco-id]').forEach(el => el.remove());
       _rotinaData.forEach(b => adicionarBlocoNaTimeline(b));
     }
-    atualizarProgressoRotina();
+    atualizarProgressoRotina(); atualizarProximoNaRotina();
   } catch(e) { console.warn('carregarRotinaFull:', e); }
 }
 
