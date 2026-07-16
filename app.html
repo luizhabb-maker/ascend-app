@@ -2209,7 +2209,16 @@
         <label style="font-size:11px;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px">Nome do hábito</label>
         <input id="habito-name" type="text" placeholder="Ex: Meditação 10 min" maxlength="40" style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:11px 14px;color:#F1F5F9;font-size:14px;font-family:inherit;outline:none" onfocus="this.style.borderColor='rgba(139,92,246,.5)'" onblur="this.style.borderColor='rgba(255,255,255,0.1)'">
       </div>
+      <div>
+        <label style="font-size:11px;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px">Horário</label>
+        <input id="habito-time" type="time" style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:11px 14px;color:#F1F5F9;font-size:14px;font-family:inherit;outline:none;color-scheme:dark" onfocus="this.style.borderColor='rgba(139,92,246,.5)'" onblur="this.style.borderColor='rgba(255,255,255,0.1)'">
+      </div>
+      <label style="display:flex;align-items:center;gap:9px;cursor:pointer;user-select:none">
+        <input id="habito-repete" type="checkbox" checked style="accent-color:#8B5CF6;width:16px;height:16px;cursor:pointer">
+        <span style="font-size:13px;color:#CBD5E1">Repete todos os dias</span>
+      </label>
       <div id="habito-error" style="display:none;color:#f87171;font-size:13px;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.25);border-radius:8px;padding:8px 12px">Digite o nome do hábito.</div>
+      <div id="habito-success" style="display:none;margin-top:2px;padding:11px 14px;background:rgba(34,197,94,0.12);border:1px solid rgba(34,197,94,0.35);border-radius:10px;color:#4ADE80;font-size:13px;font-weight:700;text-align:center"></div>
       <button type="button" onclick="salvarHabito()" style="background:linear-gradient(135deg,#8B5CF6,#7C3AED);color:#fff;border:none;border-radius:11px;padding:13px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;box-shadow:0 0 24px rgba(139,92,246,.35);margin-top:4px">Adicionar hábito</button>
     </div>
   </div>
@@ -2375,12 +2384,11 @@ function updateQuickAddButton(id) {
 }
 
 // ── HABITS TOGGLE (dashboard inline) ──
-function toggleHabitEl(el, habitId) {
+async function toggleHabitEl(el, habitId) {
   const check = el.querySelector('.habit-check');
-  check.classList.toggle('done');
-  check.textContent = check.classList.contains('done') ? '✓' : '';
-  saveHabitById(habitId, check.classList.contains('done'));
-  atualizarDashHabitos();
+  const newDone = !check.classList.contains('done');
+  await saveHabitById(habitId, newDone);
+  renderHabitos();
 }
 
 // ── MOOD SELECT ──
@@ -2634,6 +2642,12 @@ async function saveDaily(patch) {
   } catch(e) { console.warn('saveDaily:', e); }
 }
 
+function dateKeyOffset(offsetDays) {
+  const d = new Date();
+  d.setDate(d.getDate() + offsetDays);
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+
 async function saveHabitById(id, done) {
   const viewKey = _habViewDate || todayKey();
   const isToday = viewKey === todayKey();
@@ -2646,6 +2660,25 @@ async function saveHabitById(id, done) {
   if (isToday) {
     if (!_dailyData.habits) _dailyData.habits = {};
     _dailyData.habits[id] = done;
+
+    const habito = _habitosData.find(h => h.id === id);
+    if (habito) {
+      const today = todayKey();
+      const yesterday = dateKeyOffset(-1);
+      if (done) {
+        if (habito.lastDoneDate !== today) {
+          habito.streak = habito.lastDoneDate === yesterday ? (habito.streak || 0) + 1 : 1;
+          habito.lastDoneDate = today;
+        }
+      } else if (habito.lastDoneDate === today) {
+        habito.streak = Math.max(0, (habito.streak || 1) - 1);
+        habito.lastDoneDate = habito.streak > 0 ? yesterday : null;
+      }
+      if (_uid && _db) {
+        try { await _db.collection('users').doc(_uid).collection('habits').doc(id).set({ streak: habito.streak, lastDoneDate: habito.lastDoneDate }, { merge: true }); } catch(e) { console.warn('saveHabitById streak:', e); }
+      }
+    }
+
     if (done) await addXP(10);
     atualizarDashHabitos();
     atualizarMetricasHabitos();
@@ -2760,8 +2793,14 @@ function showToast(msg) {
 function openHabitoModal() {
   document.getElementById('habito-overlay').style.display = 'flex';
   document.getElementById('habito-name').value = '';
+  const timeEl = document.getElementById('habito-time');
+  if (timeEl) timeEl.value = new Date().toTimeString().slice(0, 5);
+  const repeteEl = document.getElementById('habito-repete');
+  if (repeteEl) repeteEl.checked = true;
   const errEl = document.getElementById('habito-error');
   if (errEl) errEl.style.display = 'none';
+  const succEl = document.getElementById('habito-success');
+  if (succEl) succEl.style.display = 'none';
   _selectedHabitoEmoji = '☀️';
   document.querySelectorAll('#habito-emoji-btns .emoji-pick').forEach(b => b.classList.remove('selected'));
   document.querySelector('#habito-emoji-btns .emoji-pick').classList.add('selected');
@@ -2776,20 +2815,40 @@ function selectHabitoEmoji(btn, emoji) {
 async function salvarHabito() {
   const name = document.getElementById('habito-name').value.trim();
   const errEl = document.getElementById('habito-error');
+  const time = document.getElementById('habito-time').value;
+  const repeats = document.getElementById('habito-repete').checked;
+
   if (!name) {
     if (errEl) { errEl.textContent = 'Digite o nome do hábito.'; errEl.style.display = 'block'; }
     return;
   }
+  if (!time) {
+    if (errEl) { errEl.textContent = 'Escolha um horário para o hábito.'; errEl.style.display = 'block'; }
+    return;
+  }
+  const conflito = _habitosData.find(h => h.time === time);
+  if (conflito) {
+    if (errEl) { errEl.textContent = `Já existe um hábito às ${time} (${conflito.emoji} ${conflito.name}). Escolha outro horário.`; errEl.style.display = 'block'; }
+    return;
+  }
   if (errEl) errEl.style.display = 'none';
-  const habito = { id: Date.now().toString(), name, emoji: _selectedHabitoEmoji, streak: 0, createdAt: Date.now() };
+
+  const habito = { id: Date.now().toString(), name, emoji: _selectedHabitoEmoji, time, repeats, streak: 0, lastDoneDate: null, createdAt: Date.now() };
   if (_uid && _db) {
     try { await _db.collection('users').doc(_uid).collection('habits').doc(habito.id).set(habito); } catch(e) { console.warn('salvarHabito:', e); }
   }
   _habitosData.push(habito);
+  _habitosData.sort((a, b) => (a.time || '').localeCompare(b.time || ''));
   renderHabitos();
-  closeHabitoModal();
   navigate('habitos', document.querySelector('.nav-item[onclick*="habitos"]'));
+
+  const succEl = document.getElementById('habito-success');
+  if (succEl) {
+    succEl.textContent = `✓ ${habito.emoji} ${habito.name} às ${time} adicionado!`;
+    succEl.style.display = '';
+  }
   showToast('Hábito criado! ✓');
+  setTimeout(closeHabitoModal, 1100);
 }
 
 // ── FILTRO DE DATA — HÁBITOS ──
@@ -2886,7 +2945,7 @@ async function carregarHabitos() {
     const snap = await _db.collection('users').doc(_uid).collection('habits').get();
     _habitosData = [];
     snap.forEach(doc => _habitosData.push(doc.data()));
-    _habitosData.sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
+    _habitosData.sort((a, b) => (a.time || '').localeCompare(b.time || '') || (a.createdAt || 0) - (b.createdAt || 0));
     // Inicializa view date como hoje
     _habViewDate = todayKey();
     _habViewDayHabits = (_dailyData && _dailyData.habits) ? { ..._dailyData.habits } : {};
@@ -2915,8 +2974,15 @@ function renderHabitos() {
 
   _habitosData.forEach(h => {
     const done = !!viewHabits[h.id];
-    const streakTxt = h.streak > 0 ? `🔥 ${h.streak} dias` : '— pendente';
-    const streakColor = h.streak > 0 ? 'var(--amber)' : 'var(--text-muted)';
+    let streakTxt, streakColor;
+    if (done) {
+      streakTxt = h.streak > 0 ? `🔥 ${h.streak} dias` : '✓ concluído';
+      streakColor = 'var(--green)';
+    } else {
+      streakTxt = h.streak > 0 ? `🔥 ${h.streak} dias (pendente hoje)` : '— pendente';
+      streakColor = 'var(--text-muted)';
+    }
+    const meta = [h.time || '', h.repeats === false ? 'não repete' : 'diário'].filter(Boolean).join(' · ');
 
     const el = document.createElement('div');
     el.className = 'habit-item';
@@ -2925,14 +2991,11 @@ function renderHabitos() {
       <div class="habit-check${done?' done':''}">${done?'✓':''}</div>
       <div style="flex:1">
         <div class="habit-name">${h.emoji} ${h.name}</div>
+        ${meta ? `<div style="font-size:11px;color:#64748B;margin-top:2px">${meta}</div>` : ''}
       </div>
       <div class="habit-streak" style="color:${streakColor}">${streakTxt}</div>
-      ${isViewingToday ? `<button onclick="deletarHabito('${h.id}',event)" style="background:none;border:none;color:#f87171;cursor:pointer;font-size:13px;padding:4px 6px;opacity:0;transition:opacity .2s" class="hab-del">✕</button>` : ''}`;
+      ${isViewingToday ? `<button onclick="deletarHabito('${h.id}',event)" style="background:none;border:none;color:#f87171;cursor:pointer;font-size:15px;padding:4px 8px;opacity:0.55;transition:opacity .2s" class="hab-del" onmouseenter="this.style.opacity=1" onmouseleave="this.style.opacity=0.55" title="Excluir hábito">✕</button>` : ''}`;
     el.querySelector('.habit-check').addEventListener('click', () => toggleHabitEl(el, h.id));
-    if (isViewingToday) {
-      el.addEventListener('mouseenter', () => el.querySelector('.hab-del').style.opacity = '1');
-      el.addEventListener('mouseleave', () => el.querySelector('.hab-del').style.opacity = '0');
-    }
     list.appendChild(el);
 
     // Dashboard mini version
@@ -2944,11 +3007,11 @@ function renderHabitos() {
         <div class="habit-check${done?' done':''}">${done?'✓':''}</div>
         <div class="habit-name">${h.emoji} ${h.name}</div>
         <div class="habit-streak" style="color:${streakColor}">${streakTxt}</div>`;
-      del.querySelector('.habit-check').addEventListener('click', () => {
+      del.querySelector('.habit-check').addEventListener('click', async () => {
         const check = del.querySelector('.habit-check');
-        check.classList.toggle('done');
-        check.textContent = check.classList.contains('done') ? '✓' : '';
-        saveHabitById(h.id, check.classList.contains('done'));
+        const newDone = !check.classList.contains('done');
+        await saveHabitById(h.id, newDone);
+        renderHabitos();
       });
       dashList.appendChild(del);
     }
