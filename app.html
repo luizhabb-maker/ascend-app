@@ -2364,7 +2364,7 @@ function navigate(id, el) {
   document.getElementById('section-' + id).classList.add('active');
   if (el) el.classList.add('active');
   setTimeout(() => initCharts(id), 50);
-  if (id === 'habitos') setTimeout(() => initHabViewDate(), 60);
+  if (id === 'habitos') setTimeout(() => { initHabViewDate(); carregarConsistenciaHabitos(); }, 60);
   updateQuickAddButton(id);
 }
 
@@ -2375,7 +2375,7 @@ function mobileNav(id, el) {
   document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
   document.getElementById('section-' + id).classList.add('active');
   setTimeout(() => initCharts(id), 50);
-  if (id === 'habitos') setTimeout(() => initHabViewDate(), 60);
+  if (id === 'habitos') setTimeout(() => { initHabViewDate(); carregarConsistenciaHabitos(); }, 60);
   updateQuickAddButton(id);
   document.querySelector('.main').scrollTop = 0;
 }
@@ -2480,13 +2480,14 @@ function initCharts(section) {
         labels: ['Semana 1','Semana 2','Semana 3','Semana 4'],
         datasets: [{
           label: 'Hábitos concluídos (%)',
-          data: [65, 78, 82, 87],
+          data: [0, 0, 0, 0],
           backgroundColor: ['rgba(139,92,246,0.5)','rgba(139,92,246,0.6)','rgba(139,92,246,0.75)','rgba(139,92,246,0.9)'],
           borderColor: '#8B5CF6', borderWidth: 1, borderRadius: 8
         }]
       },
       options: chartOpts(true)
     });
+    carregarConsistenciaHabitos();
   }
   if (section === 'detox' && !charts.detox) {
     const ctx = document.getElementById('detoxChart');
@@ -2885,6 +2886,47 @@ function initHabViewDate() {
 }
 
 function voltarParaHoje() { selectHabDate(todayKey()); }
+
+// Preenche o gráfico "Consistência — Últimas 4 semanas" com dados reais do Firestore.
+async function carregarConsistenciaHabitos() {
+  if (!_uid || !_db || !charts.habit) return;
+  const total = _habitosData.length;
+  if (total === 0) { charts.habit.data.datasets[0].data = [0, 0, 0, 0]; charts.habit.update(); return; }
+
+  try {
+    const todayStr = todayKey();
+    const snap = await withTimeout(_db.collection('users').doc(_uid).collection('daily')
+      .orderBy(firebase.firestore.FieldPath.documentId(), 'desc')
+      .where(firebase.firestore.FieldPath.documentId(), '<=', todayStr)
+      .limit(28).get(), 10000);
+
+    const taxaPorDia = {};
+    snap.forEach(doc => {
+      const habits = doc.data().habits || {};
+      const done = _habitosData.filter(h => habits[h.id]).length;
+      taxaPorDia[doc.id] = (done / total) * 100;
+    });
+    // O dia de hoje pode ainda não ter documento salvo — usa o estado local.
+    if (!(todayStr in taxaPorDia)) {
+      const doneHoje = _habitosData.filter(h => (_dailyData.habits || {})[h.id]).length;
+      taxaPorDia[todayStr] = (doneHoje / total) * 100;
+    }
+
+    // Agrupa os últimos 28 dias em 4 blocos de 7 dias (dias sem registro contam como 0%).
+    const semanas = [0, 0, 0, 0];
+    for (let semana = 0; semana < 4; semana++) {
+      let soma = 0;
+      for (let d = 0; d < 7; d++) {
+        const key = dateKeyOffset(-(semana * 7 + d));
+        soma += taxaPorDia[key] || 0;
+      }
+      semanas[3 - semana] = Math.round(soma / 7);
+    }
+
+    charts.habit.data.datasets[0].data = semanas;
+    charts.habit.update();
+  } catch(e) { console.warn('carregarConsistenciaHabitos:', e); }
+}
 
 async function selectHabDate(key) {
   _habViewDate = key;
