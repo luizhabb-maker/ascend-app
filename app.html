@@ -227,6 +227,21 @@
   .habit-name { font-size: 13px; font-weight: 500; flex: 1; }
   .habit-streak { font-size: 11px; color: var(--amber); font-weight: 600; }
 
+  /* ── HÁBITOS: estado vazio + FAB ── */
+  .hab-empty-state { text-align: center; padding: 44px 20px; }
+  .hab-empty-icon { font-size: 48px; margin-bottom: 14px; }
+  .hab-empty-title { font-size: 17px; font-weight: 800; color: var(--text); margin-bottom: 6px; }
+  .hab-empty-desc { font-size: 13px; color: var(--text-soft); max-width: 280px; margin: 0 auto; line-height: 1.5; }
+  .hab-fab {
+    display: none;
+    position: fixed; right: 20px; bottom: 90px; z-index: 150;
+    width: 56px; height: 56px; border-radius: 50%; border: none;
+    background: linear-gradient(135deg, var(--purple), #7C3AED);
+    color: #fff; font-size: 28px; font-weight: 400; line-height: 1;
+    cursor: pointer; box-shadow: 0 8px 24px rgba(139,92,246,0.45);
+  }
+  .hab-fab:active { transform: scale(0.94); }
+
   /* ── TIMELINE ── */
   .timeline { position: relative; padding-left: 32px; }
   .timeline::before {
@@ -596,6 +611,7 @@
     .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr 1fr; }
     .grid-4 { grid-template-columns: 1fr 1fr; }
     .mobile-bottom-nav { display: block; }
+    .hab-fab { display: flex; align-items: center; justify-content: center; }
     .page-header h1 { font-size: 20px; }
     .score-ring-wrap { display: none; }
     .score-ring-wrap:first-child { display: flex; }
@@ -985,10 +1001,15 @@
           <div class="metric-value" style="color:var(--amber)" id="hab-best-streak">0</div>
           <div class="metric-label">Maior sequência</div>
         </div>
-        <div class="metric-card" style="text-align:center">
-          <div class="metric-icon" style="font-size:28px">✓</div>
-          <div class="metric-value" style="color:var(--green)" id="hab-rate">0%</div>
-          <div class="metric-label">Concluídos hoje</div>
+        <div class="metric-card" style="text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px">
+          <div class="score-ring" style="width:72px;height:72px">
+            <svg viewBox="0 0 80 80" width="72" height="72">
+              <circle cx="40" cy="40" r="32" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="7"/>
+              <circle id="hab-rate-ring" cx="40" cy="40" r="32" fill="none" stroke="var(--green)" stroke-width="7" stroke-dasharray="201" stroke-dashoffset="201" stroke-linecap="round" style="transition:stroke-dashoffset .4s"/>
+            </svg>
+            <div class="score-ring-val" style="color:var(--green);font-size:16px" id="hab-rate">0%</div>
+          </div>
+          <div class="metric-label">Concluídos Hoje</div>
         </div>
         <div class="metric-card" style="text-align:center">
           <div class="metric-icon" style="font-size:28px">◈</div>
@@ -998,27 +1019,33 @@
       </div>
 
       <div class="card mb-16">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:10px">
           <div style="display:flex;align-items:center;gap:10px">
-            <div class="card-title" style="margin:0" id="hab-card-title">Hábitos de hoje</div>
+            <div style="font-size:19px;font-weight:800;color:var(--text)" id="hab-card-title">Hábitos de Hoje</div>
             <button id="hab-back-today-btn" onclick="voltarParaHoje()" style="display:none;font-size:11px;font-weight:700;color:#A78BFA;background:rgba(139,92,246,0.12);border:1px solid rgba(139,92,246,0.3);border-radius:8px;padding:4px 9px;cursor:pointer;font-family:inherit">← Hoje</button>
           </div>
           <div style="display:flex;gap:8px">
             <button class="btn btn-ghost" style="font-size:12px;padding:7px 12px" onclick="openHistoricoModal()">🕓 Histórico</button>
-            <button class="btn btn-ghost" style="font-size:12px;padding:7px 12px" onclick="openHabitoModal()">+ Novo hábito</button>
+            <button class="btn btn-ghost" style="font-size:12px;padding:7px 12px" onclick="openHabitoModal()">+ Novo Hábito</button>
           </div>
         </div>
         <div id="habits-full-list">
-          <div style="text-align:center;padding:32px;color:var(--text-muted);font-size:13px">Nenhum hábito ainda. Clique em "+ Novo hábito" para começar.</div>
+          <div class="hab-empty-state">
+            <div class="hab-empty-icon">🌱</div>
+            <div class="hab-empty-title">Comece sua jornada!</div>
+            <div class="hab-empty-desc">Adicione seu primeiro hábito e construa consistência.</div>
+          </div>
         </div>
       </div>
 
-      <div class="card">
+      <div class="card" style="margin-bottom:96px">
         <div class="card-title">Consistência — Últimas 4 semanas</div>
         <div class="chart-wrap">
           <canvas id="habitChart"></canvas>
         </div>
       </div>
+
+      <button class="hab-fab" onclick="openHabitoModal()" title="Novo hábito" aria-label="Novo hábito">+</button>
     </div>
 
     <!-- ════ FITNESS ════ -->
@@ -2986,7 +3013,7 @@ function renderHabitos() {
   if (!list) return;
 
   if (_habitosData.length === 0) {
-    list.innerHTML = '<div style="text-align:center;padding:32px;color:var(--text-muted);font-size:13px">Nenhum hábito ainda. Clique em "+ Novo hábito" para começar.</div>';
+    list.innerHTML = '<div class="hab-empty-state"><div class="hab-empty-icon">🌱</div><div class="hab-empty-title">Comece sua jornada!</div><div class="hab-empty-desc">Adicione seu primeiro hábito e construa consistência.</div></div>';
     if (dashList) dashList.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text-muted);font-size:13px">Adicione hábitos na aba Hábitos.</div>';
     atualizarMetricasHabitos();
     return;
@@ -3160,6 +3187,9 @@ function atualizarMetricasHabitos() {
   set('hab-best-streak', best);
   set('hab-rate', rate + '%');
   set('hab-count', total);
+
+  const ring = document.getElementById('hab-rate-ring');
+  if (ring) ring.style.strokeDashoffset = String(201 - (201 * rate / 100));
 
   // Nav badge — mostra hábitos pendentes hoje
   const badge = document.querySelector('.nav-item[onclick*="habitos"] .nav-badge');
