@@ -1076,6 +1076,12 @@
           <div class="metric-value" id="fit-peso-val">—</div>
           <div class="metric-sub" id="fit-peso-sub">Toque para registrar</div>
         </div>
+        <div class="metric-card" style="cursor:pointer" onclick="openAlturaModal()">
+          <div class="metric-icon">📐</div>
+          <div class="metric-label">Altura</div>
+          <div class="metric-value" id="fit-altura-val">—</div>
+          <div class="metric-sub" id="fit-altura-sub">Toque para registrar</div>
+        </div>
         <div class="metric-card">
           <div class="metric-icon">📏</div>
           <div class="metric-label">IMC</div>
@@ -2389,6 +2395,23 @@
   </div>
 </div>
 
+<!-- MODAL ALTURA -->
+<div id="altura-overlay" style="display:none;position:fixed;inset:0;z-index:3000;background:rgba(0,0,0,0.75);backdrop-filter:blur(8px);align-items:center;justify-content:center;padding:20px">
+  <div style="background:#0d1120;border:1px solid rgba(255,255,255,0.1);border-radius:20px;padding:32px;width:100%;max-width:360px;animation:slideup 0.25s ease;box-shadow:0 40px 80px rgba(0,0,0,0.6)">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px">
+      <div style="font-size:17px;font-weight:800">📐 Registrar altura</div>
+      <button onclick="closeAlturaModal()" style="background:rgba(255,255,255,0.06);border:none;width:30px;height:30px;border-radius:50%;color:#94A3B8;cursor:pointer;font-size:16px">✕</button>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div>
+        <label style="font-size:11px;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px">Altura (cm)</label>
+        <input id="altura-cm" type="number" min="100" max="250" step="1" placeholder="Ex: 170" style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:11px 14px;color:#F1F5F9;font-size:20px;font-family:inherit;outline:none;text-align:center;font-weight:700" onfocus="this.style.borderColor='rgba(139,92,246,.5)'" onblur="this.style.borderColor='rgba(255,255,255,0.1)'">
+      </div>
+      <button onclick="salvarAltura()" style="background:linear-gradient(135deg,#8B5CF6,#7C3AED);color:#fff;border:none;border-radius:11px;padding:13px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:4px">Registrar</button>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL TREINO -->
 <div id="treino-overlay" style="display:none;position:fixed;inset:0;z-index:3000;background:rgba(0,0,0,0.75);backdrop-filter:blur(8px);align-items:center;justify-content:center;padding:20px">
   <div style="background:#0d1120;border:1px solid rgba(255,255,255,0.1);border-radius:20px;padding:32px;width:100%;max-width:400px;animation:slideup 0.25s ease;box-shadow:0 40px 80px rgba(0,0,0,0.6)">
@@ -2398,12 +2421,31 @@
     </div>
     <div style="display:flex;flex-direction:column;gap:14px">
       <div>
-        <label style="font-size:11px;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px">Tipo de treino</label>
-        <input id="treino-tipo" type="text" placeholder="Ex: Peito & Tríceps" maxlength="40" style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:11px 14px;color:#F1F5F9;font-size:14px;font-family:inherit;outline:none" onfocus="this.style.borderColor='rgba(139,92,246,.5)'" onblur="this.style.borderColor='rgba(255,255,255,0.1)'">
+        <label style="font-size:11px;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px">Categoria</label>
+        <select id="treino-categoria" style="width:100%;background:#0d1120;border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:11px 14px;color:#F1F5F9;font-size:14px;font-family:inherit;outline:none;cursor:pointer" onfocus="this.style.borderColor='rgba(139,92,246,.5)'" onblur="this.style.borderColor='rgba(255,255,255,0.1)'">
+          <option value="Academia">🏋️ Academia</option>
+          <option value="Calistenia">🤸 Calistenia</option>
+          <option value="Corrida">🏃 Corrida</option>
+          <option value="Ciclismo">🚴 Ciclismo</option>
+          <option value="Natação">🏊 Natação</option>
+          <option value="Crossfit">🔥 Crossfit</option>
+          <option value="Yoga">🧘 Yoga</option>
+          <option value="Outro">✦ Outro</option>
+        </select>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div>
+          <label style="font-size:11px;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px">Horário</label>
+          <input id="treino-hora" type="time" style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:11px 14px;color:#F1F5F9;font-size:14px;font-family:inherit;outline:none" onfocus="this.style.borderColor='rgba(139,92,246,.5)'" onblur="this.style.borderColor='rgba(255,255,255,0.1)'">
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px">Duração (min)</label>
+          <input id="treino-min" type="number" min="1" max="300" placeholder="Ex: 45" style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:11px 14px;color:#F1F5F9;font-size:14px;font-family:inherit;outline:none" onfocus="this.style.borderColor='rgba(139,92,246,.5)'" onblur="this.style.borderColor='rgba(255,255,255,0.1)'">
+        </div>
       </div>
       <div>
-        <label style="font-size:11px;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px">Duração (minutos)</label>
-        <input id="treino-min" type="number" min="1" max="300" placeholder="Ex: 45" style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:11px 14px;color:#F1F5F9;font-size:14px;font-family:inherit;outline:none" onfocus="this.style.borderColor='rgba(139,92,246,.5)'" onblur="this.style.borderColor='rgba(255,255,255,0.1)'">
+        <label style="font-size:11px;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px">Descrição <span style="font-weight:400;text-transform:none">(opcional)</span></label>
+        <input id="treino-tipo" type="text" placeholder="Ex: Peito & Tríceps" maxlength="40" style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:11px 14px;color:#F1F5F9;font-size:14px;font-family:inherit;outline:none" onfocus="this.style.borderColor='rgba(139,92,246,.5)'" onblur="this.style.borderColor='rgba(255,255,255,0.1)'">
       </div>
       <button onclick="salvarTreino()" style="background:linear-gradient(135deg,#8B5CF6,#7C3AED);color:#fff;border:none;border-radius:11px;padding:13px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;box-shadow:0 0 24px rgba(139,92,246,.35);margin-top:4px">Registrar treino</button>
     </div>
@@ -2831,8 +2873,12 @@ async function carregarGoals(prefetchedData) {
     // Fallback para dados salvos pelo onboarding no nível raiz
     _goals.sleep    = g.sleep    || 8;
     _goals.weight   = g.weight   || parseFloat(d.goalWeight) || 80;
-    _goals.height   = g.height   || parseFloat(d.height)     || 170;
+    const alturaReal = g.height || parseFloat(d.height) || null;
+    _goals.height   = alturaReal || 170;
     _goals.workouts = g.workouts || 5;
+    // Só mostra a altura no card de Fitness se já foi realmente registrada
+    // (evita exibir o padrão de 170cm como se fosse um dado real).
+    if (alturaReal) aplicarAltura(alturaReal);
     // Se ainda não tem lastWeight mas onboarding salvou weight, usar como ponto de partida
     if (!d.lastWeight && d.weight) {
       aplicarPeso(parseFloat(d.weight));
@@ -3460,19 +3506,26 @@ function atualizarTaskCount() {
 }
 
 // ── TREINOS ──
-function openTreinoModal() { document.getElementById('treino-overlay').style.display = 'flex'; document.getElementById('treino-tipo').value = ''; document.getElementById('treino-min').value = ''; }
+function openTreinoModal() {
+  document.getElementById('treino-overlay').style.display = 'flex';
+  document.getElementById('treino-tipo').value = '';
+  document.getElementById('treino-min').value = '';
+  document.getElementById('treino-categoria').value = 'Academia';
+  document.getElementById('treino-hora').value = new Date().toTimeString().slice(0, 5);
+}
 function closeTreinoModal() { document.getElementById('treino-overlay').style.display = 'none'; }
 
 async function salvarTreino() {
+  const categoria = document.getElementById('treino-categoria').value;
+  const hora = document.getElementById('treino-hora').value;
   const tipo = document.getElementById('treino-tipo').value.trim();
   const min  = parseInt(document.getElementById('treino-min').value) || 0;
-  if (!tipo) { alert('Digite o tipo de treino.'); return; }
-  const tr = { id: Date.now().toString(), tipo, min, date: todayKey(), ts: Date.now() };
+  const tr = { id: Date.now().toString(), categoria, hora, tipo, min, date: todayKey(), ts: Date.now() };
   if (_uid && _db) {
     try { await _db.collection('users').doc(_uid).collection('workouts').doc(tr.id).set(tr); } catch(e) {}
   }
-  _treinosData.push(tr);
-  await saveDaily({ workout: { tipo, min, done: true } });
+  _treinosData.unshift(tr);
+  await saveDaily({ workout: { categoria, hora, tipo, min, done: true } });
   await addXP(30);
   renderTreinos();
   closeTreinoModal();
@@ -3509,10 +3562,15 @@ function renderTreinos() {
     const el = document.createElement('div');
     el.className = 'workout-card mb-16';
     el.style.flexDirection = 'column';
+    const titulo = t.tipo || t.categoria || 'Treino';
     el.innerHTML = `
       <div class="workout-info" style="width:100%">
-        <div style="display:flex;gap:8px;margin-bottom:8px"><span class="tag tag-purple">Treino</span><span class="tag tag-green">${t.date}</span></div>
-        <h3>${t.tipo}</h3>
+        <div style="display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap">
+          ${t.categoria ? `<span class="tag tag-purple">${t.categoria}</span>` : ''}
+          ${t.hora ? `<span class="tag tag-green">${t.hora}</span>` : ''}
+          <span class="tag tag-green">${t.date}</span>
+        </div>
+        <h3>${titulo}</h3>
         <div class="workout-stats">
           <div class="workout-stat"><div class="val">${t.min || '—'}</div><div class="lbl">Minutos</div></div>
         </div>
@@ -3605,6 +3663,34 @@ function aplicarPeso(kg) {
   // Meta de água (depende do peso)
   const waterDispEl = document.getElementById('goal-water-display');
   if (waterDispEl) waterDispEl.textContent = mlParaTexto(aguaGoalMl());
+}
+
+function openAlturaModal() {
+  document.getElementById('altura-overlay').style.display = 'flex';
+  document.getElementById('altura-cm').value = _goals.height || '';
+}
+function closeAlturaModal() { document.getElementById('altura-overlay').style.display = 'none'; }
+
+async function salvarAltura() {
+  const cm = parseFloat(document.getElementById('altura-cm').value);
+  if (!cm || cm <= 0) { showToast('Digite a altura.'); return; }
+  closeAlturaModal();
+  showToast(`Altura registrada: ${cm}cm ✓`);
+  _goals.height = cm;
+  aplicarAltura(cm);
+  if (_uid && _db) {
+    try { await _db.collection('users').doc(_uid).set({ goals: { height: cm } }, { merge: true }); } catch(e) { console.warn('salvarAltura:', e); }
+  }
+}
+
+function aplicarAltura(cm) {
+  const set = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+  set('fit-altura-val', `${cm} cm`);
+  set('fit-altura-sub', '✏️ Toque para editar');
+  const goalHeightEl = document.getElementById('goal-height');
+  if (goalHeightEl) goalHeightEl.value = cm;
+  // Recalcula o IMC, que depende da altura.
+  if (_lastWeight) aplicarPeso(_lastWeight);
 }
 
 // ── XP / LEVEL ──
